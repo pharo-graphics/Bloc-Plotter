@@ -1,5 +1,5 @@
 "
-I am a patch of an artist: an element drawn in a `BpPlotArea` from data coordinates, like matplotlib `Patch`. I know my `artist`, the index of the `dataset` I show, my `dataBounds` and, once measured, my `pixelBounds`. My subclasses are the bars (`BpRectanglePatch`) and outlines (`BpPolygonPatch`) of a `BpHistogram`, the markers (`BpMarkerPatch`) of a `BpScatterplot`, and the line (`BpPolygonPatch`) and markers of a `BpLine`.
+I am a patch of an artist: an element drawn in a `BpPlotArea` from data coordinates, like matplotlib `Patch`. I know my `artist`, the index of the `dataset` I show, my `dataBounds` and, once measured, my `pixelBounds`. My subclasses are the bars (`BpRectanglePatch`) and outlines (`BpPolygonPatch`) of a `BpHistogram`, the markers (`BpMarkerPatch`) of a `BpScatterPlot`, and the line (`BpPolygonPatch`) and markers of a `BpLine`.
 
 ## Examples
 
@@ -9,7 +9,7 @@ BpPatch scriptBarsAndSteps
 
 ## Usage
 
-1. `BpHistogram>>newBarAt:dataset:amount:bounds:`, `BpHistogram>>newStepFor:top:base:shift:` `BpScatterplot>>newPatches`, `BpLine>>newLinePatch` and `BpLine>>newMarkerPatchAt:index:` create patches, style them and add the handlers given to `BpArtist>>whenPatch:do:`.
+1. `BpHistogram>>newBarAt:dataset:amount:bounds:`, `BpHistogram>>newStepFor:top:base:shift:` `BpScatterPlot>>newPatches`, `BpLine>>newLinePatch` and `BpLine>>newMarkerPatchAt:index:` create patches, style them and add the handlers given to `BpArtist>>whenPatch:do:`.
 2. `BpAxes>>rebuild` shows them in its plot area, and `BpAxes>>autoScale:` reads their `dataBounds`.
 3. `BpPlotAreaLayout` sends `measureWith:` with the data transform of the axes, then places them at their `pixelBounds`.
 

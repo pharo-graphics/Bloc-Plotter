@@ -11,7 +11,7 @@ BpLine scriptFormats
 
 ## Design Rationale
 
-- My line is one `BpPolygonPatch` (open) through all the points, and each marker is a `BpMarkerPatch`, as in `BpScatterplot`: interaction handlers (`whenPatch:do:`) can tell the line from the points.
+- My line is one `BpPolygonPatch` (open) through all the points, and each marker is a `BpMarkerPatch`, as in `BpScatterPlot`: interaction handlers (`whenPatch:do:`) can tell the line from the points.
 - A format string sets the same slots as the setters, so a setter sent afterwards wins, as matplotlib keyword arguments win over the format. A marker without a line style draws no line ('o' draws only circles), and a string that is only a color name ('tan', 'C1') sets only the color.
 - I follow matplotlib defaults: 1.5 point wide lines, 6 point markers with 1 point edges, and dashes that grow with the width of the line (`dashPatterns`, in points for a one point line). Solid lines have projecting caps, dashed ones butt caps.
 - My patches are drawn above the grid (`isAboveGrid`), as matplotlib lines, while bars and scatter points are drawn below.
@@ -23,7 +23,7 @@ BpLine scriptFormats
 
 ## Invariants and Assumptions
 
-- x and y have the same size (`x:y:` raises an error otherwise). Marker sizes are diameters in points, so a marker patch has an area of `markerSize squared`, as the `s` of `BpScatterplot`.
+- x and y have the same size (`x:y:` raises an error otherwise). Marker sizes are diameters in points, so a marker patch has an area of `markerSize squared`, as the `s` of `BpScatterPlot`.
 "
 Class {
 	#name : 'BpLine',

@@ -9,7 +9,7 @@ BpColors scriptPalettes
 
 ## Usage
 
-I have no instances: `BpAxes>>nextColors:`, `BpArtist>>initialize`, `BpArtist>>colorOf:`, `BpScatterplot>>colorMapBlock`, `BpLine>>isColorName:` and `BpPie class>>defaultColors` use my class-side methods.
+I have no instances: `BpAxes>>nextColors:`, `BpArtist>>initialize`, `BpArtist>>colorOf:`, `BpScatterPlot>>colorMapBlock`, `BpLine>>isColorName:` and `BpPie class>>defaultColors` use my class-side methods.
 "
 Class {
 	#name : 'BpColors',

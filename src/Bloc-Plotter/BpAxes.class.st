@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterplot` added by `scatterX:y:` or a `BpLine` added by `plotX:y:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:` or a `BpLine` added by `plotX:y:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -380,7 +380,7 @@ BpAxes >> scaleOf: anAxis [
 BpAxes >> scatterX: xValues y: yValues [
 	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured like matplotlib Axes.scatter: s:, c:, marker:, alpha:, ..."
 
-	^ self addArtist: (BpScatterplot x: xValues y: yValues)
+	^ self addArtist: (BpScatterPlot x: xValues y: yValues)
 ]
 
 { #category : 'private - building' }

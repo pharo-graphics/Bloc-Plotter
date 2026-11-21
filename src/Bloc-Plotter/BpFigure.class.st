@@ -15,7 +15,7 @@ BpFigure scriptPlot.
 BpFigure scriptSave
 ```
 
-More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`, `BpScatterplot` and `BpLine`.
+More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot` and `BpLine`.
 
 ## Design Rationale
 
@@ -128,7 +128,7 @@ BpFigure class >> scriptScatter [
 	"Show a figure of one axes with a scatter of random points of random sizes and colors (the matplotlib gallery scatter)."
 
 	<example>
-	^ BpScatterplot exampleScatter show: 'scatter'
+	^ BpScatterPlot exampleScatter show: 'scatter'
 ]
 
 { #category : 'script' }

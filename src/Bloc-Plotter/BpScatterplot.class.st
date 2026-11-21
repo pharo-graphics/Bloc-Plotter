@@ -4,11 +4,11 @@ I am a scatter plot: the artist of matplotlib `Axes.scatter`. I show one `BpMark
 ## Examples
 
 ```
-BpScatterplot scriptScatter.
-BpScatterplot scriptScatterWithLegend.
-BpScatterplot scriptMarkers.
-BpScatterplot scriptInteraction.
-BpScatterplot exampleColoredPoints
+BpScatterPlot scriptScatter.
+BpScatterPlot scriptScatterWithLegend.
+BpScatterPlot scriptMarkers.
+BpScatterPlot scriptInteraction.
+BpScatterPlot exampleColoredPoints
 ```
 
 ## Design Rationale
@@ -32,7 +32,7 @@ BpScatterplot exampleColoredPoints
 - x and y have the same size; `x:y:` raises an error otherwise.
 "
 Class {
-	#name : 'BpScatterplot',
+	#name : 'BpScatterPlot',
 	#superclass : 'BpArtist',
 	#instVars : [
 		'x',
@@ -56,14 +56,14 @@ Class {
 }
 
 { #category : 'accessing' }
-BpScatterplot class >> defaultSize [
+BpScatterPlot class >> defaultSize [
 	"Answer the marker size in points squared when none is given: the square of the matplotlib default marker size, 6 points."
 
 	^ 36
 ]
 
 { #category : 'examples' }
-BpScatterplot class >> exampleColoredPoints [
+BpScatterPlot class >> exampleColoredPoints [
 	"Answer a scatter of five points colored by a number through viridis, with growing sizes."
 
 	<sampleInstance>
@@ -76,7 +76,7 @@ BpScatterplot class >> exampleColoredPoints [
 ]
 
 { #category : 'examples' }
-BpScatterplot class >> exampleInteractiveScatter [
+BpScatterPlot class >> exampleInteractiveScatter [
 	"A scatter with interaction handlers on its markers: hovering a marker outlines it, clicking it shows its point and value in the title."
 
 	| random figure axes scatter |
@@ -102,7 +102,7 @@ BpScatterplot class >> exampleInteractiveScatter [
 ]
 
 { #category : 'examples' }
-BpScatterplot class >> exampleMarkers [
+BpScatterPlot class >> exampleMarkers [
 	"matplotlib gallery: Marker examples (scatter_star_poly): a marker symbol, a TeX symbol, a path, a pentagon, a star and an asterisk."
 
 	| random x y z figure |
@@ -129,7 +129,7 @@ BpScatterplot class >> exampleMarkers [
 ]
 
 { #category : 'examples' }
-BpScatterplot class >> exampleScatter [
+BpScatterPlot class >> exampleScatter [
 	"matplotlib gallery: Scatter plot (shapes_and_collections/scatter): random points with random sizes and colors."
 
 	| random n x y colors area figure |
@@ -149,7 +149,7 @@ BpScatterplot class >> exampleScatter [
 ]
 
 { #category : 'examples' }
-BpScatterplot class >> exampleScatterWithLegend [
+BpScatterPlot class >> exampleScatterWithLegend [
 	"matplotlib gallery: Scatter plot with a legend (scatter_with_legend), first figure: one scatter per color, each with a label."
 
 	| random figure axes |
@@ -175,7 +175,7 @@ BpScatterplot class >> exampleScatterWithLegend [
 ]
 
 { #category : 'script' }
-BpScatterplot class >> scriptInteraction [
+BpScatterPlot class >> scriptInteraction [
 	"Interaction handlers on the markers of a scatter: hover a point to outline it, click it to see its coordinates and value."
 
 	<example>
@@ -183,7 +183,7 @@ BpScatterplot class >> scriptInteraction [
 ]
 
 { #category : 'script' }
-BpScatterplot class >> scriptMarkers [
+BpScatterPlot class >> scriptMarkers [
 	"Reproduce the matplotlib gallery 'Marker examples': six ways to give the marker of a scatter."
 
 	<example>
@@ -191,7 +191,7 @@ BpScatterplot class >> scriptMarkers [
 ]
 
 { #category : 'script' }
-BpScatterplot class >> scriptScatter [
+BpScatterPlot class >> scriptScatter [
 	"Reproduce the matplotlib gallery 'Scatter plot': random points with random sizes and colors, half transparent."
 
 	<example>
@@ -199,7 +199,7 @@ BpScatterplot class >> scriptScatter [
 ]
 
 { #category : 'script' }
-BpScatterplot class >> scriptScatterWithLegend [
+BpScatterPlot class >> scriptScatterWithLegend [
 	"Reproduce the matplotlib gallery 'Scatter plot with a legend': three labeled scatters, a legend and a grid."
 
 	<example>
@@ -207,7 +207,7 @@ BpScatterplot class >> scriptScatterWithLegend [
 ]
 
 { #category : 'instance creation' }
-BpScatterplot class >> x: aCollectionOfNumbers y: anotherCollectionOfNumbers [
+BpScatterPlot class >> x: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 
 	aCollectionOfNumbers size = anotherCollectionOfNumbers size ifFalse: [ ^ self error: 'x and y must be the same size' ].
 	^ self new
@@ -216,7 +216,7 @@ BpScatterplot class >> x: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> c: aColorOrCollection [
+BpScatterPlot >> c: aColorOrCollection [
 	"Set the color of the markers (matplotlib c): one color or color name, one per point, or one number per point mapped through my colormap."
 
 	c := aColorOrCollection.
@@ -224,7 +224,7 @@ BpScatterplot >> c: aColorOrCollection [
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> colorMap: aNameOrBlock [
+BpScatterPlot >> colorMap: aNameOrBlock [
 	"Set the colormap mapping the numbers of c: a name such as #viridis, or a block from a fraction between 0 and 1 to a color."
 
 	colorMap := aNameOrBlock.
@@ -232,7 +232,7 @@ BpScatterplot >> colorMap: aNameOrBlock [
 ]
 
 { #category : 'private - computing' }
-BpScatterplot >> colorMapBlock [
+BpScatterPlot >> colorMapBlock [
 
 	^ colorMap isBlock
 		  ifTrue: [ colorMap ]
@@ -240,7 +240,7 @@ BpScatterplot >> colorMapBlock [
 ]
 
 { #category : 'private - computing' }
-BpScatterplot >> compute [
+BpScatterPlot >> compute [
 
 	offsets := x with: y collect: [ :eachX :eachY | eachX @ eachY ].
 	sizes := (1 to: offsets size) collect: [ :index | self setting: (s ifNil: [ self class defaultSize ]) at: index ].
@@ -251,7 +251,7 @@ BpScatterplot >> compute [
 ]
 
 { #category : 'private - computing' }
-BpScatterplot >> edgeColorAt: anIndex [
+BpScatterPlot >> edgeColorAt: anIndex [
 	"Answer the edge color of a point, or nil without edge. An unfilled marker is drawn with its face color, as matplotlib."
 
 	| edge |
@@ -263,7 +263,7 @@ BpScatterplot >> edgeColorAt: anIndex [
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> edgeColors: anObject [
+BpScatterPlot >> edgeColors: anObject [
 	"Set the edge color of the markers: 'face' (the face color, the default), 'none', a color or color name, or one per point."
 
 	edgeColors := anObject.
@@ -271,7 +271,7 @@ BpScatterplot >> edgeColors: anObject [
 ]
 
 { #category : 'private - computing' }
-BpScatterplot >> faceColorAt: anIndex [
+BpScatterPlot >> faceColorAt: anIndex [
 
 	c ifNil: [ ^ self colorOf: defaultColors first ].
 	self hasValues ifTrue: [ ^ self colorOf: (self colorMapBlock value: (self normalized: (c at: anIndex))) ].
@@ -279,14 +279,14 @@ BpScatterplot >> faceColorAt: anIndex [
 ]
 
 { #category : 'private - computing' }
-BpScatterplot >> hasValues [
+BpScatterPlot >> hasValues [
 	"Answer whether c gives numbers to map through the colormap."
 
 	^ c isCollection and: [ c isString not and: [ c isNotEmpty and: [ c first isNumber ] ] ]
 ]
 
 { #category : 'initialization' }
-BpScatterplot >> initialize [
+BpScatterPlot >> initialize [
 
 	super initialize.
 	x := #(  ).
@@ -302,7 +302,7 @@ BpScatterplot >> initialize [
 ]
 
 { #category : 'axes' }
-BpScatterplot >> legendEntries [
+BpScatterPlot >> legendEntries [
 	"Answer my label with a marker of my first point."
 
 	(label isNil or: [ offsets isEmpty ]) ifTrue: [ ^ #(  ) ].
@@ -310,7 +310,7 @@ BpScatterplot >> legendEntries [
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> lineWidths: aNumberOrCollection [
+BpScatterPlot >> lineWidths: aNumberOrCollection [
 	"Set the width of the marker edges in points, for all points or one per point."
 
 	lineWidths := aNumberOrCollection.
@@ -318,7 +318,7 @@ BpScatterplot >> lineWidths: aNumberOrCollection [
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> marker: aSpecification [
+BpScatterPlot >> marker: aSpecification [
 	"Set the marker of all points from a matplotlib specification (see BpMarker class>>on:)."
 
 	marker := BpMarker on: aSpecification.
@@ -326,7 +326,7 @@ BpScatterplot >> marker: aSpecification [
 ]
 
 { #category : 'private - computing' }
-BpScatterplot >> newPatches [
+BpScatterPlot >> newPatches [
 
 	^ (1 to: offsets size) collect: [ :index |
 		  | patch |
@@ -344,7 +344,7 @@ BpScatterplot >> newPatches [
 ]
 
 { #category : 'private - style' }
-BpScatterplot >> newSwatch [
+BpScatterPlot >> newSwatch [
 
 	| swatch |
 	swatch := BpMarkerPatch new
@@ -360,7 +360,7 @@ BpScatterplot >> newSwatch [
 ]
 
 { #category : 'private - computing' }
-BpScatterplot >> normalized: aNumber [
+BpScatterPlot >> normalized: aNumber [
 	"Answer aNumber as a fraction between vMin and vMax, clipped between 0 and 1."
 
 	| low high |
@@ -371,14 +371,14 @@ BpScatterplot >> normalized: aNumber [
 ]
 
 { #category : 'accessing - results' }
-BpScatterplot >> offsets [
+BpScatterPlot >> offsets [
 	"Answer the points shown, in data coordinates (matplotlib PathCollection get_offsets)."
 
 	^ offsets
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> s: aNumberOrCollection [
+BpScatterPlot >> s: aNumberOrCollection [
 	"Set the marker size in points squared, for all points or one per point (matplotlib s)."
 
 	s := aNumberOrCollection.
@@ -386,7 +386,7 @@ BpScatterplot >> s: aNumberOrCollection [
 ]
 
 { #category : 'initialization' }
-BpScatterplot >> setX: aCollectionOfNumbers y: anotherCollectionOfNumbers [
+BpScatterPlot >> setX: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 
 	x := aCollectionOfNumbers asArray.
 	y := anotherCollectionOfNumbers asArray.
@@ -394,7 +394,7 @@ BpScatterplot >> setX: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 ]
 
 { #category : 'private - style' }
-BpScatterplot >> style: aPatch [
+BpScatterPlot >> style: aPatch [
 	"Give aPatch the colors of its point and the interaction handlers of the patches."
 
 	| face edge |
@@ -411,7 +411,7 @@ BpScatterplot >> style: aPatch [
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> vMax: aNumber [
+BpScatterPlot >> vMax: aNumber [
 	"Set the number of c mapped to the end of the colormap (the largest one by default)."
 
 	vMax := aNumber.
@@ -419,7 +419,7 @@ BpScatterplot >> vMax: aNumber [
 ]
 
 { #category : 'accessing - options' }
-BpScatterplot >> vMin: aNumber [
+BpScatterPlot >> vMin: aNumber [
 	"Set the number of c mapped to the start of the colormap (the smallest one by default)."
 
 	vMin := aNumber.

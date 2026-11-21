@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterplot`) or a line plot (`BpLine`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`) or a line plot (`BpLine`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -63,7 +63,7 @@ BpArtist class >> scriptArtistsInOneAxes [
 		s: 50;
 		label: 'counts'.
 	axes
-		title: 'BpHistogram and BpScatterplot';
+		title: 'BpHistogram and BpScatterPlot';
 		legend;
 		grid: true.
 	^ figure show: 'Artists'
