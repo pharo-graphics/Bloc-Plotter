@@ -1,0 +1,841 @@
+"
+I am a pie chart: a Bloc element that follows matplotlib `Axes.pie` and `Axes.pie_label`, so that the matplotlib pie gallery can be written almost word for word in Pharo. I show one `BpPieWedge` per value, optional `BpPieWedgeShadow`s behind them, and `BpPieText`s around them, all placed by my `BpPieLayout`. `whenWedge:do:` adds an interaction handler to all my wedges.
+
+## Examples
+
+```
+BpPie scriptPieFeatures.
+BpPie scriptPieLabels.
+BpPie scriptInteraction.
+BpPie exampleExplodeShadowRotate
+```
+
+## Design Rationale
+
+- My setters are the matplotlib keyword arguments (`values:` is `x`, `wedgeStyle:` is `wedgeprops`, `textStyle:` is `textprops`); `autopct:` takes a printf string or a block, and the default colors are the matplotlib cycle (`BpColors tab10`).
+- Angles are in degrees, counterclockwise from the right, as in matplotlib. The wedges convert them to the clockwise angles of `BlAnnulusSectorGeometry`.
+- Every setter rebuilds all my children. It keeps me simple, at the price of losing the handlers added directly to a wedge: `whenWedge:do:` keeps them across rebuilds.
+- Like matplotlib, a pie of radius 1 fills 1/1.25 of my half side. Unlike matplotlib, nothing is drawn outside me, so I shrink when an exploded wedge or a text would get out of my bounds.
+- I have one slot per matplotlib option, hence many slots.
+
+## Usage
+
+1. Each setter rebuilds my wedges, shadows and texts (`rebuild`).
+2. `addLabels:distance:rotate:textStyle:` (matplotlib `pie_label`) keeps a `BpPieLabelSet` and answers it.
+3. `whenWedge:do:` keeps its handlers and gives them to the new wedges of each rebuild.
+4. When I am shown, `BpPieLayout` asks me to fit my radius (`fitUnitRadiusIn:`) and places each part.
+
+- I am mutable: keep me, not my wedges, which are replaced at each change.
+
+## Implementation Notes
+
+- Only my wedges, shadows and texts are laid out; other children are not placed by `BpPieLayout`.
+- Not supported yet: hatches, legends, `rotatelabels`, `center` and `frame`. The shadow is a darker, half transparent copy of each wedge, without the options of matplotlib shadow dictionaries.
+"
+Class {
+	#name : 'BpPie',
+	#superclass : 'BlElement',
+	#instVars : [
+		'values',
+		'labels',
+		'colors',
+		'explode',
+		'autopct',
+		'pctDistance',
+		'labelDistance',
+		'startAngle',
+		'radius',
+		'counterclock',
+		'shadow',
+		'normalize',
+		'wedgeStyle',
+		'textStyle',
+		'labelSets',
+		'wedgeHandlers',
+		'wedges',
+		'texts',
+		'shadows',
+		'unitRadius'
+	],
+	#category : 'Bloc-Plotter-Pie',
+	#package : 'Bloc-Plotter',
+	#tag : 'Pie'
+}
+
+{ #category : 'defaults' }
+BpPie class >> defaultColors [
+	"Answer the colors given in turn to the wedges: the default matplotlib color cycle."
+
+	^ BpColors tab10
+]
+
+{ #category : 'private - demo' }
+BpPie class >> demoCellFor: aPie caption: aString [
+	"Answer an element showing aPie, 300 pixels wide, under aString."
+
+	^ BlElement new
+		  layout: BlLinearLayout vertical;
+		  constraintsDo: [ :c |
+			  c horizontal fitContent.
+			  c vertical fitContent ];
+		  padding: (BlInsets all: 5);
+		  addChild: (BlTextElement new text: (aString asRopedText
+			    fontSize: 13;
+			    bold;
+			    yourself));
+		  addChild: (aPie
+			   extent: 300 @ 300;
+			   yourself);
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpPie class >> demoOpen: aCollectionOfAssociations title: aString [
+	"Open a space showing in a grid each pie (association value) under its caption (association key)."
+
+	| grid space |
+	grid := BlElement new
+		        layout: (BlGridLayout horizontal columnCount: 4);
+		        background: Color white;
+		        constraintsDo: [ :c |
+			        c horizontal fitContent.
+			        c vertical fitContent ];
+		        yourself.
+	aCollectionOfAssociations do: [ :each | grid addChild: (self demoCellFor: each value caption: each key) ].
+	space := BlSpace new.
+	space
+		title: aString;
+		extent: 1260 @ 700.
+	space root
+		background: Color white;
+		addChild: grid.
+	space show.
+	^ space
+]
+
+{ #category : 'examples' }
+BpPie class >> exampleAutopct [
+	"matplotlib: ax.pie(sizes, labels=labels, autopct='%1.1f%%')"
+
+	<sampleInstance>
+	^ self frogsPie
+		  autopct: '%1.1f%%';
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> exampleColors [
+	"matplotlib: ax.pie(sizes, labels=labels, colors=['olivedrab', 'rosybrown', 'gray', 'saddlebrown'])"
+
+	<sampleInstance>
+	^ self frogsPie
+		  colors: (#( '6b8e23' 'bc8f8f' '808080' '8b4513' ) collect: [ :each | Color fromHexString: each ]);
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> exampleExplodeShadowRotate [
+	"matplotlib: ax.pie(sizes, explode=(0, 0.1, 0, 0), labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)"
+
+	<sampleInstance>
+	^ self frogsPie
+		  explode: #( 0 0.1 0 0 );
+		  autopct: '%1.1f%%';
+		  shadow: true;
+		  startAngle: 90;
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> exampleLabels [
+	"matplotlib: ax.pie(sizes, labels=labels)"
+
+	<sampleInstance>
+	^ self frogsPie
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabel [
+	"matplotlib: pie = ax.pie(data); ax.pie_label(pie, labels)"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels;
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabelAbsoluteValues [
+	"matplotlib: ax.pie_label(pie, '{absval:.1f}')"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: '{absval:.1f}';
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabelOutside [
+	"matplotlib: ax.pie_label(pie, labels, distance=1.1)"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels distance: 1.1;
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabelPercents [
+	"matplotlib: ax.pie_label(pie, '{frac:.1%}')"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: '{frac:.1%}';
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabelRotated [
+	"matplotlib: ax.pie_label(pie, labels, rotate=True)"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels
+		  distance: 0.6
+		  rotate: true
+		  textStyle: nil;
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabelSeveralSets [
+	"matplotlib: ax.pie_label(pie, labels, distance=1.1); ax.pie_label(pie, '{frac:.1%}', distance=0.7); ax.pie_label(pie, '{absval:d}', distance=0.4)"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels distance: 1.1;
+		  addLabels: '{frac:.1%}' distance: 0.7;
+		  addLabels: '{absval:d}' distance: 0.4;
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabelTextStyle [
+	"matplotlib: ax.pie_label(pie, labels, textprops={'fontsize': 'large', 'color': 'white'})"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels
+		  distance: 0.6
+		  rotate: false
+		  textStyle: [ :text |
+			  text
+				  fontSize: 18;
+				  foreground: Color white ];
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> examplePieLabelValuesAndPercents [
+	"matplotlib: ax.pie_label(pie, '{absval:d}\n{frac:.1%}')"
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: '{absval:d}\n{frac:.1%}';
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> exampleSmallRadius [
+	"matplotlib: ax.pie(sizes, labels=labels, autopct='%.0f%%', textprops={'size': 'small'}, radius=0.5)"
+
+	<sampleInstance>
+	^ self frogsPie
+		  autopct: '%.0f%%';
+		  textStyle: [ :text | text fontSize: 9 ];
+		  radius: 0.5;
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> exampleSwapLabelsAndPercents [
+	"matplotlib: ax.pie(sizes, labels=labels, autopct='%1.1f%%', pctdistance=1.25, labeldistance=.6)"
+
+	<sampleInstance>
+	^ self frogsPie
+		  autopct: '%1.1f%%';
+		  pctDistance: 1.25;
+		  labelDistance: 0.6;
+		  yourself
+]
+
+{ #category : 'examples' }
+BpPie class >> exampleWedgeStyle [
+	"matplotlib: ax.pie(sizes, labels=labels, wedgeprops={'linewidth': 3, 'edgecolor': 'white'})"
+
+	<sampleInstance>
+	^ self frogsPie
+		  wedgeStyle: [ :wedge | wedge border: (BlBorder paint: Color white width: 3) ];
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpPie class >> frogsPie [
+	"Answer the pie of the matplotlib pie features gallery."
+
+	^ self new
+		  values: #( 15 30 45 10 );
+		  labels: #( 'Frogs' 'Hogs' 'Dogs' 'Logs' );
+		  yourself
+]
+
+{ #category : 'script' }
+BpPie class >> scriptInteraction [
+	"Interaction handlers on wedges: hovering a wedge explodes it, clicking it shows its value under the pie."
+
+	<example>
+	| pie info container space |
+	info := BlTextElement new text: ('Click a wedge' asRopedText fontSize: 16).
+	pie := self frogsPie
+		       autopct: '%1.1f%%';
+		       yourself.
+	pie
+		whenWedge: BlMouseEnterEvent do: [ :event :wedge |
+			wedge explode: 0.1.
+			pie requestLayout ];
+		whenWedge: BlMouseLeaveEvent do: [ :event :wedge |
+			wedge explode: 0.
+			pie requestLayout ];
+		whenWedge: BlClickEvent do: [ :event :wedge |
+			info text: (('{1}: {2} ({3})' format: {
+				  wedge label.
+				  wedge amount.
+				  (BpTextFormatter printf: '%1.1f%%' with: wedge fraction * 100) }) asRopedText fontSize: 16) ].
+	container := BlElement new
+		             layout: BlLinearLayout vertical;
+		             padding: (BlInsets all: 10);
+		             constraintsDo: [ :c |
+			             c horizontal matchParent.
+			             c vertical matchParent ];
+		             addChildren: {
+			             pie.
+			             info };
+		             yourself.
+	space := BlSpace new.
+	space
+		title: 'Pie interaction';
+		extent: 440 @ 480.
+	space root
+		background: Color white;
+		addChild: container.
+	space show.
+	^ space
+]
+
+{ #category : 'script' }
+BpPie class >> scriptPieFeatures [
+	"Reproduce the matplotlib gallery 'Pie charts' (pie_features): labels, percentages, colors, swapped labels and percentages, explode with shadow and start angle, small radius, and wedge properties."
+
+	<example>
+	^ self
+		  demoOpen: {
+			  ('Label slices' -> self exampleLabels).
+			  ('Auto-label slices' -> self exampleAutopct).
+			  ('Color slices' -> self exampleColors).
+			  ('Swap labels and percents' -> self exampleSwapLabelsAndPercents).
+			  ('Explode, shadow, rotate' -> self exampleExplodeShadowRotate).
+			  ('Shrink pie' -> self exampleSmallRadius).
+			  ('Wedge style' -> self exampleWedgeStyle) }
+		  title: 'Pie features'
+]
+
+{ #category : 'script' }
+BpPie class >> scriptPieLabels [
+	"Reproduce the matplotlib gallery 'Label pie charts' (pie_label): labels inside, outside or rotated, absolute values, percentages, both, styled text, and several label sets on one pie."
+
+	<example>
+	^ self
+		  demoOpen: {
+			  ('Basic labels' -> self examplePieLabel).
+			  ('Labels outside' -> self examplePieLabelOutside).
+			  ('Rotated labels' -> self examplePieLabelRotated).
+			  ('Absolute values' -> self examplePieLabelAbsoluteValues).
+			  ('Percentages' -> self examplePieLabelPercents).
+			  ('Values and percentages' -> self examplePieLabelValuesAndPercents).
+			  ('Font styling' -> self examplePieLabelTextStyle).
+			  ('Multiple label sets' -> self examplePieLabelSeveralSets) }
+		  title: 'Pie labels'
+]
+
+{ #category : 'private - demo' }
+BpPie class >> spamLabels [
+
+	^ #( 'spam' 'eggs' 'bacon' 'sausage' )
+]
+
+{ #category : 'private - demo' }
+BpPie class >> spamPie [
+	"Answer the unlabeled pie of the matplotlib pie_label gallery."
+
+	^ self new
+		  values: #( 36 24 8 12 );
+		  yourself
+]
+
+{ #category : 'private - interaction' }
+BpPie >> addHandler: anAssociation to: aWedge [
+
+	aWedge addEventHandler: (BlEventHandler
+		 on: anAssociation key
+		 do: [ :event | anAssociation value cull: event cull: aWedge ])
+]
+
+{ #category : 'labels' }
+BpPie >> addLabels: aSource [
+
+	^ self addLabels: aSource distance: 0.6
+]
+
+{ #category : 'labels' }
+BpPie >> addLabels: aSource distance: aNumber [
+
+	^ self
+		  addLabels: aSource
+		  distance: aNumber
+		  rotate: false
+		  textStyle: nil
+]
+
+{ #category : 'labels' }
+BpPie >> addLabels: aSource distance: aNumber rotate: aBoolean textStyle: aBlockOrNil [
+	"Add one text per wedge, as matplotlib pie_label does. aSource is a collection of strings, a format string such as '{absval:d}\n{frac:.1%}', or a block receiving the wedge. aNumber is the distance from the center as a fraction of the radius. Answer the new label set."
+
+	| labelSet |
+	labelSet := (BpPieLabelSet labels: aSource distance: aNumber)
+		            rotate: aBoolean;
+		            textStyle: aBlockOrNil;
+		            yourself.
+	labelSets add: labelSet.
+	self rebuild.
+	^ labelSet
+]
+
+{ #category : 'private - building' }
+BpPie >> allLabelSets [
+	"Answer the label sets for my labels and percentages (matplotlib labels and autopct), followed by the ones added with addLabels:..."
+
+	| sets |
+	sets := OrderedCollection new.
+	labels ifNotNil: [
+		sets add: ((BpPieLabelSet labels: labels distance: labelDistance)
+			 textStyle: textStyle;
+			 yourself) ].
+	autopct ifNotNil: [
+		sets add: ((BpPieLabelSet percent: autopct distance: pctDistance)
+			 textStyle: textStyle;
+			 yourself) ].
+	^ sets
+		  addAll: labelSets;
+		  yourself
+]
+
+{ #category : 'geometry' }
+BpPie >> anchorOf: aText [
+
+	^ self anchorOf: aText in: self extent
+]
+
+{ #category : 'geometry' }
+BpPie >> anchorOf: aText in: anExtent [
+	"Answer the point aText is placed around: on the bisector of its wedge, at its distance from the wedge center."
+
+	| wedge |
+	wedge := aText wedge.
+	^ (self wedgeCenterOf: wedge in: anExtent) - (anExtent / 2)
+	  + (self pointAtAngle: wedge midAngle distance: aText distance in: anExtent)
+]
+
+{ #category : 'accessing' }
+BpPie >> autopct [
+
+	^ autopct
+]
+
+{ #category : 'accessing' }
+BpPie >> autopct: aStringOrBlock [
+	"Show the percentage of each wedge at pctDistance, formatted with a printf string such as '%1.1f%%' or by a block receiving the percentage."
+
+	autopct := aStringOrBlock.
+	self rebuild
+]
+
+{ #category : 'accessing' }
+BpPie >> colors [
+
+	^ colors
+]
+
+{ #category : 'accessing' }
+BpPie >> colors: aCollectionOfColors [
+	"Set the wedge colors, used in turn when there are fewer colors than wedges."
+
+	colors := aCollectionOfColors.
+	self rebuild
+]
+
+{ #category : 'accessing' }
+BpPie >> counterclock [
+
+	^ counterclock
+]
+
+{ #category : 'accessing' }
+BpPie >> counterclock: aBoolean [
+
+	counterclock := aBoolean.
+	self rebuild
+]
+
+{ #category : 'private - building' }
+BpPie >> direction [
+	"Answer 1 when the wedges go counterclockwise, -1 otherwise."
+
+	^ counterclock
+		  ifTrue: [ 1 ]
+		  ifFalse: [ -1 ]
+]
+
+{ #category : 'accessing' }
+BpPie >> explode [
+
+	^ explode
+]
+
+{ #category : 'accessing' }
+BpPie >> explode: aCollectionOfNumbers [
+	"Set, for each wedge, how far it is moved away from the center, as a fraction of the radius."
+
+	explode := aCollectionOfNumbers.
+	self rebuild
+]
+
+{ #category : 'geometry' }
+BpPie >> fitUnitRadiusIn: anExtent [
+	"Compute the radius of a pie of radius 1 in anExtent: the matplotlib frame, made smaller when an exploded wedge or a text would get out of anExtent. My texts must be measured first."
+
+	| fitted halfSide |
+	fitted := self frameRadiusIn: anExtent.
+	halfSide := (anExtent x min: anExtent y) / 2.
+	radius > 0 ifTrue: [ wedges do: [ :each | fitted := fitted min: halfSide / (radius * (1 + each explode)) ] ].
+	texts do: [ :each | fitted := fitted min: (each maxUnitRadiusIn: anExtent radius: radius) ].
+	unitRadius := fitted
+]
+
+{ #category : 'geometry' }
+BpPie >> frameRadiusIn: anExtent [
+	"Answer the radius of a pie of radius 1 when the half of the smallest side of anExtent is 1.25, as in matplotlib that shows a pie between -1.25 and 1.25."
+
+	^ (anExtent x min: anExtent y) / 2 / 1.25
+]
+
+{ #category : 'initialization' }
+BpPie >> initialize [
+
+	super initialize.
+	values := #(  ).
+	explode := #(  ).
+	colors := self class defaultColors.
+	pctDistance := 0.6.
+	labelDistance := 1.1.
+	startAngle := 0.
+	radius := 1.
+	counterclock := true.
+	shadow := false.
+	normalize := true.
+	labelSets := OrderedCollection new.
+	wedgeHandlers := OrderedCollection new.
+	wedges := #(  ).
+	shadows := #(  ).
+	texts := #(  ).
+	self layout: BpPieLayout new.
+	self extent: 400 @ 400
+]
+
+{ #category : 'accessing' }
+BpPie >> labelDistance [
+
+	^ labelDistance
+]
+
+{ #category : 'accessing' }
+BpPie >> labelDistance: aNumber [
+
+	labelDistance := aNumber.
+	self rebuild
+]
+
+{ #category : 'accessing - parts' }
+BpPie >> labelSets [
+	"Answer the label sets added with addLabels:..., the equivalent of matplotlib pie_label calls."
+
+	^ labelSets
+]
+
+{ #category : 'accessing' }
+BpPie >> labels [
+
+	^ labels
+]
+
+{ #category : 'accessing' }
+BpPie >> labels: aCollectionOfStrings [
+	"Set one label per wedge, shown at labelDistance."
+
+	labels := aCollectionOfStrings.
+	self rebuild
+]
+
+{ #category : 'private - building' }
+BpPie >> newWedgeAt: anIndex amount: aNumber fraction: aFraction from: anAngle [
+
+	| wedge |
+	wedge := BpPieWedge new
+		         index: anIndex;
+		         amount: aNumber;
+		         fraction: aFraction;
+		         theta1: anAngle theta2: anAngle + (self direction * 360 * aFraction);
+		         explode: (explode at: anIndex ifAbsent: [ 0 ]);
+		         label: (labels ifNotNil: [ labels at: anIndex ]);
+		         background: (colors at: anIndex - 1 \\ colors size + 1);
+		         yourself.
+	wedgeStyle ifNotNil: [ wedgeStyle value: wedge ].
+	wedgeHandlers do: [ :each | self addHandler: each to: wedge ].
+	^ wedge
+]
+
+{ #category : 'private - building' }
+BpPie >> newWedges [
+	"Answer one wedge per value, each starting where the previous one ends."
+
+	| total angle |
+	values ifEmpty: [ ^ #(  ) ].
+	total := normalize
+		         ifTrue: [ (values inject: 0 into: [ :sum :each | sum + each ]) asFloat ]
+		         ifFalse: [ 1 ].
+	angle := startAngle.
+	^ values asArray withIndexCollect: [ :each :index |
+		  | wedge |
+		  wedge := self
+			           newWedgeAt: index
+			           amount: each
+			           fraction: each / total
+			           from: angle.
+		  angle := wedge theta2.
+		  wedge ]
+]
+
+{ #category : 'accessing' }
+BpPie >> normalize [
+
+	^ normalize
+]
+
+{ #category : 'accessing' }
+BpPie >> normalize: aBoolean [
+	"When true (the default) the values are divided by their sum to make a full pie; when false they are used as fractions, so a sum below 1 gives a partial pie."
+
+	normalize := aBoolean.
+	self rebuild
+]
+
+{ #category : 'accessing - parts' }
+BpPie >> parts [
+	"Answer the children my layout places: shadows, wedges and texts."
+
+	^ shadows , wedges , texts
+]
+
+{ #category : 'accessing' }
+BpPie >> pctDistance [
+
+	^ pctDistance
+]
+
+{ #category : 'accessing' }
+BpPie >> pctDistance: aNumber [
+
+	pctDistance := aNumber.
+	self rebuild
+]
+
+{ #category : 'geometry' }
+BpPie >> pointAtAngle: anAngle distance: aDistance [
+	"Answer the point, in my coordinates, at anAngle (degrees, counterclockwise from the right) and aDistance from my center, as a fraction of the radius."
+
+	^ self pointAtAngle: anAngle distance: aDistance in: self extent
+]
+
+{ #category : 'geometry' }
+BpPie >> pointAtAngle: anAngle distance: aDistance in: anExtent [
+	"Answer the point of a pie drawn in anExtent at anAngle (degrees, counterclockwise from the right) and aDistance from the center, as a fraction of the radius."
+
+	| length radians |
+	length := (self unitRadiusIn: anExtent) * radius * aDistance.
+	radians := anAngle degreesToRadians.
+	^ anExtent / 2 + (radians cos * length @ (radians sin * length) negated)
+]
+
+{ #category : 'accessing' }
+BpPie >> radius [
+
+	^ radius
+]
+
+{ #category : 'accessing' }
+BpPie >> radius: aNumber [
+	"Set the pie radius, 1 being the default size."
+
+	radius := aNumber.
+	self rebuild
+]
+
+{ #category : 'private - building' }
+BpPie >> rebuild [
+	"Recreate my shadows, wedges and texts from my configuration."
+
+	self removeChildren.
+	wedges := self newWedges.
+	shadows := shadow
+		           ifTrue: [ wedges collect: [ :each | BpPieWedgeShadow on: each ] ]
+		           ifFalse: [ #(  ) ].
+	texts := self allLabelSets flatCollect: [ :each | each textsFor: wedges ].
+	self addChildren: self parts
+]
+
+{ #category : 'accessing' }
+BpPie >> shadow [
+
+	^ shadow
+]
+
+{ #category : 'accessing' }
+BpPie >> shadow: aBoolean [
+
+	shadow := aBoolean.
+	self rebuild
+]
+
+{ #category : 'geometry' }
+BpPie >> shadowOffsetIn: anExtent [
+	"Answer how far shadows are moved: to the bottom left, by 2% of the radius as in matplotlib."
+
+	^ (self unitRadiusIn: anExtent) * radius * (-0.02 @ 0.02)
+]
+
+{ #category : 'accessing - parts' }
+BpPie >> shadows [
+
+	^ shadows
+]
+
+{ #category : 'accessing' }
+BpPie >> startAngle [
+
+	^ startAngle
+]
+
+{ #category : 'accessing' }
+BpPie >> startAngle: aNumber [
+	"Set the angle where the first wedge starts, in degrees, counterclockwise from the right."
+
+	startAngle := aNumber.
+	self rebuild
+]
+
+{ #category : 'accessing' }
+BpPie >> textStyle [
+
+	^ textStyle
+]
+
+{ #category : 'accessing' }
+BpPie >> textStyle: aBlock [
+	"aBlock receives the BlText of each label and percentage text to change its font, size or color: the textprops argument of matplotlib pie."
+
+	textStyle := aBlock.
+	self rebuild
+]
+
+{ #category : 'accessing - parts' }
+BpPie >> texts [
+
+	^ texts
+]
+
+{ #category : 'geometry' }
+BpPie >> unitRadiusIn: anExtent [
+	"Answer the radius, in pixels, of a pie of radius 1 drawn in anExtent, as fitted by my layout (see fitUnitRadiusIn:)."
+
+	^ unitRadius ifNil: [ self frameRadiusIn: anExtent ]
+]
+
+{ #category : 'accessing' }
+BpPie >> values [
+
+	^ values
+]
+
+{ #category : 'accessing' }
+BpPie >> values: aCollectionOfNumbers [
+	"Set the wedge sizes, the x argument of matplotlib pie."
+
+	values := aCollectionOfNumbers.
+	self rebuild
+]
+
+{ #category : 'accessing - parts' }
+BpPie >> wedgeAt: anIndex [
+
+	^ wedges at: anIndex
+]
+
+{ #category : 'geometry' }
+BpPie >> wedgeCenterOf: aWedge in: anExtent [
+	"Answer the center of aWedge: my center, moved along its bisector when it is exploded."
+
+	^ self pointAtAngle: aWedge midAngle distance: aWedge explode in: anExtent
+]
+
+{ #category : 'geometry' }
+BpPie >> wedgeDiameterIn: anExtent [
+
+	^ (self unitRadiusIn: anExtent) * radius * 2
+]
+
+{ #category : 'accessing' }
+BpPie >> wedgeStyle [
+
+	^ wedgeStyle
+]
+
+{ #category : 'accessing' }
+BpPie >> wedgeStyle: aBlock [
+	"aBlock receives each wedge once it is built, to change its border, opacity, ...: the wedgeprops argument of matplotlib pie."
+
+	wedgeStyle := aBlock.
+	self rebuild
+]
+
+{ #category : 'accessing - parts' }
+BpPie >> wedges [
+
+	^ wedges
+]
+
+{ #category : 'interaction' }
+BpPie >> whenWedge: anEventClass do: aBlock [
+	"Evaluate aBlock with the event and the wedge each time a wedge receives an event of anEventClass. Unlike a handler added to a wedge directly, it is kept when I rebuild my wedges."
+
+	wedgeHandlers add: anEventClass -> aBlock.
+	wedges do: [ :each | self addHandler: anEventClass -> aBlock to: each ]
+]
