@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:` or a `BpLine` added by `plotX:y:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:` or a `BpBoxPlot` added by `boxPlot:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -9,15 +9,16 @@ BpAxes exampleHistogram
 
 ## Design Rationale
 
-- As in matplotlib, autoscaling adds a margin of 5% on each side, stopped by the sticky values of the artists: the bars of a histogram start exactly at 0.
+- As in matplotlib, autoscaling adds a margin of 5% on each side, stopped by the sticky values of the artists: the bars of a histogram start exactly at 0. Artists can also require values to be covered (`BpArtist>>requiredValuesOn:`): a box plot keeps half a unit around its positions.
 - My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale.
-- Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`, matplotlib `set_xticks`), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length as in matplotlib: computing it from my size would change my children during the layout pass and trigger another layout.
+- Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`, matplotlib `set_xticks`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length as in matplotlib: computing it from my size would change my children during the layout pass and trigger another layout.
+- My title is a `BpText`, so a line break gives a title on several lines, as in matplotlib.
 - I have one slot per matplotlib setting, hence many slots.
 
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:` and `plotX:y:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
+2. `hist:`, `scatterX:y:`, `plotX:y:` and `boxPlot:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
@@ -31,6 +32,8 @@ BpAxes exampleHistogram
 Class {
 	#name : 'BpAxes',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'artists',
 		'transform',
@@ -109,6 +112,15 @@ BpAxes >> autoScale: anAxis [
 	^ self limitsFrom: values min to: values max on: anAxis
 ]
 
+{ #category : 'plotting' }
+BpAxes >> boxPlot: aCollection [
+	"Add a box plot of aCollection (numbers for one box, or one collection of numbers per box) and answer it, to be configured like matplotlib Axes.boxplot: notch:, whiskers:, positions:, widths:, patchArtist:, ..."
+
+	^ self addArtist: (BpBoxPlot new
+		   x: aCollection;
+		   yourself)
+]
+
 { #category : 'layout' }
 BpAxes >> computePlotBoundsIn: anExtent [
 	"Compute the bounds of my plot area in anExtent, leaving room for the tick labels on the left and at the bottom, and for my title at the top. My tick labels and title must be measured."
@@ -134,20 +146,20 @@ BpAxes >> dataTransform [
 
 { #category : 'private - building' }
 BpAxes >> dataValuesOn: anAxis [
-	"Answer the lowest and highest coordinates on anAxis of every patch."
+	"Answer the lowest and highest coordinates on anAxis of every patch, and the values my artists require."
 
-	^ self patches flatCollect: [ :each |
-		  | box |
-		  box := each dataBounds.
-		  anAxis = #x
-			  ifTrue: [
-				  {
-					  box left.
-					  box right } ]
-			  ifFalse: [
-				  {
-					  box top.
-					  box bottom } ] ]
+	^ (self patches flatCollect: [ :each |
+		   | box |
+		   box := each dataBounds.
+		   anAxis = #x
+			   ifTrue: [
+				   {
+					   box left.
+					   box right } ]
+			   ifFalse: [
+				   {
+					   box top.
+					   box bottom } ] ]) , (artists flatCollect: [ :each | each requiredValuesOn: anAxis ])
 ]
 
 { #category : 'private - building' }
@@ -193,10 +205,7 @@ BpAxes >> initialize [
 	plotArea := BpPlotArea new
 		            dataTransform: transform;
 		            yourself.
-	titleElement := BlTextElement new
-		                labelMeasurement;
-		                text: '' asRopedText;
-		                yourself.
+	titleElement := BpText new.
 	self
 		layout: BpAxesLayout new;
 		background: Color white;
@@ -264,6 +273,17 @@ BpAxes >> logLimitsOf: aCollectionOfPositiveValues [
 ]
 
 { #category : 'private - building' }
+BpAxes >> managedTicksOn: anAxis [
+	"Answer the ticks an artist places on anAxis, unless ticks were fixed with xTicks: or yTicks:."
+
+	(anAxis = #x
+		 ifTrue: [ xTicks ]
+		 ifFalse: [ yTicks ]) ifNotNil: [ ^ nil ].
+	artists do: [ :each | (each managedTicksOn: anAxis) ifNotNil: [ :managed | ^ managed ] ].
+	^ nil
+]
+
+{ #category : 'private - building' }
 BpAxes >> newLegend [
 
 	| entries |
@@ -275,15 +295,17 @@ BpAxes >> newLegend [
 
 { #category : 'private - building' }
 BpAxes >> newTicksOn: anAxis [
-	"Answer the ticks of anAxis at its fixed locations, or chosen for my current limits and scale, labeled by its formatter."
+	"Answer the ticks of anAxis: at its fixed locations, or the ones an artist manages (a box plot), or chosen for my current limits and scale, labeled by its formatter."
 
-	| locations labels formatter |
-	locations := self tickLocationsOn: anAxis.
+	| managed locations labels formatter |
+	managed := self managedTicksOn: anAxis.
+	locations := managed ifNil: [ self tickLocationsOn: anAxis ] ifNotNil: [ managed collect: [ :each | each key ] ].
 	formatter := anAxis = #x
 		             ifTrue: [ xTickFormatter ]
 		             ifFalse: [ yTickFormatter ].
 	labels := formatter
-		          ifNil: [ self defaultLabelsFor: locations on: anAxis ]
+		          ifNil: [
+		          managed ifNil: [ self defaultLabelsFor: locations on: anAxis ] ifNotNil: [ managed collect: [ :each | each value ] ] ]
 		          ifNotNil: [ locations collect: [ :each | (formatter value: each) asString ] ].
 	^ locations asArray with: labels asArray collect: [ :location :text | BpTick axis: anAxis location: location text: text ]
 ]
@@ -419,7 +441,7 @@ BpAxes >> title [
 
 { #category : 'accessing' }
 BpAxes >> title: aString [
-	"Set the title shown above my plot area (matplotlib set_title)."
+	"Set the title shown above my plot area (matplotlib set_title); a line break gives a title on several lines."
 
 	titleElement text: (aString asRopedText fontSize: 14)
 ]

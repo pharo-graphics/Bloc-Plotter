@@ -18,6 +18,8 @@ BpPatch scriptBarsAndSteps
 Class {
 	#name : 'BpPatch',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'artist',
 		'dataset',

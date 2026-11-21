@@ -15,6 +15,8 @@ BpPlotArea exampleOfHistogram
 Class {
 	#name : 'BpPlotArea',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'transform',
 		'patches',

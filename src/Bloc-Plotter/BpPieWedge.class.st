@@ -22,6 +22,8 @@ BpPieWedge exampleHogs
 Class {
 	#name : 'BpPieWedge',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'index',
 		'fraction',

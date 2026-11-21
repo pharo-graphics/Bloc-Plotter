@@ -9,6 +9,14 @@ Class {
 }
 
 { #category : 'tests' }
+BpColorsTest >> testCommonCssNames [
+
+	self assert: (BpColors named: 'black') equals: Color black.
+	self assert: (BpColors named: 'white') equals: Color white.
+	self assert: (BpColors named: 'orange') equals: (Color fromHexString: 'ffa500')
+]
+
+{ #category : 'tests' }
 BpColorsTest >> testCycleNamesIndexTheColorCycle [
 
 	self assert: (BpColors named: 'C0') equals: BpColors tab10 first.

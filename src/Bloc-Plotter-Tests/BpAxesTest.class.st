@@ -41,6 +41,50 @@ BpAxesTest >> testBarIsPaintedWhereItsDataIs [
 	self assert: (form colorAt: point rounded) equals: Color white
 ]
 
+{ #category : 'tests - box plot' }
+BpAxesTest >> testBoxPlotAddsABoxPlot [
+
+	| axes boxPlot |
+	axes := BpAxes new.
+	boxPlot := axes boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
+	self assert: axes artists asArray equals: { boxPlot }.
+	self assert: boxPlot statistics size equals: 2
+]
+
+{ #category : 'tests - box plot' }
+BpAxesTest >> testBoxPlotLimitsAreHalfAUnitAroundThePositions [
+
+	| axes |
+	axes := BpAxes new.
+	axes boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
+	self assert: axes dataTransform xLimits equals: #( 0.5 2.5 )
+]
+
+{ #category : 'tests - box plot' }
+BpAxesTest >> testBoxPlotPutsATickAtEachPosition [
+
+	| axes |
+	axes := BpAxes new.
+	axes boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
+	self
+		assert:
+		((axes ticks select: [ :each | each axis = #x ]) collect: [ :each | each location -> each label text asString ] as: Array)
+		equals: {
+			(1 -> '1').
+			(2 -> '2') }
+]
+
+{ #category : 'tests - box plot' }
+BpAxesTest >> testBoxPlotTickLabels [
+
+	| axes |
+	axes := BpAxes new.
+	(axes boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) )) tickLabels: #( 'A' 'B' ).
+	self
+		assert: ((axes ticks select: [ :each | each axis = #x ]) collect: [ :each | each label text asString ] as: Array)
+		equals: #( 'A' 'B' )
+]
+
 { #category : 'tests' }
 BpAxesTest >> testChangingTheHistogramUpdatesThePlotArea [
 
@@ -59,6 +103,16 @@ BpAxesTest >> testExplicitLimitsReplaceAutoScaling [
 	axes hist: #( 1 2 3 ).
 	axes xLimits: #( 0 100 ).
 	self assert: axes xLimits equals: #( 0 100 )
+]
+
+{ #category : 'tests - box plot' }
+BpAxesTest >> testFixedTicksWinOverTheBoxPlotTicks [
+
+	| axes |
+	axes := BpAxes new.
+	axes boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
+	axes xTicks: #( 1 1.5 2 ).
+	self assert: ((axes ticks select: [ :each | each axis = #x ]) collect: [ :each | each location ] as: Array) equals: #( 1 1.5 2 )
 ]
 
 { #category : 'tests - grid' }
@@ -136,6 +190,15 @@ BpAxesTest >> testHistogramsTakeTheNextCycleColors [
 	axes := self newAxes.
 	axes hist: #( 1 2 3 ).
 	self assert: (axes hist: #( 1 2 3 )) patches first background paint color equals: BpColors tab10 second
+]
+
+{ #category : 'tests - box plot' }
+BpAxesTest >> testHorizontalBoxPlotPutsTheTicksOnTheYAxis [
+
+	| axes |
+	axes := BpAxes new.
+	(axes boxPlot: #( #( 1 2 3 ) )) orientation: #horizontal.
+	self assert: ((axes ticks select: [ :each | each axis = #y ]) collect: [ :each | each location ] as: Array) equals: #( 1 )
 ]
 
 { #category : 'tests' }

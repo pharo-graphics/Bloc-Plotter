@@ -19,6 +19,8 @@ BpPieWedgeShadow exampleHogsShadow
 Class {
 	#name : 'BpPieWedgeShadow',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'wedge'
 	],

@@ -35,6 +35,8 @@ BpPie exampleExplodeShadowRotate
 Class {
 	#name : 'BpPie',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'values',
 		'labels',

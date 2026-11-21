@@ -49,18 +49,6 @@ Class {
 }
 
 { #category : 'constants' }
-BpLine class >> dashPatterns [
-	"Answer the dash pattern of each line style in points for a line one point wide, as the matplotlib rcParams lines.dashed_pattern, lines.dashdot_pattern and lines.dotted_pattern."
-
-	^ Dictionary new
-		  at: #solid put: #(  );
-		  at: #dashed put: #( 3.7 1.6 );
-		  at: #dashdot put: #( 6.4 1.6 1 1.6 );
-		  at: #dotted put: #( 1 1.65 );
-		  yourself
-]
-
-{ #category : 'constants' }
 BpLine class >> defaultLineWidth [
 
 	^ 1.5
@@ -139,26 +127,6 @@ BpLine class >> formatPartsOf: aString [
 	stream := aString readStream.
 	[ stream atEnd ] whileFalse: [ self readFormatPartFrom: stream into: parts ].
 	^ parts
-]
-
-{ #category : 'constants' }
-BpLine class >> lineStyleNames [
-	"Answer the line style of each matplotlib line style string."
-
-	^ Dictionary new
-		  at: '-' put: #solid;
-		  at: '--' put: #dashed;
-		  at: '-.' put: #dashdot;
-		  at: ':' put: #dotted;
-		  at: 'solid' put: #solid;
-		  at: 'dashed' put: #dashed;
-		  at: 'dashdot' put: #dashdot;
-		  at: 'dotted' put: #dotted;
-		  at: 'None' put: #none;
-		  at: 'none' put: #none;
-		  at: '' put: #none;
-		  at: ' ' put: #none;
-		  yourself
 ]
 
 { #category : 'format' }
@@ -283,22 +251,9 @@ BpLine >> legendEntries [
 
 { #category : 'private' }
 BpLine >> lineBorder [
-	"Answer the stroke of my line: matplotlib scales the dashes with the width and draws solid lines with projecting caps and dashed ones with butt caps."
+	"Answer the stroke of my line."
 
-	| width builder |
-	width := lineWidth * self class pixelsPerPoint.
-	builder := BlBorder builder
-		           paint: self lineColor;
-		           width: width;
-		           joinRound;
-		           yourself.
-	lineStyle = #solid
-		ifTrue: [ builder capSquare ]
-		ifFalse: [
-			builder
-				capButt;
-				dashArray: ((self class dashPatterns at: lineStyle) collect: [ :each | each * width ]) ].
-	^ builder build
+	^ self strokeColor: self lineColor width: lineWidth style: lineStyle
 ]
 
 { #category : 'private' }
@@ -317,10 +272,7 @@ BpLine >> linePatch [
 BpLine >> lineStyle: aSymbolOrString [
 	"Set my line style: #solid, #dashed, #dashdot, #dotted or #none, or a matplotlib string ('-', '--', '-.', ':', 'None', ...)."
 
-	lineStyle := self class dashPatterns at: aSymbolOrString asSymbol ifPresent: [ :pattern | aSymbolOrString asSymbol ] ifAbsent: [
-		             self class lineStyleNames
-			             at: aSymbolOrString asString
-			             ifAbsent: [ ^ self error: 'Unknown line style: ' , aSymbolOrString printString ] ].
+	lineStyle := self class lineStyleOf: aSymbolOrString.
 	self refresh
 ]
 

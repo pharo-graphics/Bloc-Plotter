@@ -27,6 +27,8 @@ BpMarker scriptAllMarkers
 Class {
 	#name : 'BpMarker',
 	#superclass : 'Object',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'kind',
 		'vertices',
@@ -417,6 +419,26 @@ BpMarker >> isText [
 BpMarker >> kind [
 
 	^ kind
+]
+
+{ #category : 'inspector extensions' }
+BpMarker >> liveElement [
+	"Answer a black marker patch drawing me, 40 points wide."
+
+	| patch |
+	patch := BpMarkerPatch new
+		         marker: self;
+		         area: 40 squared;
+		         yourself.
+	patch
+		updateShape;
+		extent: (self extentWithSide: patch side);
+		background: (self isFilled
+			 ifTrue: [ Color black ]
+			 ifFalse: [ Color transparent ]);
+		border: (BlBorder paint: Color black width: 2).
+	self isText ifTrue: [ patch paintText: Color black ].
+	^ patch
 ]
 
 { #category : 'geometry' }

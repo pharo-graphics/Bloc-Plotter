@@ -43,6 +43,20 @@ BpFigureTest >> testFigureExtentIsTheSizeAskedWithExtent [
 ]
 
 { #category : 'tests' }
+BpFigureTest >> testFigureExtentOfAFigureFillingItsParentIsItsExtent [
+
+	| figure |
+	figure := BpFigure new.
+	figure inNewHeadlessSpaceDo: [ :space |
+		figure constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ].
+		space extent: 300 @ 200.
+		space settle.
+		self assert: figure figureExtent equals: figure extent ]
+]
+
+{ #category : 'tests' }
 BpFigureTest >> testNewFigureHasOneAxes [
 
 	self assert: BpFigure new axes size equals: 1

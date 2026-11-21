@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`) or a line plot (`BpLine`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`) or a box plot (`BpBoxPlot`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -9,13 +9,14 @@ BpArtist scriptArtistsInOneAxes
 
 ## Design Rationale
 
-- I only know what my axes need: my patches (`allPatches`), my legend entries, the values autoscaling must not go past (`stickyValuesOn:`), the axes I put on a log scale (`logAxes`) and how many colors of the color cycle I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The axes ignore the kind of plot.
+- I only know what my axes need: my patches (`allPatches`), my legend entries, the values autoscaling must cover besides my patches (`requiredValuesOn:`) and must not go past (`stickyValuesOn:`), the ticks I place myself (`managedTicksOn:`, matplotlib `manage_ticks`), the axes I put on a log scale (`logAxes`), how many colors of the color cycle I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The axes ignore the kind of plot.
 - Each change recomputes everything (`refresh`): subclasses define `compute` and `newPatches`, and new patches replace the previous ones. Handlers given to `whenPatch:do:` are kept and given to each new patch.
 - Style settings take one value or one per dataset or point (`setting:at:`), as matplotlib arguments.
+- My Live inspector pane (`TBpLiveInspection`) shows the figure of my axes, or a new figure holding me when I have no axes yet.
 
 ## Usage
 
-1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
+1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the axes (`BpAxes>>artistChanged:`); they rebuild their limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
@@ -23,6 +24,8 @@ BpArtist scriptArtistsInOneAxes
 Class {
 	#name : 'BpArtist',
 	#superclass : 'Object',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'axes',
 		'patchHandlers',
@@ -35,6 +38,51 @@ Class {
 	#package : 'Bloc-Plotter',
 	#tag : 'Axes'
 }
+
+{ #category : 'constants' }
+BpArtist class >> dashPatterns [
+	"Answer the dash pattern of each line style in points for a line one point wide, as the matplotlib rcParams lines.dashed_pattern, lines.dashdot_pattern and lines.dotted_pattern."
+
+	^ Dictionary new
+		  at: #solid put: #(  );
+		  at: #dashed put: #( 3.7 1.6 );
+		  at: #dashdot put: #( 6.4 1.6 1 1.6 );
+		  at: #dotted put: #( 1 1.65 );
+		  yourself
+]
+
+{ #category : 'constants' }
+BpArtist class >> lineStyleNames [
+	"Answer the line style of each matplotlib line style string."
+
+	^ Dictionary new
+		  at: '-' put: #solid;
+		  at: '--' put: #dashed;
+		  at: '-.' put: #dashdot;
+		  at: ':' put: #dotted;
+		  at: 'solid' put: #solid;
+		  at: 'dashed' put: #dashed;
+		  at: 'dashdot' put: #dashdot;
+		  at: 'dotted' put: #dotted;
+		  at: 'None' put: #none;
+		  at: 'none' put: #none;
+		  at: '' put: #none;
+		  at: ' ' put: #none;
+		  yourself
+]
+
+{ #category : 'constants' }
+BpArtist class >> lineStyleOf: aSymbolOrString [
+	"Answer the line style #solid, #dashed, #dashdot, #dotted or #none named by aSymbolOrString, a symbol or a matplotlib string ('-', '--', '-.', ':', 'None', ...)."
+
+	^ self dashPatterns
+		  at: aSymbolOrString asSymbol
+		  ifPresent: [ :pattern | aSymbolOrString asSymbol ]
+		  ifAbsent: [
+		  self lineStyleNames
+			  at: aSymbolOrString asString
+			  ifAbsent: [ self error: 'Unknown line style: ' , aSymbolOrString printString ] ]
+]
 
 { #category : 'accessing' }
 BpArtist class >> pixelsPerPoint [
@@ -168,11 +216,29 @@ BpArtist >> legendEntries [
 	^ #(  )
 ]
 
+{ #category : 'inspector extensions' }
+BpArtist >> liveElement [
+	"Answer the figure showing me. When I have no axes yet, I am added to the axes of a new figure."
+
+	| figure |
+	axes ifNotNil: [ ^ axes liveElement ].
+	figure := BpFigure new.
+	figure axes first addArtist: self.
+	^ figure
+]
+
 { #category : 'axes' }
 BpArtist >> logAxes [
 	"Answer the axes (#x, #y) I put on a log scale."
 
 	^ #(  )
+]
+
+{ #category : 'axes' }
+BpArtist >> managedTicksOn: anAxis [
+	"Answer the ticks I place on anAxis, as location -> label associations, or nil to let my axes choose them (matplotlib manage_ticks)."
+
+	^ nil
 ]
 
 { #category : 'private - computing' }
@@ -198,6 +264,13 @@ BpArtist >> refresh [
 	axes ifNotNil: [ axes artistChanged: self ]
 ]
 
+{ #category : 'axes' }
+BpArtist >> requiredValuesOn: anAxis [
+	"Answer values on anAxis (#x or #y) that autoscaling must cover besides my patches."
+
+	^ #(  )
+]
+
 { #category : 'private - style' }
 BpArtist >> setting: aValueOrCollection at: anIndex [
 	"Answer a style setting for one dataset or point: the setting itself, or its element at anIndex when it is a collection (one per dataset or point)."
@@ -212,6 +285,26 @@ BpArtist >> stickyValuesOn: anAxis [
 	"Answer the values autoscaling margins must not go past on anAxis (#x or #y), as matplotlib sticky edges."
 
 	^ #(  )
+]
+
+{ #category : 'private - style' }
+BpArtist >> strokeColor: aColor width: aNumberOfPoints style: aLineStyle [
+	"Answer the stroke of a line of aColor, aNumberOfPoints wide, in aLineStyle (#solid, #dashed, #dashdot or #dotted): matplotlib scales the dashes with the width and draws solid lines with projecting caps and dashed ones with butt caps."
+
+	| width builder |
+	width := aNumberOfPoints * self class pixelsPerPoint.
+	builder := BlBorder builder
+		           paint: aColor;
+		           width: width;
+		           joinRound;
+		           yourself.
+	aLineStyle = #solid
+		ifTrue: [ builder capSquare ]
+		ifFalse: [
+			builder
+				capButt;
+				dashArray: ((self class dashPatterns at: aLineStyle) collect: [ :each | each * width ]) ].
+	^ builder build
 ]
 
 { #category : 'interaction' }

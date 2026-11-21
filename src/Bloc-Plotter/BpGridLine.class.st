@@ -19,6 +19,8 @@ BpGridLine exampleVertical
 Class {
 	#name : 'BpGridLine',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'axis',
 		'location'

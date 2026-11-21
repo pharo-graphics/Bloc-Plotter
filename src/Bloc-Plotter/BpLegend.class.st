@@ -15,6 +15,8 @@ BpLegend exampleTwoEntries
 Class {
 	#name : 'BpLegend',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#category : 'Bloc-Plotter-Axes',
 	#package : 'Bloc-Plotter',
 	#tag : 'Axes'

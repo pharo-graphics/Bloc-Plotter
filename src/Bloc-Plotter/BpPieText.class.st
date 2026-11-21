@@ -1,5 +1,5 @@
 "
-I am a text of a `BpPie`: a label or a percentage shown on the bisector of a `BpPieWedge`, at a `distance` from the pie center given as a fraction of its radius.
+I am a text of a `BpPie`: a label or a percentage shown on the bisector of a `BpPieWedge`, at a `distance` from the pie center given as a fraction of its radius. I show my lines as my superclass `BpText` does.
 
 ## Examples
 
@@ -11,7 +11,6 @@ BpPieText exampleValueAndPercent
 
 - My `alignment` is `#center` inside the pie; outside it, as in matplotlib, `#left` on the right half and `#right` on the left half, so that I go away from the pie.
 - When I rotate, my `rotationAngle` follows the bisector of my wedge but stays between -90 and 90 degrees, so that I am never upside down.
-- I do not receive mouse events, so clicks on me reach the wedge under me.
 
 ## Usage
 
@@ -21,17 +20,15 @@ BpPieText exampleValueAndPercent
 
 ## Implementation Notes
 
-- I show one centered `BlTextElement` per line of my text, since `BlTextElement` draws a single line.
 - My rotation is a transformation around my anchor point, so it does not change my layout bounds.
 "
 Class {
 	#name : 'BpPieText',
-	#superclass : 'BlElement',
+	#superclass : 'BpText',
 	#instVars : [
 		'wedge',
 		'distance',
-		'rotate',
-		'text'
+		'rotate'
 	],
 	#category : 'Bloc-Plotter-Pie',
 	#package : 'Bloc-Plotter',
@@ -80,41 +77,7 @@ BpPieText >> initialize [
 
 	super initialize.
 	distance := 0.6.
-	rotate := false.
-	text := '' asRopedText.
-	self
-		layout: BlLinearLayout vertical alignCenter;
-		constraintsDo: [ :c |
-			c horizontal fitContent.
-			c vertical fitContent ];
-		preventMeAndChildrenMouseEvents
-]
-
-{ #category : 'private - building' }
-BpPieText >> lineElementFor: aBlText from: aStart to: anEnd [
-
-	^ BlTextElement new
-		  labelMeasurement;
-		  text: (anEnd < aStart
-			   ifTrue: [ '' asRopedText ]
-			   ifFalse: [ aBlText from: aStart to: anEnd ]);
-		  yourself
-]
-
-{ #category : 'private - building' }
-BpPieText >> linesOf: aBlText [
-	"Answer a text element for each line of aBlText, keeping its attributes."
-
-	| lines start string |
-	string := aBlText asString.
-	lines := OrderedCollection new.
-	start := 1.
-	string withIndexDo: [ :char :index |
-		char = Character cr ifTrue: [
-			lines add: (self lineElementFor: aBlText from: start to: index - 1).
-			start := index + 1 ] ].
-	lines add: (self lineElementFor: aBlText from: start to: string size).
-	^ lines
+	rotate := false
 ]
 
 { #category : 'layout' }
@@ -168,21 +131,6 @@ BpPieText >> rotationAngle [
 	angle > 270 ifTrue: [ ^ angle - 360 ].
 	angle > 90 ifTrue: [ ^ angle - 180 ].
 	^ angle
-]
-
-{ #category : 'accessing' }
-BpPieText >> text [
-
-	^ text
-]
-
-{ #category : 'accessing' }
-BpPieText >> text: aBlText [
-	"Show aBlText, one line per line break, each line centered."
-
-	text := aBlText.
-	self removeChildren.
-	self addChildren: (self linesOf: aBlText) asArray
 ]
 
 { #category : 'private - updating' }

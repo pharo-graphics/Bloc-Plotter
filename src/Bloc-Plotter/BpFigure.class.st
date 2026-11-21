@@ -39,6 +39,8 @@ More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`
 Class {
 	#name : 'BpFigure',
 	#superclass : 'BlElement',
+	#traits : 'TBpLiveInspection',
+	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
 		'rows',
 		'columns',
@@ -67,6 +69,14 @@ BpFigure class >> rows: aRowCount columns: aColumnCount [
 	^ self new
 		  rows: aRowCount columns: aColumnCount;
 		  yourself
+]
+
+{ #category : 'script' }
+BpFigure class >> scriptBoxPlot [
+	"Show the six box plot variants of the matplotlib gallery (see `BpBoxPlot`)."
+
+	<example>
+	^ BpBoxPlot exampleBoxPlotDemo show: 'boxplot_demo'
 ]
 
 { #category : 'script' }
@@ -161,9 +171,14 @@ BpFigure >> columns [
 
 { #category : 'accessing' }
 BpFigure >> figureExtent [
-	"Answer the size asked for me with extent: (matplotlib figsize). Unlike extent, it is known before I am laid out."
+	"Answer the size asked for me with extent: (matplotlib figsize). Unlike extent, it is known before I am laid out. Once I fill my parent (in a window or a Live pane), answer my current extent."
 
-	^ self constraints horizontal resizer size @ self constraints vertical resizer size
+	| horizontal vertical |
+	horizontal := self constraints horizontal resizer.
+	vertical := self constraints vertical resizer.
+	^ (horizontal isExact and: [ vertical isExact ])
+		  ifTrue: [ horizontal size @ vertical size ]
+		  ifFalse: [ self extent ]
 ]
 
 { #category : 'initialization' }
@@ -175,6 +190,15 @@ BpFigure >> initialize [
 		padding: (BlInsets all: 6);
 		extent: 640 @ 480.
 	self rows: 1 columns: 1
+]
+
+{ #category : 'inspector extensions' }
+BpFigure >> prepareForLiveView [
+	"Fill the Live pane, as I fill the space opened by show:."
+
+	self constraintsDo: [ :c |
+		c horizontal matchParent.
+		c vertical matchParent ]
 ]
 
 { #category : 'accessing' }
