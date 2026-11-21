@@ -35,28 +35,23 @@ Trait {
 
 { #category : 'inspector extensions' }
 TBpLiveInspection >> inspectionLive: aBuilder [
-	"Show my live element in a Bloc space inside the inspector, so it can be used with the mouse. An element already shown in another space (a window) is not taken from it: its snapshot is shown instead."
+	"Show my live element in the inspector with a Spec Bloc presenter, so it can be used with the mouse: a native Bloc element with the Toplo backend. An element already shown elsewhere (a window) is not taken from it: its snapshot is shown instead."
 
 	<inspectorPresentationOrder: 0 title: 'Live'>
-	| element presenter root |
+	| element |
 	element := self liveElement.
 	(element isAttachedToSceneGraph and: [ (self isInLivePane: element) not ]) ifTrue: [
-		^ aBuilder newMorph
-			  morph: element asForm asMorph;
+		^ aBuilder newImage
+			  image: element asForm;
 			  yourself ].
 	element removeFromParent.
 	element constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 	element prepareForLiveView.
-	presenter := aBuilder instantiate: SpBlSpaceInMorphPresenter.
-	self relayoutOnResize: presenter space.
-	root := presenter space root.
-	root userData at: #bpLivePane put: true.
-	root
-		layout: BlFrameLayout new;
-		addChild: element.
-	^ presenter
+	^ (aBuilder instantiate: SpBlocPresenter)
+		  blocElement: (self newLivePaneOn: element);
+		  yourself
 ]
 
 { #category : 'inspector extensions' }
@@ -68,12 +63,30 @@ TBpLiveInspection >> isInLivePane: anElement [
 
 { #category : 'inspector extensions' }
 TBpLiveInspection >> liveElement [
-	"Answer the element the Live pane shows: my topmost ancestor below the root of a space, so that a part is seen in its figure."
+	"Answer the element the Live pane shows: my topmost ancestor below the root of a space or a Live pane, so that a part is seen in its figure."
 
 	| element |
 	element := self.
-	[ element hasParent and: [ element parent isRoot not ] ] whileTrue: [ element := element parent ].
+	[ element hasParent and: [ element parent isRoot not and: [ (self isInLivePane: element) not ] ] ] whileTrue: [
+		element := element parent ].
 	^ element
+]
+
+{ #category : 'inspector extensions' }
+TBpLiveInspection >> newLivePaneOn: anElement [
+	"Answer the element of a Live pane: it fills the pane and holds anElement."
+
+	| pane |
+	pane := BlElement new
+		        layout: BlFrameLayout new;
+		        constraintsDo: [ :c |
+			        c horizontal matchParent.
+			        c vertical matchParent ];
+		        addChild: anElement;
+		        yourself.
+	pane userData at: #bpLivePane put: true.
+	pane addEventHandlerOn: BlElementAddedToSceneGraphEvent do: [ :event | self relayoutOnResize: pane space ].
+	^ pane
 ]
 
 { #category : 'inspector extensions' }
@@ -85,7 +98,7 @@ TBpLiveInspection >> prepareForLiveView [
 
 { #category : 'inspector extensions' }
 TBpLiveInspection >> relayoutOnResize: aSpace [
-	"Lay the root of aSpace out again whenever it no longer has the size of aSpace. Work around a Bloc bug: the first resize of a space embedded in a morph is not announced, so the root keeps its former size (see P15-BlocBacklog, 2026-11-21)."
+	"Lay the root of aSpace out again whenever it no longer has the size of aSpace. Work around a Bloc bug of the Morphic backend, where Spec embeds the space in a morph: the first resize of that morph is not announced, so the root keeps its former size (see P15-BlocBacklog, 2026-11-21)."
 
 	aSpace
 		addEventHandlerOn: BlSpaceEventsProcessedEvent

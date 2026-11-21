@@ -9,9 +9,6 @@ I check the Live inspector pane of `TBpLiveInspection`: it is the first pane of 
 Class {
 	#name : 'BpLiveInspectionTest',
 	#superclass : 'TestCase',
-	#instVars : [
-		'presenters'
-	],
 	#category : 'Bloc-Plotter-Tests',
 	#package : 'Bloc-Plotter-Tests'
 }
@@ -19,35 +16,26 @@ Class {
 { #category : 'private' }
 BpLiveInspectionTest >> livePaneOf: anObject [
 
-	| pane |
-	pane := anObject inspectionLive: SpPresenterBuilder new.
-	presenters add: pane.
-	^ pane
+	^ anObject inspectionLive: SpPresenterBuilder new
 ]
 
 { #category : 'private' }
-BpLiveInspectionTest >> resize: aSpace to: anExtent [
-	"Resize the morph hosting aSpace, as the inspector does, and let aSpace run its frames."
+BpLiveInspectionTest >> showInMorph: aPane resizedTo: anExtent [
+	"Show the element of aPane in a space hosted by a morph, as the Morphic adapter of SpBlocPresenter does, then resize that morph as the inspector does and let the space run its frames."
 
-	aSpace settle.
-	aSpace hostSpaceDo: [ :host | host windowExtent: anExtent ].
-	aSpace requestPulse.
-	aSpace settle.
-	(Delay forMilliseconds: 300) wait
-]
-
-{ #category : 'running' }
-BpLiveInspectionTest >> setUp [
-
-	super setUp.
-	presenters := OrderedCollection new
-]
-
-{ #category : 'running' }
-BpLiveInspectionTest >> tearDown [
-
-	presenters do: [ :each | (each isKindOf: SpBlSpaceInMorphPresenter) ifTrue: [ each space close ] ].
-	super tearDown
+	| space |
+	space := BlSpace new.
+	space host: (BlMorphicHost new
+		 containerMorph: Morph new;
+		 yourself).
+	space show.
+	[
+		space root addChild: aPane blocElement.
+		space settle.
+		space hostSpaceDo: [ :host | host windowExtent: anExtent ].
+		space requestPulse.
+		space settle.
+		(Delay forMilliseconds: 300) wait ] ensure: [ space close ]
 ]
 
 { #category : 'tests' }
@@ -57,8 +45,8 @@ BpLiveInspectionTest >> testASecondLivePaneTakesTheElementFromTheFirstOne [
 	figure := BpFigure exampleTwoByTwo.
 	first := self livePaneOf: figure.
 	second := self livePaneOf: figure.
-	self deny: (first space root children includes: figure).
-	self assert: (second space root children includes: figure)
+	self deny: (first blocElement children includes: figure).
+	self assert: (second blocElement children includes: figure)
 ]
 
 { #category : 'tests' }
@@ -70,7 +58,7 @@ BpLiveInspectionTest >> testAnElementShownInAnotherSpaceIsNotTakenFromIt [
 		| pane |
 		pane := self livePaneOf: figure.
 		self assert: figure space identicalTo: space.
-		self deny: (pane isKindOf: SpBlSpaceInMorphPresenter) ]
+		self assert: (pane isKindOf: SpImagePresenter) ]
 ]
 
 { #category : 'tests' }
@@ -153,17 +141,17 @@ BpLiveInspectionTest >> testLivePaneCentersAnElementOfItsOwnSize [
 
 	| patch |
 	patch := BpMarker exampleStar liveElement.
-	self resize: (self livePaneOf: patch) space to: 300 @ 200.
+	self showInMorph: (self livePaneOf: patch) resizedTo: 300 @ 200.
 	self assert: patch bounds inParent center equals: 150 @ 100
 ]
 
 { #category : 'tests' }
-BpLiveInspectionTest >> testLivePaneFollowsItsSize [
-	"The first resize of a space hosted in a morph is not announced by Bloc: the Live pane must still lay its figure out at the new size."
+BpLiveInspectionTest >> testLivePaneFollowsItsSizeInAMorph [
+	"The first resize of a space hosted in a morph (the Morphic backend) is not announced by Bloc: the Live pane must still lay its figure out at the new size."
 
 	| figure |
 	figure := BpFigure exampleTwoByTwo.
-	self resize: (self livePaneOf: figure) space to: 300 @ 200.
+	self showInMorph: (self livePaneOf: figure) resizedTo: 300 @ 200.
 	self assert: figure extent equals: 300 @ 200
 ]
 
@@ -173,14 +161,25 @@ BpLiveInspectionTest >> testLivePaneOfAPatchShowsItsFigure [
 	| figure pane |
 	figure := BpLine examplePlotType.
 	pane := self livePaneOf: figure axes first artists first patches first.
-	self assert: (pane space root children includes: figure)
+	self assert: (pane blocElement children includes: figure)
 ]
 
 { #category : 'tests' }
-BpLiveInspectionTest >> testLivePaneShowsTheElementInASpace [
+BpLiveInspectionTest >> testLivePaneOpensInAToploInspector [
+
+	| application window |
+	application := SpApplication new
+		               useBackend: #Toplo;
+		               yourself.
+	window := (StInspectorPresenter newApplication: application model: BpLine exampleSine) open.
+	[ self assert: window isOpen ] ensure: [ window close ]
+]
+
+{ #category : 'tests' }
+BpLiveInspectionTest >> testLivePaneShowsTheElement [
 
 	| figure pane |
 	figure := BpFigure exampleTwoByTwo.
 	pane := self livePaneOf: figure.
-	self assert: (pane space root children includes: figure)
+	self assert: (pane blocElement children includes: figure)
 ]
