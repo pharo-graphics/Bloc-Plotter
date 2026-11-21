@@ -11,37 +11,37 @@ Class {
 { #category : 'tests - format' }
 BpTextFormatterTest >> testFormatAbsoluteValueOneDecimal [
 
-	self assert: (BpTextFormatter format: '{absval:.1f}' absval: 36 frac: 0.45) equals: '36.0'
+	self assert: (BpTextFormatter format: '{absval:.1f}' absVal: 36 frac: 0.45) equals: '36.0'
 ]
 
 { #category : 'tests - format' }
 BpTextFormatterTest >> testFormatFractionAsPercent [
 
-	self assert: (BpTextFormatter format: '{frac:.1%}' absval: 36 frac: 0.45) equals: '45.0%'
+	self assert: (BpTextFormatter format: '{frac:.1%}' absVal: 36 frac: 0.45) equals: '45.0%'
 ]
 
 { #category : 'tests - format' }
 BpTextFormatterTest >> testFormatIntegerAndPercentOnTwoLines [
 
-	self assert: (BpTextFormatter format: '{absval:d}\n{frac:.1%}' absval: 36 frac: 0.45) equals: (String cr join: #( '36' '45.0%' ))
+	self assert: (BpTextFormatter format: '{absval:d}\n{frac:.1%}' absVal: 36 frac: 0.45) equals: (String cr join: #( '36' '45.0%' ))
 ]
 
 { #category : 'tests - format' }
 BpTextFormatterTest >> testFormatKeepsSurroundingText [
 
-	self assert: (BpTextFormatter format: '<{frac:.0%}>' absval: 8 frac: 0.125) equals: '<13%>'
+	self assert: (BpTextFormatter format: '<{frac:.0%}>' absVal: 8 frac: 0.125) equals: '<13%>'
 ]
 
 { #category : 'tests - errors' }
 BpTextFormatterTest >> testFormatUnknownFieldRaisesError [
 
-	self should: [ BpTextFormatter format: '{value}' absval: 8 frac: 0.1 ] raise: KeyNotFound
+	self should: [ BpTextFormatter format: '{value}' absVal: 8 frac: 0.1 ] raise: KeyNotFound
 ]
 
 { #category : 'tests - format' }
 BpTextFormatterTest >> testFormatWithoutSpec [
 
-	self assert: (BpTextFormatter format: 'v={absval}' absval: 8 frac: 0.1) equals: 'v=8'
+	self assert: (BpTextFormatter format: 'v={absval}' absVal: 8 frac: 0.1) equals: 'v=8'
 ]
 
 { #category : 'tests - printf' }

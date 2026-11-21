@@ -1,5 +1,5 @@
 "
-I am the inside of a `BpAxes`: the white rectangle framed by the spines, where the patches of the artists, the grid lines and the legend are shown, clipped to my bounds, in this order from bottom to top (`showChildren`). My `BpPlotAreaLayout` places the patches where their data are.
+I am the inside of a `BpAxes`: the white rectangle framed by the spines, where the patches of the artists, the grid lines and the legend are shown, clipped to my bounds (`showChildren`). From bottom to top: the patches of bars and scatter points, the grid lines, the patches of lines (`BpArtist>>isAboveGrid`), then the legend, as matplotlib z-orders. My `BpPlotAreaLayout` places the patches where their data are.
 
 ## Examples
 
@@ -101,9 +101,11 @@ BpPlotArea >> patches: aCollectionOfPatches [
 
 { #category : 'private - children' }
 BpPlotArea >> showChildren [
-	"Show my patches, then my grid lines, then my legend above them."
+	"Show the patches drawn below the grid, my grid lines, the patches drawn above it (lines), then my legend above them all."
 
+	| isAbove |
+	isAbove := [ :each | each artist isNotNil and: [ each artist isAboveGrid ] ].
 	self removeChildren.
-	self addChildren: patches , gridLines.
+	self addChildren: (patches reject: isAbove) , gridLines , (patches select: isAbove).
 	legend ifNotNil: [ self addChild: legend ]
 ]

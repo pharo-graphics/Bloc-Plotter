@@ -1,5 +1,5 @@
 "
-I provide the colors of matplotlib: the default color cycle (`tab10`), some named colors (`named:`, including the names of the cycle such as 'tab:blue'), and the viridis colormap (`viridis:`, or `colormap:` which answers it as a block).
+I provide the colors of matplotlib: the default color cycle (`tab10`), some named colors (`named:`, including the names of the cycle such as 'tab:blue' or 'C1'), and the viridis colormap (`viridis:`, or `colorMap:` which answers it as a block).
 
 ## Examples
 
@@ -9,7 +9,7 @@ BpColors scriptPalettes
 
 ## Usage
 
-I have no instances: `BpAxes>>nextColors:`, `BpArtist>>initialize`, `BpScatter>>colorOf:`, `BpScatter>>colormapBlock` and `BpPie class>>defaultColors` use my class-side methods.
+I have no instances: `BpAxes>>nextColors:`, `BpArtist>>initialize`, `BpArtist>>colorOf:`, `BpScatterplot>>colorMapBlock`, `BpLine>>isColorName:` and `BpPie class>>defaultColors` use my class-side methods.
 "
 Class {
 	#name : 'BpColors',
@@ -20,7 +20,7 @@ Class {
 }
 
 { #category : 'colormaps' }
-BpColors class >> colormap: aName [
+BpColors class >> colorMap: aName [
 	"Answer the colormap named aName (matplotlib cmap), as a block from a fraction between 0 and 1 to a color."
 
 	aName asString = 'viridis' ifTrue: [ ^ [ :fraction | self viridis: fraction ] ].
@@ -29,12 +29,14 @@ BpColors class >> colormap: aName [
 
 { #category : 'palettes' }
 BpColors class >> named: aString [
-	"Answer the matplotlib named color aString ('g', 'red', 'tan', 'lime', 'tab:blue', ...)."
+	"Answer the matplotlib named color aString ('g', 'red', 'tan', 'lime', 'tab:blue', 'C1' for the second color of the cycle, ...)."
 
 	| tableau |
 	tableau := #( 'tab:blue' 'tab:orange' 'tab:green' 'tab:red' 'tab:purple' 'tab:brown' 'tab:pink' 'tab:gray' 'tab:olive'
 	              'tab:cyan' ) indexOf: aString.
 	tableau > 0 ifTrue: [ ^ self tab10 at: tableau ].
+	(aString size = 2 and: [ aString first = $C and: [ aString last isDigit ] ]) ifTrue: [
+		^ self tab10 at: aString last digitValue + 1 ].
 	^ Color fromHexString: (self namedColors at: aString)
 ]
 

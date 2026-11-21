@@ -15,7 +15,7 @@ BpMarker scriptAllMarkers
 
 ## Usage
 
-1. `BpScatter>>marker:` creates me with `on:`; `BpScatter>>initialize` uses 'o'.
+1. `BpScatterplot>>marker:` creates me with `on:`; `BpScatterplot>>initialize` uses 'o'.
 2. Each `BpMarkerPatch` asks me `geometryWithSide:`, `extentWithSide:` and `offsetWithSide:` to take my shape at its size.
 
 - I am immutable and shared by all the patches of a scatter.

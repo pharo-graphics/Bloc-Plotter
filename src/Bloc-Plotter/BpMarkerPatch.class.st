@@ -1,5 +1,5 @@
 "
-I am the marker of one point of a `BpScatter`. I know the `index` of my point, its `dataPoint`, my `area` (matplotlib s, in points squared) and my `amount` (the number of c mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
+I am the marker of one point of a `BpScatterplot`. I know the `index` of my point, its `dataPoint`, my `area` (matplotlib s, in points squared) and my `amount` (the number of c mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
 
 ## Examples
 
@@ -32,7 +32,7 @@ BpMarkerPatch class >> exampleCircle [
 	"Answer the marker of the third point of a scatter, a circle of 80 points squared."
 
 	<sampleInstance>
-	^ ((BpScatter x: #( 1 2 3 ) y: #( 3 1 2 ))
+	^ ((BpScatterplot x: #( 1 2 3 ) y: #( 3 1 2 ))
 		   s: 80;
 		   yourself) patches third
 ]

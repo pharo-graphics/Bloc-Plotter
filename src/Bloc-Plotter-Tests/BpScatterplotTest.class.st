@@ -1,21 +1,21 @@
 "
-I test `BpScatter`: one marker per point, sizes, colors given or mapped through a colormap, alpha, edges, unfilled markers and legend entries.
+I test `BpScatterplot`: one marker per point, sizes, colors given or mapped through a colormap, alpha, edges, unfilled markers and legend entries.
 "
 Class {
-	#name : 'BpScatterTest',
+	#name : 'BpScatterplotTest',
 	#superclass : 'TestCase',
 	#category : 'Bloc-Plotter-Tests',
 	#package : 'Bloc-Plotter-Tests'
 }
 
 { #category : 'tests' }
-BpScatterTest >> scatter [
+BpScatterplotTest >> scatter [
 
-	^ BpScatter x: #( 1 2 3 ) y: #( 4 5 6 )
+	^ BpScatterplot x: #( 1 2 3 ) y: #( 4 5 6 )
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testAlphaMakesTheFacesTransparent [
+BpScatterplotTest >> testAlphaMakesTheFacesTransparent [
 
 	self
 		assert: (self scatter
@@ -26,7 +26,7 @@ BpScatterTest >> testAlphaMakesTheFacesTransparent [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testCGivesOneColorPerPoint [
+BpScatterplotTest >> testCGivesOneColorPerPoint [
 
 	| colors |
 	colors := {
@@ -41,7 +41,7 @@ BpScatterTest >> testCGivesOneColorPerPoint [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testCNamesOneColorForAllPoints [
+BpScatterplotTest >> testCNamesOneColorForAllPoints [
 
 	self
 		assert: ((self scatter
@@ -51,30 +51,50 @@ BpScatterTest >> testCNamesOneColorForAllPoints [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testCmapCanBeABlock [
+BpScatterplotTest >> testColorMapCanBeABlock [
 
 	self
 		assert: (self scatter
 			 c: #( 0 1 2 );
-			 cmap: [ :fraction | Color gray: fraction ];
+			 colorMap: [ :fraction | Color gray: fraction ];
 			 yourself) patches last background paint color
 		equals: (Color gray: 1)
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testDefaultColorIsTheFirstColorOfTheCycle [
+BpScatterplotTest >> testDefaultColorIsTheFirstColorOfTheCycle [
 
 	self assert: self scatter patches first background paint color equals: BpColors tab10 first
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testDefaultSizeIsTheSquareOfTheMarkerSizeOfMatplotlib [
+BpScatterplotTest >> testDefaultSizeIsTheSquareOfTheMarkerSizeOfMatplotlib [
 
 	self assert: self scatter patches first area equals: 36
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testEdgeHasTheFaceColorByDefault [
+BpScatterplotTest >> testEdgeColorsGivesTheEdgeColor [
+
+	self
+		assert: (self scatter
+			 edgeColors: Color black;
+			 yourself) patches first border paint color
+		equals: Color black
+]
+
+{ #category : 'tests' }
+BpScatterplotTest >> testEdgeColorsNoneRemovesTheEdge [
+
+	self
+		assert: (self scatter
+			 edgeColors: 'none';
+			 yourself) patches first border width
+		equals: 0
+]
+
+{ #category : 'tests' }
+BpScatterplotTest >> testEdgeHasTheFaceColorByDefault [
 
 	| patch |
 	patch := (self scatter
@@ -84,27 +104,7 @@ BpScatterTest >> testEdgeHasTheFaceColorByDefault [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testEdgecolorsGivesTheEdgeColor [
-
-	self
-		assert: (self scatter
-			 edgecolors: Color black;
-			 yourself) patches first border paint color
-		equals: Color black
-]
-
-{ #category : 'tests' }
-BpScatterTest >> testEdgecolorsNoneRemovesTheEdge [
-
-	self
-		assert: (self scatter
-			 edgecolors: 'none';
-			 yourself) patches first border width
-		equals: 0
-]
-
-{ #category : 'tests' }
-BpScatterTest >> testLabelGivesALegendEntry [
+BpScatterplotTest >> testLabelGivesALegendEntry [
 
 	self
 		assert: ((self scatter
@@ -114,16 +114,16 @@ BpScatterTest >> testLabelGivesALegendEntry [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testLinewidthsAreInPoints [
+BpScatterplotTest >> testLineWidthsAreInPoints [
 
 	self assert: ((self scatter
-		  edgecolors: Color black;
-		  linewidths: 2;
+		  edgeColors: Color black;
+		  lineWidths: 2;
 		  yourself) patches first border width closeTo: 2 * BpArtist pixelsPerPoint)
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testMarkerIsGivenToThePatches [
+BpScatterplotTest >> testMarkerIsGivenToThePatches [
 
 	self
 		assert: (self scatter
@@ -133,7 +133,7 @@ BpScatterTest >> testMarkerIsGivenToThePatches [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testMarkerSideIsTheSquareRootOfTheSizeInPoints [
+BpScatterplotTest >> testMarkerSideIsTheSquareRootOfTheSizeInPoints [
 
 	self assert: ((self scatter
 		  s: 100;
@@ -141,13 +141,13 @@ BpScatterTest >> testMarkerSideIsTheSquareRootOfTheSizeInPoints [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testNoLegendEntryWithoutLabel [
+BpScatterplotTest >> testNoLegendEntryWithoutLabel [
 
 	self assert: self scatter legendEntries isEmpty
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testNumbersOfCAreMappedThroughViridis [
+BpScatterplotTest >> testNumbersOfCAreMappedThroughViridis [
 
 	self
 		assert: ((self scatter
@@ -160,7 +160,7 @@ BpScatterTest >> testNumbersOfCAreMappedThroughViridis [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testOffsetsArePointsOfXAndY [
+BpScatterplotTest >> testOffsetsArePointsOfXAndY [
 
 	self assert: self scatter offsets equals: {
 		(1 @ 4).
@@ -169,7 +169,7 @@ BpScatterTest >> testOffsetsArePointsOfXAndY [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testOnePatchPerPoint [
+BpScatterplotTest >> testOnePatchPerPoint [
 
 	| scatter |
 	scatter := self scatter.
@@ -177,13 +177,13 @@ BpScatterTest >> testOnePatchPerPoint [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testPatchCoversOnlyItsPointInDataCoordinates [
+BpScatterplotTest >> testPatchCoversOnlyItsPointInDataCoordinates [
 
 	self assert: self scatter patches first dataBounds equals: (1 @ 4 corner: 1 @ 4)
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testPatchesKnowTheValueOfC [
+BpScatterplotTest >> testPatchesKnowTheValueOfC [
 
 	self
 		assert: ((self scatter
@@ -193,13 +193,13 @@ BpScatterTest >> testPatchesKnowTheValueOfC [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testPatchesKnowTheirIndex [
+BpScatterplotTest >> testPatchesKnowTheirIndex [
 
 	self assert: (self scatter patches collect: [ :each | each index ] as: Array) equals: #( 1 2 3 )
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testSizesCanBeGivenPerPoint [
+BpScatterplotTest >> testSizesCanBeGivenPerPoint [
 
 	self
 		assert: ((self scatter
@@ -209,7 +209,7 @@ BpScatterTest >> testSizesCanBeGivenPerPoint [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testUnfilledMarkerIsDrawnWithItsColor [
+BpScatterplotTest >> testUnfilledMarkerIsDrawnWithItsColor [
 
 	| patch |
 	patch := (self scatter
@@ -221,14 +221,14 @@ BpScatterTest >> testUnfilledMarkerIsDrawnWithItsColor [
 ]
 
 { #category : 'tests' }
-BpScatterTest >> testVminAndVmaxClipTheColormap [
+BpScatterplotTest >> testVMinAndVMaxClipTheColorMap [
 
 	self
 		assert: ((self scatter
-	  c: #( 0 3 10 );
-	  vmin: 2;
-	  vmax: 4;
-	  yourself) patches collect: [ :each | each background paint color ] as: Array)
+			  c: #( 0 3 10 );
+			  vMin: 2;
+			  vMax: 4;
+			  yourself) patches collect: [ :each | each background paint color ] as: Array)
 		equals: {
 			(BpColors viridis: 0).
 			(BpColors viridis: 0.5).
@@ -236,7 +236,7 @@ BpScatterTest >> testVminAndVmaxClipTheColormap [
 ]
 
 { #category : 'tests - errors' }
-BpScatterTest >> testXAndYOfDifferentSizesRaiseError [
+BpScatterplotTest >> testXAndYOfDifferentSizesRaiseError [
 
-	self should: [ BpScatter x: #( 1 2 ) y: #( 1 ) ] raise: Error
+	self should: [ BpScatterplot x: #( 1 2 ) y: #( 1 ) ] raise: Error
 ]

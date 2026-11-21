@@ -4,19 +4,19 @@ I am a histogram: the `BpArtist` of matplotlib `Axes.hist`. I bin one or several
 ## Examples
 
 ```
-BpHistogram scriptHisttypes.
-BpHistogram scriptMultihist.
-BpHistogram scriptMultihistStyles.
+BpHistogram scriptHistTypes.
+BpHistogram scriptMultiHist.
+BpHistogram scriptMultiHistStyles.
 BpHistogram scriptHist.
 BpHistogram scriptOptions.
 BpHistogram scriptInteraction.
-BpHistogram exampleStepfilled.
-BpHistogram exampleHisttypes
+BpHistogram exampleStepFilled.
+BpHistogram exampleHistTypes
 ```
 
 ## Design Rationale
 
-- My setters are the arguments of matplotlib `Axes.hist`, with symbols for its strings (`histtype: #stepfilled`, `bins: #auto`, `linestyle: #dashed`), so that the matplotlib gallery can be written almost word for word. The results are `counts` (matplotlib n), `binEdges` (bins) and `patches`.
+- My setters are the arguments of matplotlib `Axes.hist` in camel case (`histType:` for histtype, `relativeWidth:` for rwidth), with symbols for its strings (`histType: #stepfilled`, `bins: #auto`, `lineStyle: #dashed`), so that the matplotlib gallery can be written almost word for word. The results are `counts` (matplotlib n), `binEdges` (bins) and `patches`.
 - I follow the algorithm of matplotlib: the datasets share their edges; stacked values are running sums, normalized together when density is true; without rwidth, side by side bars take 0.8 of their bin; an unfilled step is drawn with the color of its dataset, not with facecolor.
 - I have one slot and setter per matplotlib argument, hence many slots and methods.
 
@@ -43,20 +43,20 @@ Class {
 		'weights',
 		'cumulative',
 		'bottom',
-		'histtype',
 		'align',
 		'orientation',
-		'rwidth',
 		'log',
 		'color',
 		'stacked',
-		'facecolor',
-		'edgecolor',
-		'linewidth',
-		'linestyle',
 		'fill',
 		'edges',
-		'tops'
+		'tops',
+		'lineWidth',
+		'edgeColor',
+		'relativeWidth',
+		'lineStyle',
+		'histType',
+		'faceColor'
 	],
 	#category : 'Bloc-Plotter-Histogram',
 	#package : 'Bloc-Plotter',
@@ -97,7 +97,7 @@ BpHistogram class >> exampleColorByHeight [
 ]
 
 { #category : 'examples' }
-BpHistogram class >> exampleHisttypes [
+BpHistogram class >> exampleHistTypes [
 	"matplotlib gallery: Demo of the histogram function's different histtype settings (histogram_histtypes)."
 
 	| random x w figure bottomLeft |
@@ -108,33 +108,33 @@ BpHistogram class >> exampleHisttypes [
 	((figure axesAtRow: 1 column: 1) hist: x)
 		bins: 20;
 		density: true;
-		histtype: #stepfilled;
-		facecolor: (BpColors named: 'g');
+		histType: #stepfilled;
+		faceColor: (BpColors named: 'g');
 		alpha: 0.75.
 	(figure axesAtRow: 1 column: 1) title: 'stepfilled'.
 	((figure axesAtRow: 1 column: 2) hist: x)
 		bins: 20;
 		density: true;
-		histtype: #step;
-		facecolor: (BpColors named: 'g');
+		histType: #step;
+		faceColor: (BpColors named: 'g');
 		alpha: 0.75.
 	(figure axesAtRow: 1 column: 2) title: 'step'.
 	bottomLeft := figure axesAtRow: 2 column: 1.
 	(bottomLeft hist: x)
 		density: true;
-		histtype: #barstacked;
-		rwidth: 0.8.
+		histType: #barstacked;
+		relativeWidth: 0.8.
 	(bottomLeft hist: w)
 		density: true;
-		histtype: #barstacked;
-		rwidth: 0.8.
+		histType: #barstacked;
+		relativeWidth: 0.8.
 	bottomLeft title: 'barstacked'.
 	"Create a histogram by providing the bin edges (unequally spaced)."
 	((figure axesAtRow: 2 column: 2) hist: x)
 		bins: #( 100 150 180 195 205 220 250 300 );
 		density: true;
-		histtype: #bar;
-		rwidth: 0.8.
+		histType: #bar;
+		relativeWidth: 0.8.
 	(figure axesAtRow: 2 column: 2) title: 'bar, unequal bins'.
 	^ figure
 ]
@@ -150,7 +150,7 @@ BpHistogram class >> exampleInteractiveHistogram [
 	histogram := axes hist: ((1 to: 1000) collect: [ :each | random nextNormal ]).
 	histogram
 		bins: 20;
-		edgecolor: Color white.
+		edgeColor: Color white.
 	axes title: 'Click a bar'.
 	histogram
 		whenPatch: BlMouseEnterEvent do: [ :event :bar | bar background: BpColors tab10 second ];
@@ -164,7 +164,7 @@ BpHistogram class >> exampleInteractiveHistogram [
 ]
 
 { #category : 'examples' }
-BpHistogram class >> exampleMultihist [
+BpHistogram class >> exampleMultiHist [
 	"matplotlib gallery: Plot multiple data sets as histograms (histogram_multihist), first figure."
 
 	| random x colors xMulti figure |
@@ -175,7 +175,7 @@ BpHistogram class >> exampleMultihist [
 	((figure axesAtRow: 1 column: 1) hist: x)
 		bins: 10;
 		density: true;
-		histtype: #bar;
+		histType: #bar;
 		color: (colors collect: [ :each | BpColors named: each ]);
 		label: colors.
 	(figure axesAtRow: 1 column: 1)
@@ -184,12 +184,12 @@ BpHistogram class >> exampleMultihist [
 	((figure axesAtRow: 1 column: 2) hist: x)
 		bins: 10;
 		density: true;
-		histtype: #bar;
+		histType: #bar;
 		stacked: true.
 	(figure axesAtRow: 1 column: 2) title: 'stacked bar'.
 	((figure axesAtRow: 2 column: 1) hist: x)
 		bins: 10;
-		histtype: #step;
+		histType: #step;
 		stacked: true;
 		fill: false.
 	(figure axesAtRow: 2 column: 1) title: 'stack step (unfilled)'.
@@ -197,13 +197,13 @@ BpHistogram class >> exampleMultihist [
 	xMulti := #( 10000 5000 2000 ) collect: [ :size | (1 to: size) collect: [ :each | random nextNormal ] ].
 	((figure axesAtRow: 2 column: 2) hist: xMulti)
 		bins: 10;
-		histtype: #bar.
+		histType: #bar.
 	(figure axesAtRow: 2 column: 2) title: 'different sample sizes'.
 	^ figure
 ]
 
 { #category : 'examples' }
-BpHistogram class >> exampleMultihistStyles [
+BpHistogram class >> exampleMultiHistStyles [
 	"matplotlib gallery: Plot multiple data sets as histograms (histogram_multihist), one style setting per dataset: edgecolor, facecolor, linewidth and linestyle."
 
 	| random x figure colors |
@@ -214,17 +214,17 @@ BpHistogram class >> exampleMultihistStyles [
 	((figure axesAtRow: 1 column: 1) hist: x)
 		bins: 10;
 		fill: false;
-		histtype: #step;
+		histType: #step;
 		stacked: true;
-		edgecolor: colors;
+		edgeColor: colors;
 		label: #( 'green' 'red' 'blue' ).
 	(figure axesAtRow: 1 column: 1)
 		legend;
 		title: 'Stacked Steps with Edgecolors'.
 	((figure axesAtRow: 1 column: 2) hist: x)
 		bins: 10;
-		histtype: #barstacked;
-		facecolor: colors;
+		histType: #barstacked;
+		faceColor: colors;
 		label: #( 'green' 'red' 'blue' ).
 	(figure axesAtRow: 1 column: 2)
 		legend;
@@ -232,9 +232,9 @@ BpHistogram class >> exampleMultihistStyles [
 	((figure axesAtRow: 2 column: 1) hist: x)
 		bins: 10;
 		fill: false;
-		histtype: #bar;
-		linewidth: #( 1 2 3 );
-		edgecolor: colors;
+		histType: #bar;
+		lineWidth: #( 1 2 3 );
+		edgeColor: colors;
 		label: #( '1' '2' '3' ).
 	(figure axesAtRow: 2 column: 1)
 		legend;
@@ -242,9 +242,9 @@ BpHistogram class >> exampleMultihistStyles [
 	((figure axesAtRow: 2 column: 2) hist: x)
 		bins: 10;
 		fill: false;
-		histtype: #bar;
-		linestyle: #( #solid #dotted #dashed );
-		edgecolor: colors;
+		histType: #bar;
+		lineStyle: #( #solid #dotted #dashed );
+		edgeColor: colors;
 		label: #( '-' ':' '--' ).
 	(figure axesAtRow: 2 column: 2)
 		legend;
@@ -265,17 +265,17 @@ BpHistogram class >> exampleOptions [
 		bins: 30;
 		density: true;
 		cumulative: true;
-		histtype: #step.
+		histType: #step.
 	((figure axesAtRow: 1 column: 1) hist: x)
 		bins: 30;
 		density: true;
 		cumulative: -1;
-		histtype: #step.
+		histType: #step.
 	(figure axesAtRow: 1 column: 1) title: 'cumulative: true and -1'.
 	((figure axesAtRow: 1 column: 2) hist: x)
 		bins: 15;
 		orientation: #horizontal;
-		rwidth: 0.9.
+		relativeWidth: 0.9.
 	(figure axesAtRow: 1 column: 2) title: 'orientation: #horizontal'.
 	((figure axesAtRow: 1 column: 3) hist: x)
 		bins: 30;
@@ -284,13 +284,13 @@ BpHistogram class >> exampleOptions [
 	((figure axesAtRow: 2 column: 1) hist: x)
 		bins: #( -3 -2 -1 0 1 2 3 );
 		align: #left;
-		rwidth: 0.5;
+		relativeWidth: 0.5;
 		bottom: 50.
 	(figure axesAtRow: 2 column: 1) title: 'align: #left, bottom: 50'.
 	((figure axesAtRow: 2 column: 2) hist: x)
 		bins: #fd;
-		histtype: #stepfilled;
-		edgecolor: Color black.
+		histType: #stepfilled;
+		edgeColor: Color black.
 	(figure axesAtRow: 2 column: 2) title: 'bins: #fd'.
 	((figure axesAtRow: 2 column: 3) hist: x)
 		bins: 20;
@@ -301,7 +301,7 @@ BpHistogram class >> exampleOptions [
 ]
 
 { #category : 'examples' }
-BpHistogram class >> exampleStepfilled [
+BpHistogram class >> exampleStepFilled [
 	"Answer a filled step histogram of 100 normal samples, in new axes."
 
 	<sampleInstance>
@@ -311,7 +311,7 @@ BpHistogram class >> exampleStepfilled [
 		    extent: 400 @ 300;
 		    yourself) hist: ((1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ]))
 		  bins: 20;
-		  histtype: #stepfilled;
+		  histType: #stepfilled;
 		  yourself
 ]
 
@@ -330,7 +330,7 @@ BpHistogram class >> exampleTwoDistributions [
 ]
 
 { #category : 'constants' }
-BpHistogram class >> histtypes [
+BpHistogram class >> histTypes [
 
 	^ #( #bar #barstacked #step #stepfilled )
 ]
@@ -345,11 +345,11 @@ BpHistogram class >> scriptHist [
 ]
 
 { #category : 'script' }
-BpHistogram class >> scriptHisttypes [
+BpHistogram class >> scriptHistTypes [
 	"Reproduce the matplotlib gallery 'Demo of the histogram function's different histtype settings': stepfilled, step, barstacked and bars on unequal bins."
 
 	<example>
-	^ self exampleHisttypes show: 'histogram_histtypes'
+	^ self exampleHistTypes show: 'histogram_histtypes'
 ]
 
 { #category : 'script' }
@@ -361,19 +361,19 @@ BpHistogram class >> scriptInteraction [
 ]
 
 { #category : 'script' }
-BpHistogram class >> scriptMultihist [
+BpHistogram class >> scriptMultiHist [
 	"Reproduce the matplotlib gallery 'Plot multiple data sets as histograms': bars with a legend, stacked bars, stacked unfilled steps, and datasets of different sizes."
 
 	<example>
-	^ self exampleMultihist show: 'histogram_multihist'
+	^ self exampleMultiHist show: 'histogram_multihist'
 ]
 
 { #category : 'script' }
-BpHistogram class >> scriptMultihistStyles [
+BpHistogram class >> scriptMultiHistStyles [
 	"Reproduce the second part of the matplotlib gallery 'Plot multiple data sets as histograms': one edge color, face color, line width or line style per dataset."
 
 	<example>
-	^ self exampleMultihistStyles show: 'histogram_multihist styles'
+	^ self exampleMultiHistStyles show: 'histogram_multihist styles'
 ]
 
 { #category : 'script' }
@@ -458,7 +458,7 @@ BpHistogram >> barGeometry [
 	count := datasets size.
 	ratio := self barWidthRatio.
 	totals := self binWidths.
-	(histtype = #bar and: [ self isStacked not ])
+	(histType = #bar and: [ self isStacked not ])
 		ifTrue: [
 			widths := totals collect: [ :each | ratio * each / count ].
 			steps := widths.
@@ -478,7 +478,7 @@ BpHistogram >> barGeometry [
 BpHistogram >> barWidthRatio [
 	"Answer the part of its bin a bar group takes: rwidth, or 0.8 for several datasets side by side, 1 otherwise."
 
-	rwidth ifNotNil: [ ^ rwidth min: 1 max: 0 ].
+	relativeWidth ifNotNil: [ ^ relativeWidth min: 1 max: 0 ].
 	^ (datasets size > 1 and: [ self isStacked not ])
 		  ifTrue: [ 0.8 ]
 		  ifFalse: [ 1 ]
@@ -623,25 +623,38 @@ BpHistogram >> density: aBoolean [
 	self refresh
 ]
 
+{ #category : 'accessing - style' }
+BpHistogram >> edgeColor [
+
+	^ edgeColor
+]
+
+{ #category : 'accessing - style' }
+BpHistogram >> edgeColor: aColorOrCollection [
+	"Set the outline color of the patches, one or one per dataset. Bars have no outline by default."
+
+	edgeColor := aColorOrCollection.
+	self refresh
+]
+
 { #category : 'private - style' }
 BpHistogram >> edgeColorAt: aDatasetIndex [
 	"Answer the outline color of a dataset, nil for none: steps are outlined with their color, bars only when edgecolor is given."
 
-	^ (self setting: edgecolor at: aDatasetIndex) ifNil: [
-		  histtype = #step ifTrue: [ self colorAt: aDatasetIndex ] ]
+	^ (self setting: edgeColor at: aDatasetIndex) ifNil: [ histType = #step ifTrue: [ self colorAt: aDatasetIndex ] ]
 ]
 
 { #category : 'accessing - style' }
-BpHistogram >> edgecolor [
+BpHistogram >> faceColor [
 
-	^ edgecolor
+	^ faceColor
 ]
 
 { #category : 'accessing - style' }
-BpHistogram >> edgecolor: aColorOrCollection [
-	"Set the outline color of the patches, one or one per dataset. Bars have no outline by default."
+BpHistogram >> faceColor: aColorOrCollection [
+	"Set the fill color of the patches, one or one per dataset, instead of their color."
 
-	edgecolor := aColorOrCollection.
+	faceColor := aColorOrCollection.
 	self refresh
 ]
 
@@ -650,21 +663,7 @@ BpHistogram >> faceColorAt: aDatasetIndex [
 	"Answer the fill color of a dataset, nil when not filled. An unfilled step ignores facecolor, as in matplotlib."
 
 	self isFilled ifFalse: [ ^ nil ].
-	^ (self setting: facecolor at: aDatasetIndex) ifNil: [ self colorAt: aDatasetIndex ]
-]
-
-{ #category : 'accessing - style' }
-BpHistogram >> facecolor [
-
-	^ facecolor
-]
-
-{ #category : 'accessing - style' }
-BpHistogram >> facecolor: aColorOrCollection [
-	"Set the fill color of the patches, one or one per dataset, instead of their color."
-
-	facecolor := aColorOrCollection.
-	self refresh
+	^ (self setting: faceColor at: aDatasetIndex) ifNil: [ self colorAt: aDatasetIndex ]
 ]
 
 { #category : 'accessing - style' }
@@ -682,17 +681,17 @@ BpHistogram >> fill: aBooleanOrNil [
 ]
 
 { #category : 'accessing - options' }
-BpHistogram >> histtype [
+BpHistogram >> histType [
 
-	^ histtype
+	^ histType
 ]
 
 { #category : 'accessing - options' }
-BpHistogram >> histtype: aSymbol [
+BpHistogram >> histType: aSymbol [
 	"Set how the histogram is drawn: #bar (side by side bars), #barstacked (stacked bars), #step (an outline) or #stepfilled (a filled outline)."
 
-	(self class histtypes includes: aSymbol) ifFalse: [ ^ self error: 'Unknown histtype: ' , aSymbol printString ].
-	histtype := aSymbol.
+	(self class histTypes includes: aSymbol) ifFalse: [ ^ self error: 'Unknown histtype: ' , aSymbol printString ].
+	histType := aSymbol.
 	self refresh
 ]
 
@@ -704,13 +703,13 @@ BpHistogram >> initialize [
 	bins := 10.
 	density := false.
 	cumulative := false.
-	histtype := #bar.
+	histType := #bar.
 	align := #mid.
 	orientation := #vertical.
 	log := false.
 	stacked := false.
-	linewidth := 1.
-	linestyle := #solid.
+	lineWidth := 1.
+	lineStyle := #solid.
 	edges := #(  ).
 	tops := #(  )
 ]
@@ -727,7 +726,7 @@ BpHistogram >> isCumulative [
 BpHistogram >> isFilled [
 	"Answer whether my patches are filled: as asked by fill, otherwise all types but #step."
 
-	^ fill ifNil: [ histtype ~= #step ]
+	^ fill ifNil: [ histType ~= #step ]
 ]
 
 { #category : 'accessing - options' }
@@ -746,7 +745,7 @@ BpHistogram >> isSingleDataset [
 { #category : 'accessing - options' }
 BpHistogram >> isStacked [
 
-	^ stacked or: [ histtype = #barstacked ]
+	^ stacked or: [ histType = #barstacked ]
 ]
 
 { #category : 'accessing - style' }
@@ -772,30 +771,30 @@ BpHistogram >> legendEntries [
 ]
 
 { #category : 'accessing - style' }
-BpHistogram >> linestyle [
+BpHistogram >> lineStyle [
 
-	^ linestyle
+	^ lineStyle
 ]
 
 { #category : 'accessing - style' }
-BpHistogram >> linestyle: aSymbolOrCollection [
+BpHistogram >> lineStyle: aSymbolOrCollection [
 	"Set the style of the outlines, one or one per dataset: #solid, #dashed, #dotted or #dashdot."
 
-	linestyle := aSymbolOrCollection.
+	lineStyle := aSymbolOrCollection.
 	self refresh
 ]
 
 { #category : 'accessing - style' }
-BpHistogram >> linewidth [
+BpHistogram >> lineWidth [
 
-	^ linewidth
+	^ lineWidth
 ]
 
 { #category : 'accessing - style' }
-BpHistogram >> linewidth: aNumberOrCollection [
+BpHistogram >> lineWidth: aNumberOrCollection [
 	"Set the width of the outlines in points (1 by default), one or one per dataset."
 
-	linewidth := aNumberOrCollection.
+	lineWidth := aNumberOrCollection.
 	self refresh
 ]
 
@@ -871,7 +870,7 @@ BpHistogram >> newPatches [
 	"Answer, for each dataset, the patches drawing it: one bar per bin, or one outline."
 
 	tops ifEmpty: [ ^ #(  ) ].
-	^ (#( #bar #barstacked ) includes: histtype)
+	^ (#( #bar #barstacked ) includes: histType)
 		  ifTrue: [ self newBars ]
 		  ifFalse: [ self newSteps ]
 ]
@@ -973,13 +972,13 @@ BpHistogram >> paint: anElement dataset: aDatasetIndex [
 	edge ifNotNil: [
 		anElement border: (BlBorder builder
 			 paint: edge;
-			 width: (self setting: linewidth at: aDatasetIndex) * self class pixelsPerPoint;
-			 dashArray: (self class dashArrays at: (self setting: linestyle at: aDatasetIndex));
+			 width: (self setting: lineWidth at: aDatasetIndex) * self class pixelsPerPoint;
+			 dashArray: (self class dashArrays at: (self setting: lineStyle at: aDatasetIndex));
 			 build) ].
 	alpha ifNotNil: [ anElement opacity: alpha ]
 ]
 
-{ #category : 'accessing - results' }
+{ #category : 'accessing' }
 BpHistogram >> patches [
 	"Answer the patches drawing the histogram (matplotlib patches): for one dataset its patches, for several an array of them per dataset."
 
@@ -1002,26 +1001,26 @@ BpHistogram >> range: aCollectionOrNil [
 	self refresh
 ]
 
+{ #category : 'accessing - options' }
+BpHistogram >> relativeWidth [
+
+	^ relativeWidth
+]
+
+{ #category : 'accessing - options' }
+BpHistogram >> relativeWidth: aNumberOrNil [
+	"Set the width of the bars as a fraction of their bin (matplotlib rwidth). Without it, bars fill their bin, or 0.8 of it when several datasets are side by side."
+
+	relativeWidth := aNumberOrNil.
+	self refresh
+]
+
 { #category : 'private - computing' }
 BpHistogram >> runningSumsOf: aCollectionOfRows [
 
 	| sum |
 	sum := nil.
 	^ aCollectionOfRows collect: [ :each | sum := sum ifNil: [ each copy ] ifNotNil: [ sum with: each collect: [ :a :b | a + b ] ] ]
-]
-
-{ #category : 'accessing - options' }
-BpHistogram >> rwidth [
-
-	^ rwidth
-]
-
-{ #category : 'accessing - options' }
-BpHistogram >> rwidth: aNumberOrNil [
-	"Set the width of the bars as a fraction of their bin. Without it, bars fill their bin, or 0.8 of it when several datasets are side by side."
-
-	rwidth := aNumberOrNil.
-	self refresh
 ]
 
 { #category : 'accessing - options' }

@@ -51,24 +51,24 @@ BpPieTest >> testAddLabelsWithFormat [
 ]
 
 { #category : 'tests - texts' }
-BpPieTest >> testAutopctBlockReceivesPercent [
+BpPieTest >> testAutoPctBlockReceivesPercent [
 
-	pie autopct: [ :percent | percent rounded printString ].
+	pie autoPct: [ :percent | percent rounded printString ].
 	self assert: (pie texts collect: [ :each | each text asString ] as: Array) equals: #( '15' '30' '45' '10' )
 ]
 
 { #category : 'tests - texts' }
-BpPieTest >> testAutopctCreatesPercentTexts [
+BpPieTest >> testAutoPctCreatesPercentTexts [
 
-	pie autopct: '%1.1f%%'.
+	pie autoPct: '%1.1f%%'.
 	self assert: (pie texts collect: [ :each | each text asString ] as: Array) equals: #( '15.0%' '30.0%' '45.0%' '10.0%' )
 ]
 
 { #category : 'tests - texts' }
-BpPieTest >> testAutopctTextsAreAtPctDistance [
+BpPieTest >> testAutoPctTextsAreAtPctDistance [
 
 	pie
-		autopct: '%1.1f%%';
+		autoPct: '%1.1f%%';
 		pctDistance: 1.25.
 	self assert: (pie texts allSatisfy: [ :each | each distance closeTo: 1.25 ])
 ]
@@ -99,7 +99,7 @@ BpPieTest >> testEachLabelSetAddsOneTextPerWedge [
 
 	pie
 		labels: #( 'Frogs' 'Hogs' 'Dogs' 'Logs' );
-		autopct: '%1.1f%%';
+		autoPct: '%1.1f%%';
 		addLabels: '{absval:d}' distance: 0.4.
 	self assert: pie texts size equals: 12
 ]
@@ -311,7 +311,7 @@ BpPieTest >> testTextsDoNotHideWedgesFromClicks [
 	| clicked |
 	clicked := nil.
 	pie
-		autopct: '%1.1f%%';
+		autoPct: '%1.1f%%';
 		whenWedge: BlClickEvent do: [ :event :wedge | clicked := wedge ].
 	"the percent text of the first wedge is centered there"
 	self clickAtAngle: pie wedges first midAngle distance: pie pctDistance.
@@ -329,12 +329,12 @@ BpPieTest >> testTwoLineTextIsTallerThanOneLineText [
 ]
 
 { #category : 'tests - wedges' }
-BpPieTest >> testWedgeAnglesGoClockwiseWhenNotCounterclock [
+BpPieTest >> testWedgeAnglesGoClockwiseWhenNotCounterClock [
 
 	| second |
 	pie
 		startAngle: 90;
-		counterclock: false.
+		counterClock: false.
 	second := pie wedges second.
 	self assert: second theta1 equals: 36.
 	self assert: second theta2 equals: -72

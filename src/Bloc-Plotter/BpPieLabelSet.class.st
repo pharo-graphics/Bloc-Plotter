@@ -38,11 +38,11 @@ BpPieLabelSet class >> examplePercents [
 
 { #category : 'instance creation' }
 BpPieLabelSet class >> labels: aSource distance: aNumber [
-	"Answer a label set like the ones of matplotlib pie_label. aSource is a collection of strings (one per wedge), a format string using {absval} and {frac} (see BpTextFormatter class>>format:absval:frac:), or a block receiving the wedge."
+	"Answer a label set like the ones of matplotlib pie_label. aSource is a collection of strings (one per wedge), a format string using {absval} and {frac} (see BpTextFormatter class>>format:absVal:frac:), or a block receiving the wedge."
 
 	| block |
 	block := aSource isString
-		         ifTrue: [ [ :wedge | BpTextFormatter format: aSource absval: wedge amount frac: wedge fraction ] ]
+		         ifTrue: [ [ :wedge | BpTextFormatter format: aSource absVal: wedge amount frac: wedge fraction ] ]
 		         ifFalse: [
 			         aSource isCollection
 				         ifTrue: [ [ :wedge | aSource at: wedge index ] ]

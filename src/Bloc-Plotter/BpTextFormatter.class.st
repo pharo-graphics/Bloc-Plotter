@@ -1,5 +1,5 @@
 "
-I format numbers the way matplotlib pies expect: C printf strings for `autopct` (`printf:with:`, e.g. `'%1.1f%%'`) and Python replacement fields for `pie_label` (`format:absval:frac:`, e.g. `'{absval:d}\n{frac:.1%}'`, where the two characters `\n` stand for a line break).
+I format numbers the way matplotlib pies expect: C printf strings for `autopct` (`printf:with:`, e.g. `'%1.1f%%'`) and Python replacement fields for `pie_label` (`format:absVal:frac:`, e.g. `'{absval:d}\n{frac:.1%}'`, where the two characters `\n` stand for a line break).
 
 ## Examples
 
@@ -24,7 +24,7 @@ Class {
 }
 
 { #category : 'formatting' }
-BpTextFormatter class >> format: aPattern absval: anAbsoluteValue frac: aFraction [
+BpTextFormatter class >> format: aPattern absVal: anAbsoluteValue frac: aFraction [
 	"Answer aPattern where each Python replacement field {absval} or {frac}, with an optional format spec (d, .Nf, .N%), is replaced by the corresponding value. The two characters \n stand for a line break. This is the format matplotlib uses for the labels of pie_label."
 
 	| in values |
@@ -110,7 +110,7 @@ BpTextFormatter class >> scriptFormats [
 	^ {
 		  (self printf: '%1.1f%%' with: 15).
 		  (self printf: '%.0f%%' with: 30.4).
-		  (self format: '{absval:.1f}' absval: 36 frac: 0.45).
-		  (self format: '{frac:.1%}' absval: 36 frac: 0.45).
-		  (self format: '{absval:d}\n{frac:.1%}' absval: 36 frac: 0.45) } inspect
+		  (self format: '{absval:.1f}' absVal: 36 frac: 0.45).
+		  (self format: '{frac:.1%}' absVal: 36 frac: 0.45).
+		  (self format: '{absval:d}\n{frac:.1%}' absVal: 36 frac: 0.45) } inspect
 ]

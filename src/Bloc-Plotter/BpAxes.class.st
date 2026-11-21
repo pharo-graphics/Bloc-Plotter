@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:` or a `BpScatter` added by `scatterX:y:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterplot` added by `scatterX:y:` or a `BpLine` added by `plotX:y:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -11,14 +11,14 @@ BpAxes exampleHistogram
 
 - As in matplotlib, autoscaling adds a margin of 5% on each side, stopped by the sticky values of the artists: the bars of a histogram start exactly at 0.
 - My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale.
-- The number of ticks is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length as in matplotlib: computing it from my size would change my children during the layout pass and trigger another layout.
+- Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`, matplotlib `set_xticks`), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length as in matplotlib: computing it from my size would change my children during the layout pass and trigger another layout.
 - I have one slot per matplotlib setting, hence many slots.
 
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:` and `scatterX:y:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
-3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoscale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
+2. `hist:`, `scatterX:y:` and `plotX:y:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
+3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
 - My settings are named after the matplotlib ones (`set_xlim` is `xLimits:`, `set_yscale` is `yScale:`); nil limits mean autoscaling, and a tick formatter is a block answering the label of a value.
@@ -26,7 +26,7 @@ BpAxes exampleHistogram
 
 ## Implementation Notes
 
-- Not supported yet: axis labels, shared axes, `tight_layout`, colorbars, line plots.
+- Not supported yet: axis labels, shared axes, `tight_layout`, colorbars, the `_mpl-gallery` style of the matplotlib plot types (small figure, grid below the data).
 "
 Class {
 	#name : 'BpAxes',
@@ -48,7 +48,9 @@ Class {
 		'plotBounds',
 		'xTickFormatter',
 		'yTickFormatter',
-		'showGrid'
+		'showGrid',
+		'xTicks',
+		'yTicks'
 	],
 	#category : 'Bloc-Plotter-Axes',
 	#package : 'Bloc-Plotter',
@@ -93,7 +95,7 @@ BpAxes >> artists [
 ]
 
 { #category : 'private - building' }
-BpAxes >> autoscale: anAxis [
+BpAxes >> autoScale: anAxis [
 	"Answer the limits of anAxis (#x or #y) covering all patches, with margins as matplotlib autoscaling."
 
 	| values |
@@ -111,15 +113,15 @@ BpAxes >> autoscale: anAxis [
 BpAxes >> computePlotBoundsIn: anExtent [
 	"Compute the bounds of my plot area in anExtent, leaving room for the tick labels on the left and at the bottom, and for my title at the top. My tick labels and title must be measured."
 
-	| yTicks xTicks left bottom top right |
-	yTicks := ticks select: [ :each | each axis = #y ].
-	xTicks := ticks select: [ :each | each axis = #x ].
-	left := (yTicks inject: 0 into: [ :max :each | max max: each label measuredExtent x ]) + 10.
-	bottom := (xTicks inject: 0 into: [ :max :each | max max: each label measuredExtent y ]) + 10.
+	| leftTicks bottomTicks left bottom top right |
+	leftTicks := ticks select: [ :each | each axis = #y ].
+	bottomTicks := ticks select: [ :each | each axis = #x ].
+	left := (leftTicks inject: 0 into: [ :max :each | max max: each label measuredExtent x ]) + 10.
+	bottom := (bottomTicks inject: 0 into: [ :max :each | max max: each label measuredExtent y ]) + 10.
 	top := self title isEmpty
 		       ifTrue: [ 10 ]
 		       ifFalse: [ titleElement measuredExtent y + 10 ].
-	right := xTicks ifEmpty: [ 12 ] ifNotEmpty: [ xTicks last label measuredExtent x / 2 + 4 max: 12 ].
+	right := bottomTicks ifEmpty: [ 12 ] ifNotEmpty: [ bottomTicks last label measuredExtent x / 2 + 4 max: 12 ].
 	self plotBounds: (left @ top corner: (anExtent x - right max: left + 1) @ (anExtent y - bottom max: top + 1))
 ]
 
@@ -166,7 +168,7 @@ BpAxes >> grid: aBoolean [
 
 { #category : 'plotting' }
 BpAxes >> hist: aCollection [
-	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured like matplotlib Axes.hist: bins:, density:, histtype:, ..."
+	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured like matplotlib Axes.hist: bins:, density:, histType:, ..."
 
 	^ self addArtist: (BpHistogram new
 		   x: aCollection;
@@ -273,13 +275,10 @@ BpAxes >> newLegend [
 
 { #category : 'private - building' }
 BpAxes >> newTicksOn: anAxis [
-	"Answer the ticks of anAxis for my current limits, scale and formatter."
+	"Answer the ticks of anAxis at its fixed locations, or chosen for my current limits and scale, labeled by its formatter."
 
-	| limits locations labels formatter |
-	limits := self limitsOn: anAxis.
-	locations := (self scaleOf: anAxis) = #log
-		             ifTrue: [ BpTickLocator logTicksFrom: limits first to: limits last ]
-		             ifFalse: [ BpTickLocator linearTicksFrom: limits first to: limits last count: (self tickCountOn: anAxis) ].
+	| locations labels formatter |
+	locations := self tickLocationsOn: anAxis.
 	formatter := anAxis = #x
 		             ifTrue: [ xTickFormatter ]
 		             ifFalse: [ yTickFormatter ].
@@ -326,6 +325,22 @@ BpAxes >> plotBounds: aRectangle [
 	transform extent: (aRectangle extent max: 1 @ 1)
 ]
 
+{ #category : 'plotting' }
+BpAxes >> plotX: xValues y: yValues [
+	"Draw a line through the points of xValues and yValues (matplotlib plot). Answer the `BpLine`, to set its style."
+
+	^ self addArtist: (BpLine x: xValues y: yValues)
+]
+
+{ #category : 'plotting' }
+BpAxes >> plotX: xValues y: yValues format: aString [
+	"Draw the points of xValues and yValues with the matplotlib format aString ('o-', 'r--', 'x', ...). Answer the `BpLine`."
+
+	^ (self plotX: xValues y: yValues)
+		  format: aString;
+		  yourself
+]
+
 { #category : 'private - building' }
 BpAxes >> rebuild [
 	"Recompute my scales and limits from my artists, then show their patches, my legend, my ticks and my grid."
@@ -334,8 +349,8 @@ BpAxes >> rebuild [
 	transform
 		xScale: xScale;
 		yScale: yScale;
-		xLimits: (xLimits ifNil: [ self autoscale: #x ]);
-		yLimits: (yLimits ifNil: [ self autoscale: #y ]).
+		xLimits: (xLimits ifNil: [ self autoScale: #x ]);
+		yLimits: (yLimits ifNil: [ self autoScale: #y ]).
 	plotArea patches: self patches.
 	plotArea legend: self newLegend.
 	self rebuildTicks.
@@ -365,7 +380,7 @@ BpAxes >> scaleOf: anAxis [
 BpAxes >> scatterX: xValues y: yValues [
 	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured like matplotlib Axes.scatter: s:, c:, marker:, alpha:, ..."
 
-	^ self addArtist: (BpScatter x: xValues y: yValues)
+	^ self addArtist: (BpScatterplot x: xValues y: yValues)
 ]
 
 { #category : 'private - building' }
@@ -374,6 +389,20 @@ BpAxes >> tickCountOn: anAxis [
 	^ anAxis = #x
 		  ifTrue: [ xTickCount ]
 		  ifFalse: [ yTickCount ]
+]
+
+{ #category : 'private - building' }
+BpAxes >> tickLocationsOn: anAxis [
+
+	| fixed limits |
+	fixed := anAxis = #x
+		         ifTrue: [ xTicks ]
+		         ifFalse: [ yTicks ].
+	fixed ifNotNil: [ ^ fixed ].
+	limits := self limitsOn: anAxis.
+	^ (self scaleOf: anAxis) = #log
+		  ifTrue: [ BpTickLocator logTicksFrom: limits first to: limits last ]
+		  ifFalse: [ BpTickLocator linearTicksFrom: limits first to: limits last count: (self tickCountOn: anAxis) ]
 ]
 
 { #category : 'accessing' }
@@ -464,6 +493,14 @@ BpAxes >> xTickFormatter: aBlockOrNil [
 ]
 
 { #category : 'accessing' }
+BpAxes >> xTicks: aCollectionOfNumbers [
+	"Put the ticks of the x axis at aCollectionOfNumbers instead of choosing them (matplotlib set_xticks); nil chooses them again."
+
+	xTicks := aCollectionOfNumbers ifNotNil: [ aCollectionOfNumbers asArray ].
+	self rebuild
+]
+
+{ #category : 'accessing' }
 BpAxes >> yLimits [
 
 	^ transform yLimits
@@ -510,5 +547,13 @@ BpAxes >> yTickFormatter: aBlockOrNil [
 	"Set a block answering the label of a y tick from its value (matplotlib yaxis.set_major_formatter); nil prints the values."
 
 	yTickFormatter := aBlockOrNil.
+	self rebuild
+]
+
+{ #category : 'accessing' }
+BpAxes >> yTicks: aCollectionOfNumbers [
+	"Put the ticks of the y axis at aCollectionOfNumbers instead of choosing them (matplotlib set_yticks); nil chooses them again."
+
+	yTicks := aCollectionOfNumbers ifNotNil: [ aCollectionOfNumbers asArray ].
 	self rebuild
 ]

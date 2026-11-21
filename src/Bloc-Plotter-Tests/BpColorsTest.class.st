@@ -9,6 +9,13 @@ Class {
 }
 
 { #category : 'tests' }
+BpColorsTest >> testCycleNamesIndexTheColorCycle [
+
+	self assert: (BpColors named: 'C0') equals: BpColors tab10 first.
+	self assert: (BpColors named: 'C9') equals: BpColors tab10 last
+]
+
+{ #category : 'tests' }
 BpColorsTest >> testNamedColor [
 
 	self assert: (BpColors named: 'g') equals: (Color fromHexString: '008000')

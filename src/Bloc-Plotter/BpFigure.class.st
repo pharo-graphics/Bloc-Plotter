@@ -1,27 +1,28 @@
 "
-I am a figure: a grid of `BpAxes`, the Bloc counterpart of the matplotlib figure answered by `plt.subplots(nrows, ncols)`. Plots are added to the axes answered by `axesAtRow:column:`, and `show:` opens me, like `plt.show()`; `savefig:` saves me as SVG, PDF or PNG, like `fig.savefig()`.
+I am a figure: a grid of `BpAxes`, the Bloc counterpart of the matplotlib figure answered by `plt.subplots(nrows, ncols)`. Plots are added to the axes answered by `axesAtRow:column:`, and `show:` opens me, like `plt.show()`; `saveAsSVG:`, `saveAsPDF:` and `saveAsPNG:` save me, like `fig.savefig()`.
 
 ## Examples
 
 ```
 BpFigure exampleTwoByTwo.
 BpFigure scriptTwoByTwo.
-BpFigure scriptHisttypes.
-BpFigure scriptMultihist.
+BpFigure scriptHistTypes.
+BpFigure scriptMultiHist.
 BpFigure scriptOptions.
 BpFigure scriptInteraction.
 BpFigure scriptScatter.
-BpFigure scriptSavefig
+BpFigure scriptPlot.
+BpFigure scriptSave
 ```
 
-More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`.
+More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`, `BpScatterplot` and `BpLine`.
 
 ## Design Rationale
 
 - Rows and columns are counted from 1, as Pharo collections: `axesAtRow: 1 column: 1` is matplotlib `axs[0, 0]`.
 - My default extent is the matplotlib one, 640 by 480, so that the figures of the matplotlib gallery keep their proportions. `figureExtent` answers the size asked with `extent:` (matplotlib figsize): `show:` sizes its space with it, since `extent` is only known once I am laid out.
 
-- `savefig:` chooses the format from the extension of the file. SVG and PDF are vector graphics; `savefig:dpi:` sets the resolution of a PNG, 100 dots per inch giving my extent in pixels as matplotlib.
+- Unlike matplotlib savefig, each format has its own message, so the format never depends on the name of the file. SVG and PDF are vector graphics; `saveAsPNG:dpi:` sets the resolution of a PNG, 100 dots per inch giving my extent in pixels as matplotlib.
 
 ## Usage
 
@@ -69,11 +70,11 @@ BpFigure class >> rows: aRowCount columns: aColumnCount [
 ]
 
 { #category : 'script' }
-BpFigure class >> scriptHisttypes [
+BpFigure class >> scriptHistTypes [
 	"Show a figure of four axes, each with a different kind of histogram (the matplotlib gallery histogram_histtypes)."
 
 	<example>
-	^ BpHistogram exampleHisttypes show: 'histogram_histtypes'
+	^ BpHistogram exampleHistTypes show: 'histogram_histtypes'
 ]
 
 { #category : 'script' }
@@ -85,11 +86,11 @@ BpFigure class >> scriptInteraction [
 ]
 
 { #category : 'script' }
-BpFigure class >> scriptMultihist [
+BpFigure class >> scriptMultiHist [
 	"Show a figure of four axes with several datasets per histogram (the matplotlib gallery histogram_multihist)."
 
 	<example>
-	^ BpHistogram exampleMultihist show: 'histogram_multihist'
+	^ BpHistogram exampleMultiHist show: 'histogram_multihist'
 ]
 
 { #category : 'script' }
@@ -101,16 +102,25 @@ BpFigure class >> scriptOptions [
 ]
 
 { #category : 'script' }
-BpFigure class >> scriptSavefig [
+BpFigure class >> scriptPlot [
+	"Show the figure of the plot type page of matplotlib: lines and markers drawn with format strings (see `BpLine`)."
+
+	<example>
+	^ BpLine examplePlotType show: 'plot'
+]
+
+{ #category : 'script' }
+BpFigure class >> scriptSave [
 	"Save the histtypes figure of the matplotlib gallery as SVG and PDF (vector graphics) and as PNG at 200 dots per inch, in the image directory, and inspect the files."
 
 	<example>
-	| figure directory files |
-	figure := BpHistogram exampleHisttypes.
+	| figure directory |
+	figure := BpHistogram exampleHistTypes.
 	directory := FileLocator imageDirectory asFileReference.
-	files := { 'histogram_histtypes.svg'. 'histogram_histtypes.pdf' } collect: [ :each | figure savefig: directory / each ].
-	files := files , { (figure savefig: directory / 'histogram_histtypes.png' dpi: 200) }.
-	^ files inspect
+	^ {
+		  (figure saveAsSVG: directory / 'histogram_histtypes.svg').
+		  (figure saveAsPDF: directory / 'histogram_histtypes.pdf').
+		  (figure saveAsPNG: directory / 'histogram_histtypes.png' dpi: 200) } inspect
 ]
 
 { #category : 'script' }
@@ -118,7 +128,7 @@ BpFigure class >> scriptScatter [
 	"Show a figure of one axes with a scatter of random points of random sizes and colors (the matplotlib gallery scatter)."
 
 	<example>
-	^ BpScatter exampleScatter show: 'scatter'
+	^ BpScatterplot exampleScatter show: 'scatter'
 ]
 
 { #category : 'script' }
@@ -147,16 +157,6 @@ BpFigure >> axesAtRow: aRowIndex column: aColumnIndex [
 BpFigure >> columns [
 
 	^ columns
-]
-
-{ #category : 'saving' }
-BpFigure >> exporterFor: anExtension [
-	"Answer the Bloc exporter writing files of anExtension; it draws me on an Alexandrie canvas of the format."
-
-	anExtension = 'svg' ifTrue: [ ^ BAExporter svg ].
-	anExtension = 'pdf' ifTrue: [ ^ BAExporter pdf ].
-	anExtension = 'png' ifTrue: [ ^ BAExporter png ].
-	^ self error: ('Unsupported format: {1} (use svg, pdf or png)' format: { anExtension printString })
 ]
 
 { #category : 'accessing' }
@@ -198,26 +198,46 @@ BpFigure >> rows: aRowCount columns: aColumnCount [
 	self addChildren: axes
 ]
 
-{ #category : 'saving' }
-BpFigure >> savefig: aFileReference [
-	"Save me in aFileReference, as matplotlib savefig: SVG or PDF (vector graphics) or PNG, chosen by its extension. Answer the file."
+{ #category : 'private - saving' }
+BpFigure >> save: anExporter in: aFileReference [
+	"Let anExporter draw me on an Alexandrie canvas of its format and write aFileReference. Answer the file."
 
-	^ self savefig: aFileReference dpi: 100
+	^ anExporter
+		  element: self;
+		  target: aFileReference asFileReference;
+		  export
 ]
 
 { #category : 'saving' }
-BpFigure >> savefig: aFileReference dpi: aNumber [
-	"Save me in aFileReference, chosen by its extension; a PNG has aNumber dots per inch, 100 giving my extent in pixels as matplotlib. Answer the file."
+BpFigure >> saveAsPDF: aFileReference [
+	"Save me in aFileReference as a PDF of vector graphics. Answer the file."
 
-	| file extension exporter |
-	file := aFileReference asFileReference.
-	extension := file extension asLowercase.
-	exporter := self exporterFor: extension.
-	extension = 'png' ifTrue: [ exporter scale: aNumber / 100 ].
-	^ exporter
-		  element: self;
-		  target: file;
-		  export
+	^ self save: BAExporter pdf in: aFileReference
+]
+
+{ #category : 'saving' }
+BpFigure >> saveAsPNG: aFileReference [
+	"Save me in aFileReference as a PNG of my extent in pixels (100 dots per inch, as matplotlib). Answer the file."
+
+	^ self saveAsPNG: aFileReference dpi: 100
+]
+
+{ #category : 'saving' }
+BpFigure >> saveAsPNG: aFileReference dpi: aNumber [
+	"Save me in aFileReference as a PNG of aNumber dots per inch: 100 gives my extent in pixels, as matplotlib. Answer the file."
+
+	^ self
+		  save: (BAExporter png
+			   scale: aNumber / 100;
+			   yourself)
+		  in: aFileReference
+]
+
+{ #category : 'saving' }
+BpFigure >> saveAsSVG: aFileReference [
+	"Save me in aFileReference as SVG vector graphics. Answer the file."
+
+	^ self save: BAExporter svg in: aFileReference
 ]
 
 { #category : 'opening' }

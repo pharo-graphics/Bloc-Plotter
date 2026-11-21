@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`) or a scatter plot (`BpScatter`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterplot`) or a line plot (`BpLine`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -9,13 +9,13 @@ BpArtist scriptArtistsInOneAxes
 
 ## Design Rationale
 
-- I only know what my axes need: my patches (`allPatches`), my legend entries, the values autoscaling must not go past (`stickyValuesOn:`), the axes I put on a log scale (`logAxes`) and how many colors of the color cycle I take (`colorCount`). The axes ignore the kind of plot.
+- I only know what my axes need: my patches (`allPatches`), my legend entries, the values autoscaling must not go past (`stickyValuesOn:`), the axes I put on a log scale (`logAxes`) and how many colors of the color cycle I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The axes ignore the kind of plot.
 - Each change recomputes everything (`refresh`): subclasses define `compute` and `newPatches`, and new patches replace the previous ones. Handlers given to `whenPatch:do:` are kept and given to each new patch.
 - Style settings take one value or one per dataset or point (`setting:at:`), as matplotlib arguments.
 
 ## Usage
 
-1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
+1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the axes (`BpAxes>>artistChanged:`); they rebuild their limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
@@ -45,7 +45,7 @@ BpArtist class >> pixelsPerPoint [
 
 { #category : 'script' }
 BpArtist class >> scriptArtistsInOneAxes [
-	"Show two kinds of artists in the same axes: a histogram of normal samples and, above it, a scatter of their counts; each takes the next color of the cycle and the axes scale to cover both."
+	"Show two kinds of artists in the same axes: a histogram of normal samples and, above it, a scatter plot of their counts; each takes the next color of the cycle and the axes scale to cover both."
 
 	<example>
 	| random samples axes figure histogram |
@@ -63,7 +63,7 @@ BpArtist class >> scriptArtistsInOneAxes [
 		s: 50;
 		label: 'counts'.
 	axes
-		title: 'BpHistogram and BpScatter';
+		title: 'BpHistogram and BpScatterplot';
 		legend;
 		grid: true.
 	^ figure show: 'Artists'
@@ -111,6 +111,17 @@ BpArtist >> colorCount [
 	^ 1
 ]
 
+{ #category : 'private - style' }
+BpArtist >> colorOf: aColorOrName [
+	"Answer the color aColorOrName names (a `Color` or a matplotlib name), made transparent by my alpha."
+
+	| color |
+	color := aColorOrName isColor
+		         ifTrue: [ aColorOrName ]
+		         ifFalse: [ BpColors named: aColorOrName ].
+	^ alpha ifNil: [ color ] ifNotNil: [ color alpha: alpha ]
+]
+
 { #category : 'private - computing' }
 BpArtist >> compute [
 	"Compute what my patches show from my data and settings."
@@ -133,6 +144,13 @@ BpArtist >> initialize [
 	patchHandlers := OrderedCollection new.
 	patches := #(  ).
 	defaultColors := BpColors tab10
+]
+
+{ #category : 'axes' }
+BpArtist >> isAboveGrid [
+	"Answer whether my patches are drawn above the grid. matplotlib draws the grid above patches and collections (bars, scatter points) and below lines."
+
+	^ false
 ]
 
 { #category : 'accessing - style' }
@@ -162,6 +180,13 @@ BpArtist >> newPatches [
 	"Answer new patches showing my last computation."
 
 	^ self subclassResponsibility
+]
+
+{ #category : 'accessing' }
+BpArtist >> patches [
+	"Answer the patches I currently draw."
+
+	^ patches
 ]
 
 { #category : 'private - computing' }

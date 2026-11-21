@@ -1,5 +1,5 @@
 "
-I am the outline of a step histogram (`BpHistogram` histtype #step or #stepfilled): a polyline through my `dataVertices` when open, a filled polygon when closed. See `BpPatch` for the life cycle.
+I am a polyline through my `dataVertices` when open, a filled polygon when closed: the outline of a step histogram (`BpHistogram` histtype #step or #stepfilled) or the line of a `BpLine`. See `BpPatch` for the life cycle.
 
 ## Examples
 
@@ -32,7 +32,7 @@ BpPolygonPatch class >> exampleStep [
 	^ (BpHistogram new
 		   x: #( 1 2 2 3 );
 		   bins: 3;
-		   histtype: #step;
+		   histType: #step;
 		   yourself) patches first
 ]
 

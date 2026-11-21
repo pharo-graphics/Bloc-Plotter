@@ -12,7 +12,7 @@ BpPie exampleExplodeShadowRotate
 
 ## Design Rationale
 
-- My setters are the matplotlib keyword arguments (`values:` is `x`, `wedgeStyle:` is `wedgeprops`, `textStyle:` is `textprops`); `autopct:` takes a printf string or a block, and the default colors are the matplotlib cycle (`BpColors tab10`).
+- My setters are the matplotlib keyword arguments (in camel case: `autoPct:` is `autopct`, `counterClock:` is `counterclock`; `values:` is `x`, `wedgeStyle:` is `wedgeprops`, `textStyle:` is `textprops`); `autoPct:` takes a printf string or a block, and the default colors are the matplotlib cycle (`BpColors tab10`).
 - Angles are in degrees, counterclockwise from the right, as in matplotlib. The wedges convert them to the clockwise angles of `BlAnnulusSectorGeometry`.
 - Every setter rebuilds all my children. It keeps me simple, at the price of losing the handlers added directly to a wedge: `whenWedge:do:` keeps them across rebuilds.
 - Like matplotlib, a pie of radius 1 fills 1/1.25 of my half side. Unlike matplotlib, nothing is drawn outside me, so I shrink when an exploded wedge or a text would get out of my bounds.
@@ -40,12 +40,10 @@ Class {
 		'labels',
 		'colors',
 		'explode',
-		'autopct',
 		'pctDistance',
 		'labelDistance',
 		'startAngle',
 		'radius',
-		'counterclock',
 		'shadow',
 		'normalize',
 		'wedgeStyle',
@@ -55,7 +53,9 @@ Class {
 		'wedges',
 		'texts',
 		'shadows',
-		'unitRadius'
+		'unitRadius',
+		'autoPct',
+		'counterClock'
 	],
 	#category : 'Bloc-Plotter-Pie',
 	#package : 'Bloc-Plotter',
@@ -114,12 +114,12 @@ BpPie class >> demoOpen: aCollectionOfAssociations title: aString [
 ]
 
 { #category : 'examples' }
-BpPie class >> exampleAutopct [
+BpPie class >> exampleAutoPct [
 	"matplotlib: ax.pie(sizes, labels=labels, autopct='%1.1f%%')"
 
 	<sampleInstance>
 	^ self frogsPie
-		  autopct: '%1.1f%%';
+		  autoPct: '%1.1f%%';
 		  yourself
 ]
 
@@ -140,7 +140,7 @@ BpPie class >> exampleExplodeShadowRotate [
 	<sampleInstance>
 	^ self frogsPie
 		  explode: #( 0 0.1 0 0 );
-		  autopct: '%1.1f%%';
+		  autoPct: '%1.1f%%';
 		  shadow: true;
 		  startAngle: 90;
 		  yourself
@@ -251,7 +251,7 @@ BpPie class >> exampleSmallRadius [
 
 	<sampleInstance>
 	^ self frogsPie
-		  autopct: '%.0f%%';
+		  autoPct: '%.0f%%';
 		  textStyle: [ :text | text fontSize: 9 ];
 		  radius: 0.5;
 		  yourself
@@ -263,7 +263,7 @@ BpPie class >> exampleSwapLabelsAndPercents [
 
 	<sampleInstance>
 	^ self frogsPie
-		  autopct: '%1.1f%%';
+		  autoPct: '%1.1f%%';
 		  pctDistance: 1.25;
 		  labelDistance: 0.6;
 		  yourself
@@ -297,7 +297,7 @@ BpPie class >> scriptInteraction [
 	| pie info container space |
 	info := BlTextElement new text: ('Click a wedge' asRopedText fontSize: 16).
 	pie := self frogsPie
-		       autopct: '%1.1f%%';
+		       autoPct: '%1.1f%%';
 		       yourself.
 	pie
 		whenWedge: BlMouseEnterEvent do: [ :event :wedge |
@@ -340,7 +340,7 @@ BpPie class >> scriptPieFeatures [
 	^ self
 		  demoOpen: {
 			  ('Label slices' -> self exampleLabels).
-			  ('Auto-label slices' -> self exampleAutopct).
+			  ('Auto-label slices' -> self exampleAutoPct).
 			  ('Color slices' -> self exampleColors).
 			  ('Swap labels and percents' -> self exampleSwapLabelsAndPercents).
 			  ('Explode, shadow, rotate' -> self exampleExplodeShadowRotate).
@@ -430,8 +430,8 @@ BpPie >> allLabelSets [
 		sets add: ((BpPieLabelSet labels: labels distance: labelDistance)
 			 textStyle: textStyle;
 			 yourself) ].
-	autopct ifNotNil: [
-		sets add: ((BpPieLabelSet percent: autopct distance: pctDistance)
+	autoPct ifNotNil: [
+		sets add: ((BpPieLabelSet percent: autoPct distance: pctDistance)
 			 textStyle: textStyle;
 			 yourself) ].
 	^ sets
@@ -456,16 +456,16 @@ BpPie >> anchorOf: aText in: anExtent [
 ]
 
 { #category : 'accessing' }
-BpPie >> autopct [
+BpPie >> autoPct [
 
-	^ autopct
+	^ autoPct
 ]
 
 { #category : 'accessing' }
-BpPie >> autopct: aStringOrBlock [
-	"Show the percentage of each wedge at pctDistance, formatted with a printf string such as '%1.1f%%' or by a block receiving the percentage."
+BpPie >> autoPct: aStringOrBlock [
+	"Show the percentage of each wedge at pctDistance, formatted with a printf string such as '%1.1f%%' or by a block receiving the percentage (matplotlib autopct)."
 
-	autopct := aStringOrBlock.
+	autoPct := aStringOrBlock.
 	self rebuild
 ]
 
@@ -484,15 +484,15 @@ BpPie >> colors: aCollectionOfColors [
 ]
 
 { #category : 'accessing' }
-BpPie >> counterclock [
+BpPie >> counterClock [
 
-	^ counterclock
+	^ counterClock
 ]
 
 { #category : 'accessing' }
-BpPie >> counterclock: aBoolean [
+BpPie >> counterClock: aBoolean [
 
-	counterclock := aBoolean.
+	counterClock := aBoolean.
 	self rebuild
 ]
 
@@ -500,7 +500,7 @@ BpPie >> counterclock: aBoolean [
 BpPie >> direction [
 	"Answer 1 when the wedges go counterclockwise, -1 otherwise."
 
-	^ counterclock
+	^ counterClock
 		  ifTrue: [ 1 ]
 		  ifFalse: [ -1 ]
 ]
@@ -549,7 +549,7 @@ BpPie >> initialize [
 	labelDistance := 1.1.
 	startAngle := 0.
 	radius := 1.
-	counterclock := true.
+	counterClock := true.
 	shadow := false.
 	normalize := true.
 	labelSets := OrderedCollection new.

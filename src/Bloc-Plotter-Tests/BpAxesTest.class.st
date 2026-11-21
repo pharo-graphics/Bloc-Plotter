@@ -52,7 +52,7 @@ BpAxesTest >> testChangingTheHistogramUpdatesThePlotArea [
 ]
 
 { #category : 'tests' }
-BpAxesTest >> testExplicitLimitsReplaceAutoscaling [
+BpAxesTest >> testExplicitLimitsReplaceAutoScaling [
 
 	| axes |
 	axes := self newAxes.
@@ -83,6 +83,28 @@ BpAxesTest >> testGridHasOneLinePerTick [
 	self
 		assert: (axes plotArea gridLines collect: [ :each | each location ] as: Array)
 		equals: (axes ticks collect: [ :each | each location ] as: Array)
+]
+
+{ #category : 'tests - plot' }
+BpAxesTest >> testGridIsDrawnAboveScatterPoints [
+
+	| axes scatter children |
+	axes := BpAxes new.
+	scatter := axes scatterX: #( 0 1 ) y: #( 0 1 ).
+	axes grid: true.
+	children := axes plotArea children asArray.
+	self assert: (children indexOf: scatter patches first) < (children findFirst: [ :each | each isKindOf: BpGridLine ])
+]
+
+{ #category : 'tests - plot' }
+BpAxesTest >> testGridIsDrawnBelowLines [
+
+	| axes line children |
+	axes := BpAxes new.
+	line := axes plotX: #( 0 1 ) y: #( 0 1 ).
+	axes grid: true.
+	children := axes plotArea children asArray.
+	self assert: (children indexOf: line linePatch) > (children findLast: [ :each | each isKindOf: BpGridLine ])
 ]
 
 { #category : 'tests - grid' }
@@ -197,6 +219,46 @@ BpAxesTest >> testPatchesAreShownInThePlotArea [
 	self assert: (histogram patches allSatisfy: [ :each | each parent == axes plotArea ])
 ]
 
+{ #category : 'tests - plot' }
+BpAxesTest >> testPlotAddsALine [
+
+	| axes line |
+	axes := BpAxes new.
+	line := axes plotX: #( 0 1 2 ) y: #( 3 4 5 ).
+	self assert: axes artists asArray equals: { line }.
+	self assert: line points equals: {
+		(0 @ 3).
+		(1 @ 4).
+		(2 @ 5) }
+]
+
+{ #category : 'tests - plot' }
+BpAxesTest >> testPlotAutoScalesOnItsPoints [
+
+	| axes |
+	axes := BpAxes new.
+	axes plotX: #( 0 10 ) y: #( 0 1 ).
+	self assert: axes dataTransform xLimits equals: #( -0.5 10.5 )
+]
+
+{ #category : 'tests - plot' }
+BpAxesTest >> testPlotFormatSetsTheStyle [
+
+	| line |
+	line := BpAxes new plotX: #( 0 1 ) y: #( 0 1 ) format: 'ro'.
+	self assert: line linePatch isNil.
+	self assert: line markerPatches size equals: 2
+]
+
+{ #category : 'tests - plot' }
+BpAxesTest >> testPlotsTakeTheNextColorsOfTheCycle [
+
+	| axes |
+	axes := BpAxes new.
+	axes plotX: #( 0 1 ) y: #( 0 1 ).
+	self assert: (axes plotX: #( 0 1 ) y: #( 1 2 )) linePatch border paint color equals: BpColors tab10 second
+]
+
 { #category : 'tests - scatter' }
 BpAxesTest >> testScatterAnswersAScatterOfTheAxes [
 
@@ -246,7 +308,7 @@ BpAxesTest >> testStepIsDrawnAsAnOutline [
 	axes := self newAxes.
 	(axes hist: #( 1 1 1 3 ))
 		bins: #( 0 2 4 );
-		histtype: #step;
+		histType: #step;
 		color: Color red.
 	form := axes asForm.
 	self assert: (form colorAt: (axes plotBounds origin + (axes dataTransform pointFor: 1 @ 1.5)) rounded) equals: Color white.
@@ -345,6 +407,18 @@ BpAxesTest >> testXLimitsHaveFivePercentMargins [
 	self assert: axes xLimits equals: #( -0.5 10.5 )
 ]
 
+{ #category : 'tests - plot' }
+BpAxesTest >> testXTicksAreTheGivenLocations [
+
+	| axes |
+	axes := BpAxes new.
+	axes plotX: #( 0 10 ) y: #( 0 10 ).
+	axes xTicks: (1 to: 7).
+	self
+		assert: ((axes ticks select: [ :each | each axis = #x ]) collect: [ :each | each location ] as: Array)
+		equals: #( 1 2 3 4 5 6 7 )
+]
+
 { #category : 'tests' }
 BpAxesTest >> testYLimitsStickToZero [
 
@@ -353,4 +427,16 @@ BpAxesTest >> testYLimitsStickToZero [
 	(axes hist: #( 1 1 )) bins: #( 0 10 ).
 	self assert: axes yLimits first equals: 0.
 	self assert: axes yLimits last closeTo: 2.1
+]
+
+{ #category : 'tests - plot' }
+BpAxesTest >> testYTicksAreTheGivenLocations [
+
+	| axes |
+	axes := BpAxes new.
+	axes plotX: #( 0 10 ) y: #( 0 10 ).
+	axes yTicks: #( 2 4 ).
+	self
+		assert: ((axes ticks select: [ :each | each axis = #y ]) collect: [ :each | each label text asString ] as: Array)
+		equals: #( '2' '4' )
 ]

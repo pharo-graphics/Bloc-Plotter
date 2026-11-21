@@ -55,52 +55,54 @@ BpFigureTest >> testRowsColumnsCreatesAGridOfAxes [
 ]
 
 { #category : 'tests - saving' }
-BpFigureTest >> testSavefigAnswersTheFile [
-
-	self withFileNamed: 'figure.svg' do: [ :file | self assert: (BpFigure exampleTwoByTwo savefig: file) equals: file ]
-]
-
-{ #category : 'tests - saving' }
-BpFigureTest >> testSavefigDpiScalesThePng [
-
-	self withFileNamed: 'figure.png' do: [ :file |
-		BpFigure exampleTwoByTwo savefig: file dpi: 200.
-		self assert: (file binaryReadStreamDo: [ :stream | (PNGReadWriter on: stream) nextImage ]) extent equals: 1280 @ 960 ]
-]
-
-{ #category : 'tests - saving' }
-BpFigureTest >> testSavefigPdfWritesAPdf [
+BpFigureTest >> testSaveAsPDFWritesAPdf [
 
 	self withFileNamed: 'figure.pdf' do: [ :file |
-		BpFigure exampleTwoByTwo savefig: file.
+		BpFigure exampleTwoByTwo saveAsPDF: file.
 		self assert: (file binaryReadStreamDo: [ :stream | (stream next: 5) asString ]) equals: '%PDF-' ]
 ]
 
 { #category : 'tests - saving' }
-BpFigureTest >> testSavefigPngHasTheFigureExtent [
+BpFigureTest >> testSaveAsPNGDpiScalesTheImage [
 
 	self withFileNamed: 'figure.png' do: [ :file |
-		BpFigure exampleTwoByTwo savefig: file.
+		BpFigure exampleTwoByTwo saveAsPNG: file dpi: 200.
+		self assert: (file binaryReadStreamDo: [ :stream | (PNGReadWriter on: stream) nextImage ]) extent equals: 1280 @ 960 ]
+]
+
+{ #category : 'tests - saving' }
+BpFigureTest >> testSaveAsPNGHasTheFigureExtent [
+
+	self withFileNamed: 'figure.png' do: [ :file |
+		BpFigure exampleTwoByTwo saveAsPNG: file.
 		self assert: (file binaryReadStreamDo: [ :stream | (PNGReadWriter on: stream) nextImage ]) extent equals: 640 @ 480 ]
 ]
 
 { #category : 'tests - saving' }
-BpFigureTest >> testSavefigSvgWritesVectorGraphics [
+BpFigureTest >> testSaveAsSVGAnswersTheFile [
+
+	self withFileNamed: 'figure.svg' do: [ :file | self assert: (BpFigure exampleTwoByTwo saveAsSVG: file) equals: file ]
+]
+
+{ #category : 'tests - saving' }
+BpFigureTest >> testSaveAsSVGDoesNotDependOnTheExtension [
+
+	self withFileNamed: 'figure.txt' do: [ :file |
+		BpFigure exampleTwoByTwo saveAsSVG: file.
+		self assert: (file contents includesSubstring: '<svg') ]
+]
+
+{ #category : 'tests - saving' }
+BpFigureTest >> testSaveAsSVGWritesVectorGraphics [
 
 	self withFileNamed: 'figure.svg' do: [ :file |
 		| contents |
-		BpFigure exampleTwoByTwo savefig: file.
+		BpFigure exampleTwoByTwo saveAsSVG: file.
 		contents := file contents.
 		self assert: (contents includesSubstring: '<svg').
 		self assert: (contents includesSubstring: 'width="640" height="480"').
 		self assert: (contents includesSubstring: '<path').
 		self deny: (contents includesSubstring: '<image') ]
-]
-
-{ #category : 'tests - errors' }
-BpFigureTest >> testSavefigWithAnUnknownExtensionRaisesError [
-
-	self withFileNamed: 'figure.xyz' do: [ :file | self should: [ BpFigure exampleTwoByTwo savefig: file ] raise: Error ]
 ]
 
 { #category : 'tests - saving' }
