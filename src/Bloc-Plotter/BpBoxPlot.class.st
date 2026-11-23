@@ -661,14 +661,6 @@ BpBoxPlot >> oriented: aPoint [
 		  ifFalse: [ aPoint ]
 ]
 
-{ #category : 'private - computing' }
-BpBoxPlot >> paintOf: aColorOrName [
-	"Answer the color of aColorOrName with my alpha, transparent for 'none'."
-
-	(aColorOrName isNil or: [ aColorOrName = 'none' ]) ifTrue: [ ^ Color transparent ].
-	^ self colorOf: aColorOrName
-]
-
 { #category : 'accessing' }
 BpBoxPlot >> parts [
 	"Answer my patches by role, as the dictionary answered by matplotlib boxplot: #boxes, #medians, #whiskers, #caps, #fliers and #means."

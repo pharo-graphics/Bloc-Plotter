@@ -1,5 +1,5 @@
 "
-I am the marker of one point of a `BpScatterPlot`. I know the `index` of my point, its `dataPoint`, my `area` (matplotlib s, in points squared) and my `amount` (the number of c mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
+I am the marker of one point of a `BpScatterPlot` or a `BpLine`, of a flier or a mean of a `BpBoxPlot`, or of a head of a `BpStemPlot`. I know the `index` of my point, its `dataPoint`, my `area` (matplotlib s, in points squared) and my `amount` (the number of c mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
 
 ## Examples
 

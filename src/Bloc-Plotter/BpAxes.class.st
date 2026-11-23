@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:` or a `BpBarPlot` added by `barX:height:` or `barhY:width:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:` a `BpBarPlot` added by `barX:height:` or `barhY:width:`, or a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -18,7 +18,7 @@ BpAxes exampleHistogram
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:` and `barhY:width:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:` and `stemLocations:heads:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
@@ -422,6 +422,24 @@ BpAxes >> scatterX: xValues y: yValues [
 	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured like matplotlib Axes.scatter: s:, c:, marker:, alpha:, ..."
 
 	^ self addArtist: (BpScatterPlot x: xValues y: yValues)
+]
+
+{ #category : 'plotting' }
+BpAxes >> stem: aCollection [
+	"Add a stem plot of the heads aCollection, located at 0, 1, 2, ..., and answer it, to be configured like matplotlib Axes.stem: lineFormat:, markerFormat:, baseFormat:, bottom:, orientation:, ..."
+
+	^ self addArtist: (BpStemPlot new
+		   heads: aCollection;
+		   yourself)
+]
+
+{ #category : 'plotting' }
+BpAxes >> stemLocations: aCollection heads: anotherCollection [
+	"Add a stem plot of the heads anotherCollection at the locations aCollection and answer it, as matplotlib Axes.stem(locs, heads), whose locs are my locations."
+
+	^ self addArtist: (BpStemPlot new
+		   locations: aCollection heads: anotherCollection;
+		   yourself)
 ]
 
 { #category : 'private - building' }

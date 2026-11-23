@@ -46,9 +46,9 @@ BpColors class >> namedColors [
 	^ Dictionary newFromPairs:
 		  #( 'b' '0000ff' 'g' '008000' 'r' 'ff0000' 'c' '00bfbf' 'm' 'bf00bf' 'y' 'bfbf00' 'k' '000000' 'w' 'ffffff' 'red' 'ff0000'
 		     'green' '008000' 'blue' '0000ff' 'tan' 'd2b48c' 'lime' '00ff00' 'olivedrab' '6b8e23' 'rosybrown' 'bc8f8f' 'gray' '808080'
-		     'saddlebrown' '8b4513' 'black' '000000' 'white' 'ffffff' 'orange' 'ffa500' 'purple' '800080' 'brown' 'a52a2a' 'pink' 'ffc0cb'
-		     'cyan' '00ffff' 'magenta' 'ff00ff' 'yellow' 'ffff00' 'navy' '000080' 'darkorange' 'ff8c00' 'lightblue' 'add8e6' 'lightgray'
-		     'd3d3d3' 'darkgray' 'a9a9a9' 'silver' 'c0c0c0' 'gold' 'ffd700' 'orchid' 'da70d6' )
+		     'grey' '808080' 'saddlebrown' '8b4513' 'black' '000000' 'white' 'ffffff' 'orange' 'ffa500' 'purple' '800080' 'brown'
+		     'a52a2a' 'pink' 'ffc0cb' 'cyan' '00ffff' 'magenta' 'ff00ff' 'yellow' 'ffff00' 'navy' '000080' 'darkorange' 'ff8c00'
+		     'lightblue' 'add8e6' 'lightgray' 'd3d3d3' 'darkgray' 'a9a9a9' 'silver' 'c0c0c0' 'gold' 'ffd700' 'orchid' 'da70d6' )
 ]
 
 { #category : 'script' }

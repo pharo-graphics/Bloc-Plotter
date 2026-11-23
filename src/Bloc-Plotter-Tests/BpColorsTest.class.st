@@ -24,6 +24,12 @@ BpColorsTest >> testCycleNamesIndexTheColorCycle [
 ]
 
 { #category : 'tests' }
+BpColorsTest >> testGreyIsTheBritishSpellingOfGray [
+
+	self assert: (BpColors named: 'grey') equals: (BpColors named: 'gray')
+]
+
+{ #category : 'tests' }
 BpColorsTest >> testNamedColor [
 
 	self assert: (BpColors named: 'g') equals: (Color fromHexString: '008000')

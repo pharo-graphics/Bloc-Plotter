@@ -233,16 +233,6 @@ BpLine >> isAboveGrid [
 	^ true
 ]
 
-{ #category : 'private' }
-BpLine >> isColorName: aString [
-
-	^ [
-		  BpColors named: aString.
-		  true ]
-		  on: Error
-		  do: [ false ]
-]
-
 { #category : 'axes' }
 BpLine >> legendEntries [
 	"Answer my label with a short piece of my line, with one marker in its middle, as matplotlib legends."

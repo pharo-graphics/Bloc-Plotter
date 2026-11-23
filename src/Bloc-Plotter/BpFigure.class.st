@@ -13,10 +13,11 @@ BpFigure scriptInteraction.
 BpFigure scriptScatter.
 BpFigure scriptPlot.
 BpFigure scriptBar.
+BpFigure scriptStem.
 BpFigure scriptSave
 ```
 
-More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot` and `BpBarPlot`.
+More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot` and `BpStemPlot`.
 
 ## Design Rationale
 
@@ -148,6 +149,14 @@ BpFigure class >> scriptScatter [
 
 	<example>
 	^ BpScatterPlot exampleScatter show: 'scatter'
+]
+
+{ #category : 'script' }
+BpFigure class >> scriptStem [
+	"Show the figure of the matplotlib gallery stem plot: exp(sin(x)) drawn as stems (see `BpStemPlot`)."
+
+	<example>
+	^ BpStemPlot exampleStemPlot show: 'stem'
 ]
 
 { #category : 'script' }
