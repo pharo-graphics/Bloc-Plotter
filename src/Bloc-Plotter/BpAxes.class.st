@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:` or a `BpBoxPlot` added by `boxPlot:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:` or a `BpBarPlot` added by `barX:height:` or `barhY:width:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -11,14 +11,14 @@ BpAxes exampleHistogram
 
 - As in matplotlib, autoscaling adds a margin of 5% on each side, stopped by the sticky values of the artists: the bars of a histogram start exactly at 0. Artists can also require values to be covered (`BpArtist>>requiredValuesOn:`): a box plot keeps half a unit around its positions.
 - My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale.
-- Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`, matplotlib `set_xticks`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length as in matplotlib: computing it from my size would change my children during the layout pass and trigger another layout.
+- Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`, matplotlib `set_xticks`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box, a bar plot one at each category), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length as in matplotlib: computing it from my size would change my children during the layout pass and trigger another layout.
 - My title is a `BpText`, so a line break gives a title on several lines, as in matplotlib.
 - I have one slot per matplotlib setting, hence many slots.
 
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:` and `boxPlot:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:` and `barhY:width:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
@@ -110,6 +110,25 @@ BpAxes >> autoScale: anAxis [
 			  (values min - 0.5).
 			  (values max + 0.5) } ].
 	^ self limitsFrom: values min to: values max on: anAxis
+]
+
+{ #category : 'plotting' }
+BpAxes >> barX: aCollectionOrValue height: aCollectionOrNumber [
+	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured like matplotlib Axes.bar: width:, bottom:, align:, color:, tickLabel:, ..."
+
+	^ self addArtist: (BpBarPlot new
+		   x: aCollectionOrValue height: aCollectionOrNumber;
+		   yourself)
+]
+
+{ #category : 'plotting' }
+BpAxes >> barhY: aCollectionOrValue width: aCollectionOrNumber [
+	"Add horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, and answer them, as matplotlib Axes.barh. They keep the vocabulary of bar: the thickness of the bars (barh height) is width:, their start (barh left) is bottom:."
+
+	^ self addArtist: (BpBarPlot new
+		   orientation: #horizontal;
+		   x: aCollectionOrValue height: aCollectionOrNumber;
+		   yourself)
 ]
 
 { #category : 'plotting' }

@@ -137,6 +137,7 @@ BpBoxPlot class >> defaultWhiskerProps [
 BpBoxPlot class >> exampleBoxPlotDemo [
 	"Answer the first figure of the matplotlib gallery Boxplots (statistics/boxplot_demo): the same data drawn as a basic, a notched, a horizontal box plot, with other flier symbols, without fliers and with shorter whiskers."
 
+	<sampleInstance>
 	| random data figure settings |
 	random := Random seed: 19680801.
 	data := ((1 to: 50) collect: [ :each | random next * 100 ]) , (Array new: 25 withAll: 50)
@@ -168,6 +169,7 @@ BpBoxPlot class >> exampleBoxPlotDemo [
 BpBoxPlot class >> exampleInteractiveBoxPlot [
 	"Answer a figure of three filled boxes: hovering a part outlines it in red, clicking a part shows the statistics of its box in the title."
 
+	<sampleInstance>
 	| figure axes boxPlot names |
 	names := #( 'A' 'B' 'C' ).
 	figure := BpFigure new.
@@ -199,6 +201,7 @@ BpBoxPlot class >> exampleInteractiveBoxPlot [
 BpBoxPlot class >> examplePlotType [
 	"Answer the figure of the plot type page of matplotlib (plot_types/stats/boxplot_plot): three filled boxes at 2, 4 and 6 without fliers, with white medians and edges."
 
+	<sampleInstance>
 	| random columns figure axes |
 	random := Random seed: 10.
 	columns := #( #( 3 1.25 ) #( 5 1 ) #( 4 1.25 ) ) collect: [ :meanAndDeviation |

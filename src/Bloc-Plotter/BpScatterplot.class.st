@@ -79,6 +79,7 @@ BpScatterPlot class >> exampleColoredPoints [
 BpScatterPlot class >> exampleInteractiveScatter [
 	"A scatter with interaction handlers on its markers: hovering a marker outlines it, clicking it shows its point and value in the title."
 
+	<sampleInstance>
 	| random figure axes scatter |
 	random := Random seed: 19680801.
 	figure := BpFigure new.
@@ -105,6 +106,7 @@ BpScatterPlot class >> exampleInteractiveScatter [
 BpScatterPlot class >> exampleMarkers [
 	"matplotlib gallery: Marker examples (scatter_star_poly): a marker symbol, a TeX symbol, a path, a pentagon, a star and an asterisk."
 
+	<sampleInstance>
 	| random x y z figure |
 	random := Random seed: 19680801.
 	x := (1 to: 10) collect: [ :each | random next ].
@@ -132,6 +134,7 @@ BpScatterPlot class >> exampleMarkers [
 BpScatterPlot class >> exampleScatter [
 	"matplotlib gallery: Scatter plot (shapes_and_collections/scatter): random points with random sizes and colors."
 
+	<sampleInstance>
 	| random n x y colors area figure |
 	random := Random seed: 19680801.
 	n := 50.
@@ -152,6 +155,7 @@ BpScatterPlot class >> exampleScatter [
 BpScatterPlot class >> exampleScatterWithLegend [
 	"matplotlib gallery: Scatter plot with a legend (scatter_with_legend), first figure: one scatter per color, each with a label."
 
+	<sampleInstance>
 	| random figure axes |
 	random := Random seed: 19680801.
 	figure := BpFigure new.

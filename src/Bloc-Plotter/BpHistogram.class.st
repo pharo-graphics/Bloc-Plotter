@@ -79,6 +79,7 @@ BpHistogram class >> dashArrays [
 BpHistogram class >> exampleColorByHeight [
 	"matplotlib gallery: Histograms (hist), second figure: bars colored by their height with viridis (normalized between the lowest and the highest bar), and a density with percent tick labels."
 
+	<sampleInstance>
 	| random dist1 figure histogram lowest highest |
 	random := Random seed: 19680801.
 	dist1 := (1 to: 100000) collect: [ :each | random nextNormal ].
@@ -100,6 +101,7 @@ BpHistogram class >> exampleColorByHeight [
 BpHistogram class >> exampleHistTypes [
 	"matplotlib gallery: Demo of the histogram function's different histtype settings (histogram_histtypes)."
 
+	<sampleInstance>
 	| random x w figure bottomLeft |
 	random := Random seed: 19680801.
 	x := (1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ].
@@ -143,6 +145,7 @@ BpHistogram class >> exampleHistTypes [
 BpHistogram class >> exampleInteractiveHistogram [
 	"A histogram with interaction handlers on its bars: hovering a bar highlights it, clicking it shows its bin and count in the title."
 
+	<sampleInstance>
 	| random figure axes histogram |
 	random := Random seed: 19680801.
 	figure := BpFigure new.
@@ -167,6 +170,7 @@ BpHistogram class >> exampleInteractiveHistogram [
 BpHistogram class >> exampleMultiHist [
 	"matplotlib gallery: Plot multiple data sets as histograms (histogram_multihist), first figure."
 
+	<sampleInstance>
 	| random x colors xMulti figure |
 	random := Random seed: 19680801.
 	x := (1 to: 3) collect: [ :dataset | (1 to: 1000) collect: [ :each | random nextNormal ] ].
@@ -206,6 +210,7 @@ BpHistogram class >> exampleMultiHist [
 BpHistogram class >> exampleMultiHistStyles [
 	"matplotlib gallery: Plot multiple data sets as histograms (histogram_multihist), one style setting per dataset: edgecolor, facecolor, linewidth and linestyle."
 
+	<sampleInstance>
 	| random x figure colors |
 	random := Random seed: 19680801.
 	x := (1 to: 3) collect: [ :dataset | (1 to: 1000) collect: [ :each | random nextNormal ] ].
@@ -256,6 +261,7 @@ BpHistogram class >> exampleMultiHistStyles [
 BpHistogram class >> exampleOptions [
 	"The other options of matplotlib Axes.hist: cumulative densities, horizontal bars, log scale, bars aligned on the left edges and starting at a bottom, and a bin strategy."
 
+	<sampleInstance>
 	| random x figure |
 	random := Random seed: 19680801.
 	x := (1 to: 1000) collect: [ :each | random nextNormal ].
@@ -319,6 +325,7 @@ BpHistogram class >> exampleStepFilled [
 BpHistogram class >> exampleTwoDistributions [
 	"matplotlib gallery: Histograms (hist), first figure: the number of bins set with bins."
 
+	<sampleInstance>
 	| random dist1 dist2 figure |
 	random := Random seed: 19680801.
 	dist1 := (1 to: 100000) collect: [ :each | random nextNormal ].

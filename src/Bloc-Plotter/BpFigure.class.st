@@ -12,10 +12,11 @@ BpFigure scriptOptions.
 BpFigure scriptInteraction.
 BpFigure scriptScatter.
 BpFigure scriptPlot.
+BpFigure scriptBar.
 BpFigure scriptSave
 ```
 
-More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot` and `BpLine`.
+More figures of the matplotlib gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot` and `BpBarPlot`.
 
 ## Design Rationale
 
@@ -72,6 +73,14 @@ BpFigure class >> rows: aRowCount columns: aColumnCount [
 ]
 
 { #category : 'script' }
+BpFigure class >> scriptBar [
+	"Show the figure of the matplotlib gallery bar color demo: one bar per category, with its own color and legend label (see `BpBarPlot`)."
+
+	<example>
+	^ BpBarPlot exampleBarColors show: 'bar'
+]
+
+{ #category : 'script' }
 BpFigure class >> scriptBoxPlot [
 	"Show the six box plot variants of the matplotlib gallery (see `BpBoxPlot`)."
 
@@ -123,7 +132,7 @@ BpFigure class >> scriptPlot [
 BpFigure class >> scriptSave [
 	"Save the histtypes figure of the matplotlib gallery as SVG and PDF (vector graphics) and as PNG at 200 dots per inch, in the image directory, and inspect the files."
 
-	<example>
+	<script>
 	| figure directory |
 	figure := BpHistogram exampleHistTypes.
 	directory := FileLocator imageDirectory asFileReference.

@@ -70,6 +70,7 @@ BpLine class >> defaultMarkerSize [
 BpLine class >> exampleFormats [
 	"Answer the figure of the pyplot tutorial drawing three curves with format strings ('r--', 'bs', 'g^') and a legend."
 
+	<sampleInstance>
 	| figure axes t |
 	t := (0 to: 24) collect: [ :index | index / 5 ].
 	figure := BpFigure new.
@@ -87,6 +88,7 @@ BpLine class >> exampleFormats [
 BpLine class >> examplePlotType [
 	"Answer the figure of the plot type page of matplotlib (plot_types/basic/plot): markers only, a line, and a line with markers, with fixed limits and ticks."
 
+	<sampleInstance>
 	| figure axes x y x2 y2 |
 	x := (0 to: 99) collect: [ :index | index * 10 / 99.0 ].
 	y := x collect: [ :each | 4 + (2 * each) sin ].

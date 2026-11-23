@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`) or a box plot (`BpBoxPlot`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`) or a bar plot (`BpBarPlot`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -16,7 +16,7 @@ BpArtist scriptArtistsInOneAxes
 
 ## Usage
 
-1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
+1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the axes (`BpAxes>>artistChanged:`); they rebuild their limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
