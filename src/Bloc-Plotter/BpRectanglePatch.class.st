@@ -15,9 +15,9 @@ Class {
 		'bin',
 		'amount'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instances' }

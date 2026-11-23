@@ -18,16 +18,16 @@ BpPlotAreaLayout instanceOfHistogram
 Class {
 	#name : 'BpPlotAreaLayout',
 	#superclass : 'BlLayout',
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instances' }
 BpPlotAreaLayout class >> instanceOfHistogram [
 
 	<sampleInstance>
-	^ BpAxes instanceHistogram plotArea layout
+	^ BpChart instanceHistogram plotArea layout
 ]
 
 { #category : 'layout' }
@@ -45,7 +45,7 @@ BpPlotAreaLayout >> layout: aPlotArea in: aRectangle context: aBlElementBoundsUp
 
 { #category : 'measure' }
 BpPlotAreaLayout >> measure: aPlotArea with: anExtentSpec [
-	"Take the extent given by the axes, size each patch from its data coordinates, each grid line across the plot area, and let the legend fit its content."
+	"Take the extent given by the chart, size each patch from its data coordinates, each grid line across the plot area, and let the legend fit its content."
 
 	aPlotArea measuredExtent: (anExtentSpec extentForWidth: 0.0 height: 0.0).
 	aPlotArea patches do: [ :each | each measureWith: aPlotArea dataTransform ].

@@ -76,7 +76,7 @@ BpLiveInspectionTest >> testLiveElementOfAFreeArtistIsANewFigureShowingIt [
 	line := BpLine instanceSine.
 	figure := line liveElement.
 	self assert: (figure isKindOf: BpFigure).
-	self assert: figure axes first artists asArray equals: { line }
+	self assert: figure charts first artists asArray equals: { line }
 ]
 
 { #category : 'tests' }
@@ -92,7 +92,7 @@ BpLiveInspectionTest >> testLiveElementOfAPatchIsItsFigure [
 
 	| figure |
 	figure := BpFigure instanceLinePlotType.
-	self assert: figure axes first artists first patches first liveElement identicalTo: figure
+	self assert: figure charts first artists first patches first liveElement identicalTo: figure
 ]
 
 { #category : 'tests' }
@@ -100,7 +100,7 @@ BpLiveInspectionTest >> testLiveElementOfAnArtistIsItsFigure [
 
 	| figure |
 	figure := BpFigure instanceLinePlotType.
-	self assert: figure axes first artists first liveElement identicalTo: figure
+	self assert: figure charts first artists first liveElement identicalTo: figure
 ]
 
 { #category : 'tests' }
@@ -108,7 +108,7 @@ BpLiveInspectionTest >> testLiveIsTheFirstPaneOfEveryVisualClass [
 
 	{
 		BpFigure.
-		BpAxes.
+		BpChart.
 		BpPie.
 		BpPieWedge.
 		BpPlotArea.
@@ -160,7 +160,7 @@ BpLiveInspectionTest >> testLivePaneOfAPatchShowsItsFigure [
 
 	| figure pane |
 	figure := BpFigure instanceLinePlotType.
-	pane := self livePaneOf: figure axes first artists first patches first.
+	pane := self livePaneOf: figure charts first artists first patches first.
 	self assert: (pane blocElement children includes: figure)
 ]
 

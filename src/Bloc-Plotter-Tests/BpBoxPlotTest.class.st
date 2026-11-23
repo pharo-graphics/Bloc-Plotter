@@ -58,12 +58,12 @@ BpBoxPlotTest >> testBoxPropertiesStyleTheBox [
 	box := ((self boxPlot
 		         patchArtist: true;
 		         boxProperties: {
-			         (#faceColor -> 'C1').
-			         (#edgeColor -> 'white').
+			         (#faceColor -> (BpPalette default colorAt: 2)).
+			         (#edgeColor -> Color white).
 			         (#lineWidth -> 0.5) } asDictionary;
 		         yourself) parts at: #boxes) first.
-	self assert: box background paint color equals: BpColors tab10 second.
-	self assert: box border paint color equals: (BpColors named: 'white').
+	self assert: box background paint color equals: (BpPalette default colorAt: 2).
+	self assert: box border paint color equals: Color white.
 	self assert: (box border width closeTo: 0.5 * self ppp)
 ]
 
@@ -94,6 +94,22 @@ BpBoxPlotTest >> testDefaultPositionsCountFromOne [
 			 x: #( #( 1 2 ) #( 3 4 ) #( 5 6 ) );
 			 yourself) positions asArray
 		equals: #( 1 2 3 )
+]
+
+{ #category : 'tests - palette' }
+BpBoxPlotTest >> testDefaultStyleTakesTheColorsOfThePalette [
+
+	| chart palette boxPlot |
+	palette := BpQualitativePalette set1.
+	chart := BpChart new.
+	chart palette: palette.
+	boxPlot := (chart boxPlot: #( #( 1 2 3 4 5 ) ))
+		           patchArtist: true;
+		           showMeans: true;
+		           yourself.
+	self assert: (boxPlot parts at: #boxes) first background paint color equals: (palette colorAt: 1).
+	self assert: (boxPlot parts at: #medians) first border paint color equals: (palette colorAt: 2).
+	self assert: (boxPlot parts at: #means) first background paint color equals: (palette colorAt: 3)
 ]
 
 { #category : 'tests' }
@@ -136,14 +152,24 @@ BpBoxPlotTest >> testEmptyFlierSymbolHidesThem [
 ]
 
 { #category : 'tests' }
-BpBoxPlotTest >> testFlierSymbolGivesMarkerAndColor [
+BpBoxPlotTest >> testFlierSymbolGivesTheMarker [
 
-	| flier |
-	flier := ((self boxPlot
-		           flierSymbol: 'gD';
-		           yourself) parts at: #fliers) first.
-	self assert: flier marker vertices size equals: 4.
-	self assert: flier background paint color equals: (BpColors named: 'g')
+	self
+		assert: ((self boxPlot
+			  flierSymbol: 'D';
+			  yourself) parts at: #fliers) first marker vertices size
+		equals: 4
+]
+
+{ #category : 'tests' }
+BpBoxPlotTest >> testFlierSymbolKeepsTheColorsOfTheFlierProperties [
+
+	self
+		assert: ((self boxPlot
+			  flierProperties: { (#markerFaceColor -> Color green) } asDictionary;
+			  flierSymbol: 'D';
+			  yourself) parts at: #fliers) first background paint color
+		equals: Color green
 ]
 
 { #category : 'tests' }
@@ -197,7 +223,7 @@ BpBoxPlotTest >> testMedianCrossesTheBox [
 { #category : 'tests' }
 BpBoxPlotTest >> testMedianIsOrangeByDefault [
 
-	self assert: (self boxPlot parts at: #medians) first border paint color equals: BpColors tab10 second
+	self assert: (self boxPlot parts at: #medians) first border paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests' }
@@ -206,10 +232,10 @@ BpBoxPlotTest >> testMedianPropertiesStyleTheMedian [
 	| median |
 	median := ((self boxPlot
 		            medianProperties: {
-			            (#color -> 'white').
+			            (#color -> Color white).
 			            (#lineWidth -> 0.5) } asDictionary;
 		            yourself) parts at: #medians) first.
-	self assert: median border paint color equals: (BpColors named: 'white').
+	self assert: median border paint color equals: Color white.
 	self assert: (median border width closeTo: 0.5 * self ppp)
 ]
 
@@ -248,7 +274,7 @@ BpBoxPlotTest >> testPatchArtistFillsTheBoxWithTheFirstColorOfTheCycle [
 	box := ((self boxPlot
 		         patchArtist: true;
 		         yourself) parts at: #boxes) first.
-	self assert: box background paint color equals: BpColors tab10 first
+	self assert: box background paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests' }
@@ -302,7 +328,7 @@ BpBoxPlotTest >> testShowMeansAddsAGreenTriangle [
 		          showMeans: true;
 		          yourself) parts at: #means) first.
 	self assert: mean dataPoint equals: 1 @ (145 / 10).
-	self assert: mean background paint color equals: BpColors tab10 third
+	self assert: mean background paint color equals: (BpPalette default colorAt: 3)
 ]
 
 { #category : 'tests' }
@@ -326,10 +352,10 @@ BpBoxPlotTest >> testWhiskerAndCapPropertiesStyleThem [
 
 	| parts |
 	parts := (self boxPlot
-		          whiskerProperties: { (#color -> 'C0') } asDictionary;
+		          whiskerProperties: { (#color -> (BpPalette default colorAt: 1)) } asDictionary;
 		          capProperties: { (#lineWidth -> 2) } asDictionary;
 		          yourself) parts.
-	self assert: (parts at: #whiskers) first border paint color equals: BpColors tab10 first.
+	self assert: (parts at: #whiskers) first border paint color equals: (BpPalette default colorAt: 1).
 	self assert: ((parts at: #caps) first border width closeTo: 2 * self ppp)
 ]
 

@@ -1,5 +1,5 @@
 "
-I check `BpBarPlot`, as `BpAxes>>barX:height:` and `BpAxes>>barhY:width:` create it: the rectangle of each bar (position, width, bottom, alignment, orientation), the broadcasting of settings given once, categories and tick labels, styles, legend entries, sticky bottoms and log scale.
+I check `BpBarPlot`, as `BpChart>>barX:height:` and `BpChart>>barhY:width:` create it: the rectangle of each bar (position, width, bottom, alignment, orientation), the broadcasting of settings given once, categories and tick labels, styles, legend entries, sticky bottoms and log scale.
 
 ## Implementation Notes
 
@@ -37,28 +37,6 @@ BpBarPlotTest >> testAlphaMakesTheBarsTransparent [
 ]
 
 { #category : 'tests' }
-BpBarPlotTest >> testAxesBarAddsABarPlot [
-
-	| axes bars |
-	axes := BpAxes new.
-	bars := axes barX: #( 1 2 ) height: #( 3 4 ).
-	self assert: bars axes identicalTo: axes.
-	self assert: (axes artists includes: bars).
-	self assert: bars patches size equals: 2
-]
-
-{ #category : 'tests' }
-BpBarPlotTest >> testAxesBarhAddsHorizontalBars [
-
-	| bars |
-	bars := (BpAxes new barhY: #( 1 2 ) width: #( 3 4 ))
-		        width: 1 / 2;
-		        yourself.
-	self assert: bars orientation equals: #horizontal.
-	self assert: bars patches second dataBounds equals: (0 @ (7 / 4) corner: 4 @ (9 / 4))
-]
-
-{ #category : 'tests' }
 BpBarPlotTest >> testBarsAreBelowTheGrid [
 
 	self deny: self bars isAboveGrid
@@ -88,7 +66,7 @@ BpBarPlotTest >> testBarsKnowTheirIndexAndHeight [
 { #category : 'tests' }
 BpBarPlotTest >> testBarsTakeTheFirstColorOfTheCycle [
 
-	self assert: self bars patches first background paint color equals: BpColors tab10 first
+	self assert: self bars patches first background paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests' }
@@ -127,16 +105,41 @@ BpBarPlotTest >> testCategoriesAreTheTicksOfThePositionAxis [
 ]
 
 { #category : 'tests' }
+BpBarPlotTest >> testChartBarAddsABarPlot [
+
+	| chart bars |
+	chart := BpChart new.
+	bars := chart barX: #( 1 2 ) height: #( 3 4 ).
+	self assert: bars chart identicalTo: chart.
+	self assert: (chart artists includes: bars).
+	self assert: bars patches size equals: 2
+]
+
+{ #category : 'tests' }
+BpBarPlotTest >> testChartBarhAddsHorizontalBars [
+
+	| bars |
+	bars := (BpChart new barhY: #( 1 2 ) width: #( 3 4 ))
+		        width: 1 / 2;
+		        yourself.
+	self assert: bars orientation equals: #horizontal.
+	self assert: bars patches second dataBounds equals: (0 @ (7 / 4) corner: 4 @ (9 / 4))
+]
+
+{ #category : 'tests' }
 BpBarPlotTest >> testColorPerBar [
 
 	self
 		assert: ((self bars
-			  color: #( 'tab:red' 'tab:blue' 'tab:red' );
+			  color: {
+	Color red.
+	Color blue.
+	Color red };
 			  yourself) patches collect: [ :each | each background paint color ] as: Array)
 		equals: {
-			(BpColors named: 'tab:red').
-			(BpColors named: 'tab:blue').
-			(BpColors named: 'tab:red') }
+			Color red.
+			Color blue.
+			Color red }
 ]
 
 { #category : 'tests' }
@@ -153,11 +156,10 @@ BpBarPlotTest >> testEdgeAlignStartsTheBarsAtTheirPositions [
 BpBarPlotTest >> testEdgeColorAndLineWidthOutlineTheBars [
 
 	| bar |
-	bar := (self bars
-		        edgeColor: 'white';
+	bar := (self bars edgeColor: Color white;
 		        lineWidth: 0.7;
 		        yourself) patches first.
-	self assert: bar border paint color equals: (BpColors named: 'white').
+	self assert: bar border paint color equals: Color white.
 	self assert: (bar border width closeTo: 0.7 * self ppp)
 ]
 
@@ -168,7 +170,7 @@ BpBarPlotTest >> testHandlersAreKeptWhenTheBarsAreRebuilt [
 	bars := self bars.
 	clicked := nil.
 	bars whenPatch: BlClickEvent do: [ :event :bar | clicked := bar ].
-	bars color: 'red'.
+	bars color: Color red.
 	BlEvent fireEvent: BlClickEvent new target: bars patches second.
 	self assert: clicked identicalTo: bars patches second
 ]
@@ -236,10 +238,13 @@ BpBarPlotTest >> testLegendSwatchHasTheColorOfItsBar [
 
 	self
 		assert: (self bars
-			 color: #( 'tab:red' 'tab:blue' 'tab:green' );
+			 color: {
+	Color red.
+	Color blue.
+	Color green };
 			 label: #( 'red' 'blue' 'green' );
 			 yourself) legendEntries second value background paint color
-		equals: (BpColors named: 'tab:blue')
+		equals: Color blue
 ]
 
 { #category : 'tests' }
@@ -283,7 +288,7 @@ BpBarPlotTest >> testNoLabelGivesNoLegendEntry [
 ]
 
 { #category : 'tests' }
-BpBarPlotTest >> testNumericPositionsLetTheAxesChooseTheTicks [
+BpBarPlotTest >> testNumericPositionsLetTheChartChooseTheTicks [
 
 	self assert: (self bars managedTicksOn: #x) isNil
 ]

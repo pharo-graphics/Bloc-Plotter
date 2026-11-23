@@ -1,5 +1,5 @@
 "
-I am the legend of a `BpAxes`: one row per labeled dataset, a swatch drawn like its patches followed by its label (`BpAxes>>legend`).
+I am the legend of a `BpChart`: one row per labeled dataset, a swatch drawn like its patches followed by its label (`BpChart>>legend`).
 
 ## Examples
 
@@ -9,17 +9,17 @@ BpLegend instanceTwoEntries
 
 ## Usage
 
-1. `BpAxes>>newLegend` creates me with `entries:` once `BpAxes>>legend` was sent, from the `legendEntries` of its artists.
-2. `BpPlotArea>>legend:` shows me, and the axes replace me at each rebuild.
+1. `BpChart>>newLegend` creates me with `entries:` once `BpChart>>legend` was sent, from the `legendEntries` of its artists.
+2. `BpPlotArea>>legend:` shows me, and the chart replaces me at each rebuild.
 "
 Class {
 	#name : 'BpLegend',
 	#superclass : 'BlElement',
 	#traits : 'TBpLiveInspection',
 	#classTraits : 'TBpLiveInspection classTrait',
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instance creation' }
@@ -34,9 +34,9 @@ BpLegend class >> entries: aCollectionOfAssociations [
 BpLegend class >> instanceTwoEntries [
 
 	<sampleInstance>
-	^ self entries: (#( 'red' 'tan' ) collect: [ :each |
+	^ self entries: (#( 'first' 'second' ) withIndexCollect: [ :each :index |
 		   each -> (BlElement new
-			    background: (BpColors named: each);
+			    background: (BpPalette default colorAt: index);
 			    extent: 20 @ 10;
 			    yourself) ])
 ]

@@ -9,14 +9,14 @@ BpTickLocator exampleTicks
 
 ## Usage
 
-I have no instances: `BpAxes>>newTicksOn:` and `BpAxes>>defaultLabelsFor:on:` use my class-side methods.
+I have no instances: `BpChart>>newTicksOn:` and `BpChart>>defaultLabelsFor:on:` use my class-side methods.
 "
 Class {
 	#name : 'BpTickLocator',
 	#superclass : 'Object',
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'ticks' }

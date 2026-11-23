@@ -1,5 +1,5 @@
 "
-I test `BpScatterPlot`: one marker per point, sizes, colors given or mapped through a colormap, alpha, edges, unfilled markers and legend entries.
+I test `BpScatterPlot`: one marker per point, sizes, colors given or mapped through a color map, alpha, edges, unfilled markers and legend entries.
 "
 Class {
 	#name : 'BpScatterPlotTest',
@@ -26,6 +26,16 @@ BpScatterPlotTest >> testAlphaMakesTheFacesTransparent [
 ]
 
 { #category : 'tests' }
+BpScatterPlotTest >> testCGivesOneColorForAllPoints [
+
+	self
+		assert: ((self scatter
+			  c: Color red;
+			  yourself) patches collect: [ :each | each background paint color ] as: Set) asArray
+		equals: { Color red }
+]
+
+{ #category : 'tests' }
 BpScatterPlotTest >> testCGivesOneColorPerPoint [
 
 	| colors |
@@ -41,16 +51,6 @@ BpScatterPlotTest >> testCGivesOneColorPerPoint [
 ]
 
 { #category : 'tests' }
-BpScatterPlotTest >> testCNamesOneColorForAllPoints [
-
-	self
-		assert: ((self scatter
-	  c: 'red';
-	  yourself) patches collect: [ :each | each background paint color ] as: Set) asArray
-		equals: { (BpColors named: 'red') }
-]
-
-{ #category : 'tests' }
 BpScatterPlotTest >> testColorMapCanBeABlock [
 
 	self
@@ -62,9 +62,22 @@ BpScatterPlotTest >> testColorMapCanBeABlock [
 ]
 
 { #category : 'tests' }
+BpScatterPlotTest >> testColorMapCanBeAPalette [
+
+	| palette |
+	palette := BpInterpolatedPalette name: 'ends' anchors: (BpSequentialPalette greys: 9) colors.
+	self
+		assert: (self scatter
+			 c: #( 0 1 2 );
+			 colorMap: palette;
+			 yourself) patches last background paint color
+		equals: (palette colorAt: 1)
+]
+
+{ #category : 'tests' }
 BpScatterPlotTest >> testDefaultColorIsTheFirstColorOfTheCycle [
 
-	self assert: self scatter patches first background paint color equals: BpColors tab10 first
+	self assert: self scatter patches first background paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests' }
@@ -84,23 +97,12 @@ BpScatterPlotTest >> testEdgeColorsGivesTheEdgeColor [
 ]
 
 { #category : 'tests' }
-BpScatterPlotTest >> testEdgeColorsNoneRemovesTheEdge [
-
-	self
-		assert: (self scatter
-			 edgeColors: 'none';
-			 yourself) patches first border width
-		equals: 0
-]
-
-{ #category : 'tests' }
 BpScatterPlotTest >> testEdgeHasTheFaceColorByDefault [
 
 	| patch |
-	patch := (self scatter
-		          c: 'red';
+	patch := (self scatter c: Color red;
 		          yourself) patches first.
-	self assert: patch border paint color equals: (BpColors named: 'red')
+	self assert: patch border paint color equals: Color red
 ]
 
 { #category : 'tests' }
@@ -154,9 +156,9 @@ BpScatterPlotTest >> testNumbersOfCAreMappedThroughViridis [
 	  c: #( 0 5 10 );
 	  yourself) patches collect: [ :each | each background paint color ] as: Array)
 		equals: {
-			(BpColors viridis: 0).
-			(BpColors viridis: 0.5).
-			(BpColors viridis: 1) }
+			(BpInterpolatedPalette viridis colorAt: 0).
+			(BpInterpolatedPalette viridis colorAt: 0.5).
+			(BpInterpolatedPalette viridis colorAt: 1) }
 ]
 
 { #category : 'tests' }
@@ -209,15 +211,24 @@ BpScatterPlotTest >> testSizesCanBeGivenPerPoint [
 ]
 
 { #category : 'tests' }
+BpScatterPlotTest >> testTransparentEdgeColorRemovesTheEdge [
+
+	self
+		assert: (self scatter
+			 edgeColors: Color transparent;
+			 yourself) patches first border width
+		equals: 0
+]
+
+{ #category : 'tests' }
 BpScatterPlotTest >> testUnfilledMarkerIsDrawnWithItsColor [
 
 	| patch |
-	patch := (self scatter
-		          c: 'red';
+	patch := (self scatter c: Color red;
 		          marker: '+';
 		          yourself) patches first.
 	self assert: patch background isTransparent.
-	self assert: patch border paint color equals: (BpColors named: 'red')
+	self assert: patch border paint color equals: Color red
 ]
 
 { #category : 'tests' }
@@ -230,9 +241,9 @@ BpScatterPlotTest >> testVMinAndVMaxClipTheColorMap [
 			  vMax: 4;
 			  yourself) patches collect: [ :each | each background paint color ] as: Array)
 		equals: {
-			(BpColors viridis: 0).
-			(BpColors viridis: 0.5).
-			(BpColors viridis: 1) }
+			(BpInterpolatedPalette viridis colorAt: 0).
+			(BpInterpolatedPalette viridis colorAt: 0.5).
+			(BpInterpolatedPalette viridis colorAt: 1) }
 ]
 
 { #category : 'tests - errors' }

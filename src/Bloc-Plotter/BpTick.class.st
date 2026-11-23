@@ -1,5 +1,5 @@
 "
-I am one tick of an axis of `BpAxes`: a short mark against the plot area and the label of my location.
+I am one tick of an axis of `BpChart`: a short mark against the plot area and the label of my location.
 
 ## Examples
 
@@ -9,9 +9,9 @@ BpTick instanceXTick
 
 ## Usage
 
-1. `BpAxes>>newTicksOn:` creates me with `axis:location:text:`, and `BpAxes>>rebuildTicks` adds my `elements` to the axes.
-2. `BpAxesLayout` sends me `layoutIn:context:` to place my mark and my label from the data transform of the axes.
-3. The axes replace me at each rebuild.
+1. `BpChart>>newTicksOn:` creates me with `axis:location:text:`, and `BpChart>>rebuildTicks` adds my `elements` to the chart.
+2. `BpChartLayout` sends me `layoutIn:context:` to place my mark and my label from the data transform of the chart.
+3. The chart replaces me at each rebuild.
 "
 Class {
 	#name : 'BpTick',
@@ -22,9 +22,9 @@ Class {
 		'label',
 		'location'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instance creation' }
@@ -81,19 +81,19 @@ BpTick >> label [
 ]
 
 { #category : 'layout' }
-BpTick >> layoutIn: anAxes context: aBlElementBoundsUpdater [
+BpTick >> layoutIn: aChart context: aBlElementBoundsUpdater [
 	"Place my mark outside the plot area, against its side, and my label next to it."
 
 	| plot position size |
-	plot := anAxes plotBounds.
+	plot := aChart plotBounds.
 	size := label measuredExtent.
 	axis = #x
 		ifTrue: [
-			position := plot left + (anAxes dataTransform pointFor: location @ anAxes dataTransform yLimits first) x.
+			position := plot left + (aChart dataTransform pointFor: location @ aChart dataTransform yLimits first) x.
 			mark applyLayoutIn: (position - 0.5 @ plot bottom extent: 1 @ 3.5) context: aBlElementBoundsUpdater.
 			label applyLayoutIn: (position - (size x / 2) @ (plot bottom + 5) extent: size) context: aBlElementBoundsUpdater ]
 		ifFalse: [
-			position := plot top + (anAxes dataTransform pointFor: anAxes dataTransform xLimits first @ location) y.
+			position := plot top + (aChart dataTransform pointFor: aChart dataTransform xLimits first @ location) y.
 			mark applyLayoutIn: (plot left - 3.5 @ (position - 0.5) extent: 3.5 @ 1) context: aBlElementBoundsUpdater.
 			label applyLayoutIn: (plot left - 5 - size x @ (position - (size y / 2)) extent: size) context: aBlElementBoundsUpdater ]
 ]

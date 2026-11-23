@@ -1,5 +1,5 @@
 "
-I test `BpFigure`: its default size and its grid of axes.
+I test `BpFigure`: its default size, its grid of charts and the palette it gives them.
 "
 Class {
 	#name : 'BpFigureTest',
@@ -9,11 +9,11 @@ Class {
 }
 
 { #category : 'tests' }
-BpFigureTest >> testAxesAreCountedRowByRow [
+BpFigureTest >> testChartsAreCountedRowByRow [
 
 	| figure |
 	figure := BpFigure rows: 2 columns: 3.
-	self assert: (figure axesAtRow: 2 column: 1) identicalTo: (figure axes at: 4)
+	self assert: (figure chartAtRow: 2 column: 1) identicalTo: (figure charts at: 4)
 ]
 
 { #category : 'tests' }
@@ -56,16 +56,37 @@ BpFigureTest >> testFigureExtentOfAFigureFillingItsParentIsItsExtent [
 		self assert: figure figureExtent equals: figure extent ]
 ]
 
-{ #category : 'tests' }
-BpFigureTest >> testNewFigureHasOneAxes [
+{ #category : 'tests - palette' }
+BpFigureTest >> testNewChartsTakeTheFigurePalette [
 
-	self assert: BpFigure new axes size equals: 1
+	| figure palette |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	figure palette: palette.
+	figure rows: 2 columns: 1.
+	self assert: (figure charts allSatisfy: [ :each | each palette == palette ])
 ]
 
 { #category : 'tests' }
-BpFigureTest >> testRowsColumnsCreatesAGridOfAxes [
+BpFigureTest >> testNewFigureHasOneChart [
 
-	self assert: (BpFigure rows: 2 columns: 3) axes size equals: 6
+	self assert: BpFigure new charts size equals: 1
+]
+
+{ #category : 'tests - palette' }
+BpFigureTest >> testPaletteIsGivenToAllCharts [
+
+	| figure palette |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure rows: 1 columns: 2.
+	figure palette: palette.
+	self assert: (figure charts allSatisfy: [ :each | each palette == palette ])
+]
+
+{ #category : 'tests' }
+BpFigureTest >> testRowsColumnsCreatesAGridOfCharts [
+
+	self assert: (BpFigure rows: 2 columns: 3) charts size equals: 6
 ]
 
 { #category : 'tests - saving' }

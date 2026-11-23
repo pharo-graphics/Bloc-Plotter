@@ -1,5 +1,5 @@
 "
-I am a stack plot, added by `BpAxes>>stackPlotX:ys:`: layers drawn on top of each other over the same x values, each one filled from the top of the previous layer to its own top. The running sums of the layers are my `stacks`; the curve the first layer starts from is my `baselineValues`, set by `baseline:`. I draw one closed `BpPolygonPatch` per layer, its `dataset` being the index of the layer.
+I am a stack plot, added by `BpChart>>stackPlotX:ys:`: layers drawn on top of each other over the same x values, each one filled from the top of the previous layer to its own top. The running sums of the layers are my `stacks`; the curve the first layer starts from is my `baselineValues`, set by `baseline:`. I draw one closed `BpPolygonPatch` per layer, its `dataset` being the index of the layer.
 
 ## Examples
 
@@ -14,19 +14,19 @@ BpStackPlot exampleInteraction
 
 - A layer is the area between two curves, so its polygon has the vertices of a `BpFillBetween` filling everywhere: its start on the bottom curve, along the top curve, its end, and back along the bottom curve.
 - The baselines: #zero stacks on 0; #sym centers the stack on 0; #wiggle minimizes the sum of the squared slopes of the layers, which gives streamgraphs; #weightedWiggle does the same, weighting each slope by the size of its layer.
-- Each layer takes the next color of the cycle; `colors:` gives one color per layer, repeated when there are fewer colors than layers. Layers have no outline unless `edgeColor:` is given, and `alpha:` makes them transparent.
+- Each layer takes the next color of the palette of my chart; `colors:` gives one color per layer, repeated when there are fewer colors than layers. Layers have no outline unless `edgeColor:` is given, and `alpha:` makes them transparent.
 - `label:` takes one label per layer (nil for none); a single string labels the first layer only.
 - Like fills, my polygons are drawn below the grid.
 
 ## Usage
 
-1. `BpAxes>>stackPlotX:ys:` creates me with my data (`x:ys:`) and adds me to the axes (see `BpArtist`), which give me one color of their cycle per layer.
-2. My axes read my polygons (`patches`) for autoscaling and my `legendEntries` (one filled rectangle per labeled layer).
+1. `BpChart>>stackPlotX:ys:` creates me with my data (`x:ys:`) and adds me to the chart (see `BpArtist`), which gives me one color of its palette per layer.
+2. My chart reads my polygons (`patches`) for autoscaling and my `legendEntries` (one filled rectangle per labeled layer).
 
 ## Implementation Notes
 
 - Not supported yet: hatches, and baselines given as a curve.
-- I take colors of the cycle even when `colors:` is given, because my axes give them to me before I am configured.
+- I take colors of the palette even when `colors:` is given, because my chart gives them to me before I am configured.
 
 ## Invariants and Assumptions
 
@@ -101,17 +101,17 @@ BpStackPlot class >> gaussianMixtureOver: someXs random: aRandom [
 
 { #category : 'instances' }
 BpStackPlot class >> instanceLayers [
-	"Answer three labeled layers stacked on zero, in new axes with a legend."
+	"Answer three labeled layers stacked on zero, in a new chart with a legend."
 
 	<sampleInstance>
-	| axes stack |
-	axes := BpAxes new
-		        extent: 400 @ 300;
-		        yourself.
-	stack := (axes stackPlotX: (1 to: 6) ys: #( #( 1 2 3 2 3 4 ) #( 2 2 1 2 3 2 ) #( 1 1 2 2 1 1 ) ))
+	| chart stack |
+	chart := BpChart new
+		         extent: 400 @ 300;
+		         yourself.
+	stack := (chart stackPlotX: (1 to: 6) ys: #( #( 1 2 3 2 3 4 ) #( 2 2 1 2 3 2 ) #( 1 1 2 2 1 1 ) ))
 		         label: #( 'first' 'second' 'third' );
 		         yourself.
-	axes legend.
+	chart legend.
 	^ stack
 ]
 
@@ -144,7 +144,7 @@ BpStackPlot >> baselineValues [
 
 { #category : 'private - style' }
 BpStackPlot >> colorAt: anIndex [
-	"Answer the fill color of a layer: my colors, repeated when there are fewer than layers, else the color my axes gave it."
+	"Answer the fill color of a layer: my colors, repeated when there are fewer than layers, else the color my chart gave it."
 
 	| palette |
 	palette := colors ifNil: [ defaultColors ].
@@ -154,14 +154,14 @@ BpStackPlot >> colorAt: anIndex [
 
 { #category : 'axes' }
 BpStackPlot >> colorCount [
-	"Answer one color of the cycle per layer."
+	"Answer one color of the palette per layer."
 
 	^ self layers size
 ]
 
 { #category : 'accessing' }
 BpStackPlot >> colors: aColorOrCollection [
-	"Set the fill colors of the layers, one color for all or one per layer, repeated when there are fewer colors than layers. Without it, each layer takes the next color of the cycle of my axes."
+	"Set the fill colors of the layers, one color for all or one per layer, repeated when there are fewer colors than layers. Without it, each layer takes the next color of the palette of my chart."
 
 	colors := aColorOrCollection.
 	self refresh
@@ -186,10 +186,10 @@ BpStackPlot >> compute [
 ]
 
 { #category : 'accessing' }
-BpStackPlot >> edgeColor: aColorOrName [
-	"Outline each layer with aColorOrName; nil, the default, draws no outline."
+BpStackPlot >> edgeColor: aColorOrNil [
+	"Outline each layer with aColorOrNil; nil, the default, draws no outline."
 
-	edgeColor := aColorOrName.
+	edgeColor := aColorOrNil.
 	self refresh
 ]
 

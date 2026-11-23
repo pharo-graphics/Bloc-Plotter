@@ -1,5 +1,5 @@
 "
-I am a bar plot, added by `BpAxes>>barX:height:` and `BpAxes>>barhY:width:`. I draw one rectangle (`BpRectanglePatch`) per bar, standing on its `bottom` at its position on the position axis and as long as its height on the value axis. Positions are numbers or category names (strings), which then become the ticks of my position axis.
+I am a bar plot, added by `BpChart>>barX:height:` and `BpChart>>barhY:width:`. I draw one rectangle (`BpRectanglePatch`) per bar, standing on its `bottom` at its position on the position axis and as long as its height on the value axis. Positions are numbers or category names (strings), which then become the ticks of my position axis.
 
 ## Examples
 
@@ -15,24 +15,24 @@ BpBarPlot exampleInteraction
 ## Design Rationale
 
 - My settings take symbols (`align: #edge`, `orientation: #horizontal`). Each setting takes one value for all bars or one per bar, broadcast as numpy does; `x` and `height` too.
-- I keep the vocabulary of `BpAxes>>barX:height:` whatever my orientation: `x` is the position axis, `height` the value axis, `width` the thickness and `bottom` the base of the bars. `BpAxes>>barhY:width:` maps the arguments of `Axes.barh` on them, so its `height` and `left` arguments are my `width:` and `bottom:`.
-- Strings in `x` are categories: each distinct one takes the next position from 0 in order of appearance, and the categories label the ticks of my position axis (`managedTicksOn:`). `tickLabel:` labels the bars at their positions instead; with numbers and no tick labels, my axes choose the ticks.
+- I keep the vocabulary of `BpChart>>barX:height:` whatever my orientation: `x` is the position axis, `height` the value axis, `width` the thickness and `bottom` the base of the bars. `BpChart>>barhY:width:` keeps them: its y positions are my `x`, its widths my `height`, and the thickness and start of its bars my `width:` and `bottom:`.
+- Strings in `x` are categories: each distinct one takes the next position from 0 in order of appearance, and the categories label the ticks of my position axis (`managedTicksOn:`). `tickLabel:` labels the bars at their positions instead; with numbers and no tick labels, my chart chooses the ticks.
 - `label:` takes one label, for one legend entry, or one per bar, for an entry per bar; labels starting with an underscore are hidden, which lets bars of the same color share one entry.
 - The bottoms of the bars are sticky on the value axis: autoscaling adds no margin below them.
 
 ## Usage
 
-1. `BpAxes>>barX:height:` and `BpAxes>>barhY:width:` create me with my data (`x:height:`) and add me to the axes (see `BpArtist`), which give me one color of their cycle.
-2. My axes read my `stickyValuesOn:` (the bottoms), `managedTicksOn:` (categories or tick labels) and `logAxes` (the value axis when `log:` is true).
+1. `BpChart>>barX:height:` and `BpChart>>barhY:width:` create me with my data (`x:height:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette.
+2. My chart reads my `stickyValuesOn:` (the bottoms), `managedTicksOn:` (categories or tick labels) and `logAxes` (the value axis when `log:` is true).
 
 - `positions`, `dataValues` and `patches` are the results of my last computation.
 
 ## Implementation Notes
 
 - I have one slot and setter per option, hence many slots.
-- Not supported yet: error bars (xerr, yerr, ecolor, capsize), hatches, `Axes.bar_label`.
-- I take a color of the cycle even when `color:` is given, because my axes give it to me before I am configured.
-- My categories are my own: several bar plots in the same axes share positions only when their categories come in the same order.
+- Not supported yet: error bars (xerr, yerr, ecolor, capsize), hatches, bar labels.
+- I take a color of the palette even when `color:` is given, because my chart gives it to me before I am configured.
+- My categories are my own: several bar plots in the same chart share positions only when their categories come in the same order.
 
 ## Invariants and Assumptions
 
@@ -113,10 +113,10 @@ BpBarPlot class >> exampleStacked [
 
 { #category : 'instances' }
 BpBarPlot class >> instanceThreeBars [
-	"Answer three bars of fruits, in new axes."
+	"Answer three bars of fruits, in a new chart."
 
 	<sampleInstance>
-	^ (BpAxes new
+	^ (BpChart new
 		   extent: 400 @ 300;
 		   yourself) barX: #( 'apple' 'blueberry' 'cherry' ) height: #( 40 100 30 )
 ]
@@ -196,7 +196,7 @@ BpBarPlot >> color [
 
 { #category : 'accessing - style' }
 BpBarPlot >> color: aColorOrCollection [
-	"Set the fill color of the bars, one for all or one per bar (a Color or a name known by `BpColors`). Without it, the bars take the color my axes give me from their cycle."
+	"Set the fill color of the bars, one for all or one per bar. Without it, the bars take the next color of the palette of my chart."
 
 	color := aColorOrCollection.
 	self refresh
@@ -317,7 +317,7 @@ BpBarPlot >> log [
 
 { #category : 'accessing - options' }
 BpBarPlot >> log: aBoolean [
-	"When true, the value axis of my axes uses a log scale."
+	"When true, the value axis of my chart uses a log scale."
 
 	log := aBoolean.
 	self refresh
@@ -334,7 +334,7 @@ BpBarPlot >> logAxes [
 
 { #category : 'axes' }
 BpBarPlot >> managedTicksOn: anAxis [
-	"Answer the ticks of my position axis: my tick labels at the positions of my bars, or my categories at theirs; nil lets my axes choose them."
+	"Answer the ticks of my position axis: my tick labels at the positions of my bars, or my categories at theirs; nil lets my chart choose them."
 
 	(anAxis ~= self positionAxis or: [ positions isEmpty ]) ifTrue: [ ^ nil ].
 	tickLabel ifNotNil: [ ^ positions withIndexCollect: [ :each :index | each -> (self setting: tickLabel at: index) asString ] ].
@@ -392,7 +392,7 @@ BpBarPlot >> orientation [
 
 { #category : 'accessing - options' }
 BpBarPlot >> orientation: aSymbol [
-	"Set #vertical bars (`BpAxes>>barX:height:`, the default) or #horizontal ones (`BpAxes>>barhY:width:`)."
+	"Set #vertical bars (`BpChart>>barX:height:`, the default) or #horizontal ones (`BpChart>>barhY:width:`)."
 
 	(#( #vertical #horizontal ) includes: aSymbol) ifFalse: [ ^ self error: 'Unknown orientation: ' , aSymbol printString ].
 	orientation := aSymbol.

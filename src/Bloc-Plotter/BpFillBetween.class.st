@@ -1,5 +1,5 @@
 "
-I am the area between two curves, added by `BpAxes>>fillBetweenX:y1:y2:` and `BpAxes>>fillBetweenY:x1:x2:`. Both curves share their x values; `y1` and `y2` give one value per x, or one for all (a horizontal line, 0 by default). I fill one closed `BpPolygonPatch` per region: `where:` selects the x values to fill and splits the area into separate regions, `interpolate:` ends the regions where the curves cross, and `step:` draws the curves as steps.
+I am the area between two curves, added by `BpChart>>fillBetweenX:y1:y2:` and `BpChart>>fillBetweenY:x1:x2:`. Both curves share their x values; `y1` and `y2` give one value per x, or one for all (a horizontal line, 0 by default). I fill one closed `BpPolygonPatch` per region: `where:` selects the x values to fill and splits the area into separate regions, `interpolate:` ends the regions where the curves cross, and `step:` draws the curves as steps.
 
 ## Examples
 
@@ -16,20 +16,20 @@ BpFillBetween exampleInteraction
 ## Design Rationale
 
 - I compute my polygons as follows: for each run of true values of `where`, the polygon starts at the first x on `y2`, goes along `y1`, comes back along `y2`; with `interpolate:` its two ends are the points where `y1 - y2` changes sign, found by linear interpolation; `step:` turns each run into steps (#pre, #post, #mid) before.
-- I keep the vocabulary of `BpAxes>>fillBetweenX:y1:y2:` whatever my orientation: `x` is the independent axis, `y1` and `y2` the dependent one. `BpAxes>>fillBetweenY:x1:x2:` maps its arguments on them.
-- Without color, the fill takes the next color of the cycle and has no outline; `color:` sets both the fill and the outline, `faceColor:` only the fill, `edgeColor:` only the outline; `alpha:` makes both transparent.
+- I keep the vocabulary of `BpChart>>fillBetweenX:y1:y2:` whatever my orientation: `x` is the independent axis, `y1` and `y2` the dependent one. `BpChart>>fillBetweenY:x1:x2:` maps its arguments on them.
+- Without color, the fill takes the next color of the palette of my chart and has no outline; `color:` sets both the fill and the outline, `faceColor:` only the fill, `edgeColor:` only the outline; `alpha:` makes both transparent.
 - Like bars, my polygons are drawn below the grid.
 
 ## Usage
 
-1. `BpAxes>>fillBetweenX:y1:`, `BpAxes>>fillBetweenX:y1:y2:` and `BpAxes>>fillBetweenY:x1:x2:` create me with my data (`x:y1:y2:`) and add me to the axes (see `BpArtist`), which give me one color of their cycle.
-2. My axes read my polygons (`patches`) for autoscaling and my `legendEntries` (a filled rectangle).
+1. `BpChart>>fillBetweenX:y1:`, `BpChart>>fillBetweenX:y1:y2:` and `BpChart>>fillBetweenY:x1:x2:` create me with my data (`x:y1:y2:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette.
+2. My chart reads my polygons (`patches`) for autoscaling and my `legendEntries` (a filled rectangle).
 
 ## Implementation Notes
 
 - I have one slot and setter per argument, hence many slots.
 - Not supported yet: hatches, masked or NaN values.
-- I take a color of the cycle even when `color:` or `faceColor:` is given, because my axes give it to me before I am configured.
+- I take a color of the palette even when `color:` or `faceColor:` is given, because my chart gives it to me before I am configured.
 
 ## Invariants and Assumptions
 
@@ -93,7 +93,7 @@ BpFillBetween class >> exampleFillBetweenDemo [
 
 { #category : 'examples' }
 BpFillBetween class >> exampleFillBetweenX [
-	"Reproduce the gallery 'Fill the area between two vertical lines' (`BpAxes>>fillBetweenY:x1:x2:`)."
+	"Reproduce the gallery 'Fill the area between two vertical lines' (`BpChart>>fillBetweenY:x1:x2:`)."
 
 	<example>
 	^ BpFigure instanceFillBetweenX show: 'fill_betweenx_demo'
@@ -133,12 +133,12 @@ BpFillBetween class >> exampleSteps [
 
 { #category : 'instances' }
 BpFillBetween class >> instanceArea [
-	"Answer the area under a sine between 0 and pi, in new axes."
+	"Answer the area under a sine between 0 and pi, in a new chart."
 
 	<sampleInstance>
 	| x |
 	x := self linspaceFrom: 0 to: Float pi count: 50.
-	^ (BpAxes new
+	^ (BpChart new
 		   extent: 400 @ 300;
 		   yourself) fillBetweenX: x y1: (x collect: [ :each | each sin ])
 ]
@@ -150,10 +150,10 @@ BpFillBetween >> color [
 ]
 
 { #category : 'accessing - style' }
-BpFillBetween >> color: aColorOrName [
+BpFillBetween >> color: aColor [
 	"Set the color of the fill and of its outline."
 
-	color := aColorOrName.
+	color := aColor.
 	self refresh
 ]
 
@@ -198,10 +198,10 @@ BpFillBetween >> edgeColor [
 ]
 
 { #category : 'accessing - style' }
-BpFillBetween >> edgeColor: aColorOrName [
+BpFillBetween >> edgeColor: aColor [
 	"Set the color of the outline only. The fill has no outline by default."
 
-	edgeColor := aColorOrName.
+	edgeColor := aColor.
 	self refresh
 ]
 
@@ -212,10 +212,10 @@ BpFillBetween >> faceColor [
 ]
 
 { #category : 'accessing - style' }
-BpFillBetween >> faceColor: aColorOrName [
-	"Set the color of the fill only; 'none' leaves it empty."
+BpFillBetween >> faceColor: aColor [
+	"Set the color of the fill only; `Color transparent` leaves it empty."
 
-	faceColor := aColorOrName.
+	faceColor := aColor.
 	self refresh
 ]
 
@@ -304,7 +304,7 @@ BpFillBetween >> newPatches [
 
 { #category : 'private - patches' }
 BpFillBetween >> newPolygonThrough: somePoints [
-	"Answer a closed polygon through somePoints, given as (x @ y) of `BpAxes>>fillBetweenX:y1:y2:`, styled and with my handlers."
+	"Answer a closed polygon through somePoints, given as (x @ y) of `BpChart>>fillBetweenX:y1:y2:`, styled and with my handlers."
 
 	| polygon |
 	polygon := BpPolygonPatch new
@@ -326,7 +326,7 @@ BpFillBetween >> orientation [
 
 { #category : 'accessing - options' }
 BpFillBetween >> orientation: aSymbol [
-	"Fill between curves of y over x (#vertical, `BpAxes>>fillBetweenX:y1:y2:`, the default) or of x over y (#horizontal, `BpAxes>>fillBetweenY:x1:x2:`)."
+	"Fill between curves of y over x (#vertical, `BpChart>>fillBetweenX:y1:y2:`, the default) or of x over y (#horizontal, `BpChart>>fillBetweenY:x1:x2:`)."
 
 	(#( #vertical #horizontal ) includes: aSymbol) ifFalse: [ ^ self error: 'Unknown orientation: ' , aSymbol printString ].
 	orientation := aSymbol.
@@ -335,7 +335,7 @@ BpFillBetween >> orientation: aSymbol [
 
 { #category : 'private - patches' }
 BpFillBetween >> oriented: aPoint [
-	"Answer aPoint, given as (x @ y) of `BpAxes>>fillBetweenX:y1:y2:`, in data coordinates: swapped for `BpAxes>>fillBetweenY:x1:x2:`."
+	"Answer aPoint, given as (x @ y) of `BpChart>>fillBetweenX:y1:y2:`, in data coordinates: swapped for `BpChart>>fillBetweenY:x1:x2:`."
 
 	^ self isHorizontal
 		  ifTrue: [ aPoint y @ aPoint x ]

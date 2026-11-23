@@ -1,5 +1,5 @@
 "
-I am a line plot of a `BpAxes` (`BpAxes>>plotX:y:`): a line through points given by their x and y values, with an optional marker at each point. `format:` reads a format string such as 'o-' or 'r--'; the setters (`color:`, `lineStyle:`, `lineWidth:`, `marker:`, `markerSize:`, `markerFaceColor:`, `markerEdgeColor:`, `markerEdgeWidth:`) set one property each.
+I am a line plot of a `BpChart` (`BpChart>>plotX:y:`): a line through points given by their x and y values, with an optional marker at each point. `format:` reads a format string such as 'o-' or '--'; the setters (`color:`, `lineStyle:`, `lineWidth:`, `marker:`, `markerSize:`, `markerFaceColor:`, `markerEdgeColor:`, `markerEdgeWidth:`) set one property each.
 
 ## Examples
 
@@ -11,13 +11,13 @@ BpLine exampleFormats
 ## Design Rationale
 
 - My line is one `BpPolygonPatch` (open) through all the points, and each marker is a `BpMarkerPatch`, as in `BpScatterPlot`: interaction handlers (`whenPatch:do:`) can tell the line from the points.
-- A format string sets the same slots as the setters, so a setter sent afterwards wins over the format. A marker without a line style draws no line ('o' draws only circles), and a string that is only a color name ('tan', 'C1') sets only the color.
+- A format string sets the same slots as the setters, so a setter sent afterwards wins over the format. A marker without a line style draws no line ('o' draws only circles). It gives no color: `color:` does, else I take the next color of the palette of my chart.
 - My defaults are 1.5 point wide lines, 6 point markers with 1 point edges, and dashes that grow with the width of the line (`dashPatterns`, in points for a one point line). Solid lines have projecting caps, dashed ones butt caps.
 - My patches are drawn above the grid (`isAboveGrid`), while bars and scatter points are drawn below.
 
 ## Usage
 
-1. `BpAxes>>plotX:y:` and `BpAxes>>plotX:y:format:` create me and add me to the axes; see `BpArtist` for the rest of the life cycle. `BpErrorBar` adds error bars to my points.
+1. `BpChart>>plotX:y:` and `BpChart>>plotX:y:format:` create me and add me to the chart; see `BpArtist` for the rest of the life cycle. `BpErrorBar` adds error bars to my points.
 2. My legend entry (`legendEntries`) is a short piece of my line with one marker in its middle.
 
 ## Invariants and Assumptions
@@ -83,7 +83,7 @@ BpLine class >> examplePlotType [
 
 { #category : 'format' }
 BpLine class >> formatPartsOf: aString [
-	"Answer the parts of the format string aString, as a dictionary with the keys #marker, #lineStyle and #color."
+	"Answer the parts of the format string aString, as a dictionary with the keys #marker and #lineStyle."
 
 	| stream parts |
 	parts := Dictionary new.
@@ -113,9 +113,6 @@ BpLine class >> readFormatPartFrom: aStream into: aDictionary [
 		^ aDictionary at: #lineStyle put: (self lineStyleNames at: ((char = $- and: [ '-.' includes: aStream peek ])
 			    ifTrue: [ String with: char with: aStream next ]
 			    ifFalse: [ String with: char ])) ].
-	(char = $C and: [ aStream peek isNotNil and: [ aStream peek isDigit ] ]) ifTrue: [
-		^ aDictionary at: #color put: (String with: char with: aStream next) ].
-	('bgrcmykw' includes: char) ifTrue: [ ^ aDictionary at: #color put: (String with: char) ].
 	(BpMarker namedMarkers includesKey: (String with: char)) ifTrue: [ ^ aDictionary at: #marker put: (String with: char) ].
 	^ self error: 'Unknown format character: ' , char printString
 ]
@@ -137,10 +134,10 @@ BpLine class >> x: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 ]
 
 { #category : 'accessing' }
-BpLine >> color: aColorOrName [
+BpLine >> color: aColor [
 	"Set the color of my line and, by default, of my markers."
 
-	color := aColorOrName.
+	color := aColor.
 	self refresh
 ]
 
@@ -164,12 +161,10 @@ BpLine >> faceColor [
 
 { #category : 'accessing - format' }
 BpLine >> format: aString [
-	"Set my marker, line style and color from a format string '[marker][line][color]', in any order ('o-', 'r--', '^k:', 'C1', or a whole color name such as 'tan'). A marker without a line style draws no line. Setters sent afterwards win."
+	"Set my marker and line style from a format string '[marker][line]', in any order ('o-', '--', '^:', 'D'). A marker without a line style draws no line. Setters sent afterwards win."
 
 	| parts |
-	(self isColorName: aString) ifTrue: [ ^ self color: aString ].
 	parts := self class formatPartsOf: aString.
-	parts at: #color ifPresent: [ :each | color := each ].
 	parts at: #marker ifPresent: [ :each | marker := BpMarker on: each ].
 	lineStyle := parts at: #lineStyle ifAbsent: [
 		             (parts includesKey: #marker)
@@ -249,9 +244,9 @@ BpLine >> marker: aMarkerSpec [
 ]
 
 { #category : 'accessing' }
-BpLine >> markerEdgeColor: aColorOrName [
+BpLine >> markerEdgeColor: aColor [
 
-	markerEdgeColor := aColorOrName.
+	markerEdgeColor := aColor.
 	self refresh
 ]
 
@@ -264,9 +259,9 @@ BpLine >> markerEdgeWidth: aNumber [
 ]
 
 { #category : 'accessing' }
-BpLine >> markerFaceColor: aColorOrName [
+BpLine >> markerFaceColor: aColor [
 
-	markerFaceColor := aColorOrName.
+	markerFaceColor := aColor.
 	self refresh
 ]
 

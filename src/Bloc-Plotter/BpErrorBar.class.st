@@ -1,5 +1,5 @@
 "
-I am a line plot with error bars, added by `BpAxes>>errorBarX:y:yErr:` and `BpAxes>>errorBarX:y:xErr:yErr:`: around each point, a bar on y (`yErr:`), on x (`xErr:`) or both shows the uncertainty of the measure. As a `BpLine`, I draw the points with my line and markers (`format:`, `color:`, `marker:`, ...; `format: 'none'` draws only the bars). The bars can end with caps (`capSize:`), and a value can be marked as a limit, which draws its bar on one side only with an arrow (`lowerLimits:`, `upperLimits:`, `xLowerLimits:`, `xUpperLimits:`).
+I am a line plot with error bars, added by `BpChart>>errorBarX:y:yErr:` and `BpChart>>errorBarX:y:xErr:yErr:`: around each point, a bar on y (`yErr:`), on x (`xErr:`) or both shows the uncertainty of the measure. As a `BpLine`, I draw the points with my line and markers (`format:`, `color:`, `marker:`, ...; `format: 'none'` draws only the bars). The bars can end with caps (`capSize:`), and a value can be marked as a limit, which draws its bar on one side only with an arrow (`lowerLimits:`, `upperLimits:`, `xLowerLimits:`, `xUpperLimits:`).
 
 ## Examples
 
@@ -22,7 +22,7 @@ BpErrorBar exampleInteraction
 
 ## Usage
 
-1. `BpAxes>>errorBarX:y:yErr:` and `BpAxes>>errorBarX:y:xErr:yErr:` create me (`BpLine class>>x:y:`) and add me to the axes; see `BpArtist` for the rest of the life cycle.
+1. `BpChart>>errorBarX:y:yErr:` and `BpChart>>errorBarX:y:xErr:yErr:` create me (`BpLine class>>x:y:`) and add me to the chart; see `BpArtist` for the rest of the life cycle.
 2. Each setter rebuilds my patches: `barPatches` (`BpPolygonPatch`es whose `dataset` is the index of their point) and `capPatches` (`BpMarkerPatch`es for caps and arrows), then those of my line.
 3. My legend entry is the swatch of my line crossed by an error bar.
 
@@ -62,14 +62,14 @@ Class {
 }
 
 { #category : 'private - demo' }
-BpErrorBar class >> addLimitSeriesTo: anAxes [
-	"Draw in anAxes the four series of the gallery limits demo: no limits, upper limits, both limits, and alternate limits."
+BpErrorBar class >> addLimitSeriesTo: aChart [
+	"Draw in aChart the four series of the gallery limits demo: no limits, upper limits, both limits, and alternate limits."
 
 	| x y yErr shifted |
 	x := 0 to: 9.
 	y := x collect: [ :each | (each / 20 * Float pi) sin * 2.5 ].
 	yErr := self linspaceFrom: 0.05 to: 0.2 count: 10.
-	shifted := [ :offset | anAxes errorBarX: x y: (y collect: [ :each | each + offset ]) yErr: yErr ].
+	shifted := [ :offset | aChart errorBarX: x y: (y collect: [ :each | each + offset ]) yErr: yErr ].
 	(shifted value: 3) label: 'both limits (default)'.
 	(shifted value: 2)
 		upperLimits: true;
@@ -152,10 +152,10 @@ BpErrorBar class >> exampleSubsample [
 
 { #category : 'instances' }
 BpErrorBar class >> instanceMeasures [
-	"Answer five measures drawn as circles with error bars and caps, in new axes."
+	"Answer five measures drawn as circles with error bars and caps, in a new chart."
 
 	<sampleInstance>
-	^ ((BpAxes new
+	^ ((BpChart new
 		    extent: 400 @ 300;
 		    yourself) errorBarX: (1 to: 5) y: #( 2.1 3.4 3.0 4.6 5.2 ) yErr: #( 0.3 0.5 0.4 0.6 0.3 ))
 		  format: 'o';
@@ -164,23 +164,23 @@ BpErrorBar class >> instanceMeasures [
 ]
 
 { #category : 'private - demo' }
-BpErrorBar class >> subsampleIn: anAxes column: anInteger [
-	"Draw in anAxes the two series of the gallery subsampling demo: with all their error bars in the first column, one in six in the second one, one in six shifted by three points for the second series in the third one."
+BpErrorBar class >> subsampleIn: aChart column: anInteger [
+	"Draw in aChart the two series of the gallery subsampling demo: with all their error bars in the first column, one in six in the second one, one in six shifted by three points for the second series in the third one."
 
 	| x first second |
 	x := self arangeFrom: 0.1 to: 4 by: 0.1.
-	first := anAxes errorBarX: x y: (x collect: [ :each | each negated exp ]) yErr: (x collect: [ :each | 0.1 * each sqrt + 0.1 ]).
-	second := anAxes
+	first := aChart errorBarX: x y: (x collect: [ :each | each negated exp ]) yErr: (x collect: [ :each | 0.1 * each sqrt + 0.1 ]).
+	second := aChart
 		          errorBarX: x
 		          y: (x collect: [ :each | (each / -2) exp ])
 		          yErr: (x collect: [ :each | 0.1 * (each / 2) sqrt + 0.1 ]).
-	anInteger = 1 ifTrue: [ ^ anAxes title: 'all errorbars' ].
+	anInteger = 1 ifTrue: [ ^ aChart title: 'all errorbars' ].
 	first errorEvery: 6.
 	anInteger = 2 ifTrue: [
 		second errorEvery: 6.
-		^ anAxes title: 'only every 6th errorbar' ].
+		^ aChart title: 'only every 6th errorbar' ].
 	second errorEvery: 6 startingAt: 4.
-	anAxes title: 'second series shifted by 3'
+	aChart title: 'second series shifted by 3'
 ]
 
 { #category : 'private - patches' }
@@ -319,10 +319,10 @@ BpErrorBar >> endsOf: anIndex on: anAxis errors: aPair [
 ]
 
 { #category : 'accessing' }
-BpErrorBar >> errorColor: aColorOrName [
+BpErrorBar >> errorColor: aColor [
 	"Set the color of the error bars and caps (the color of my line by default)."
 
-	errorColor := aColorOrName.
+	errorColor := aColor.
 	self refresh
 ]
 

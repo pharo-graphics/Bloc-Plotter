@@ -1,5 +1,5 @@
 "
-I am a scatter plot, added by `BpAxes>>scatterX:y:`. I show one `BpMarkerPatch` per point, whose `BpMarker`, size and color may vary from point to point: the numbers of `c:` are mapped to colors through a colormap.
+I am a scatter plot, added by `BpChart>>scatterX:y:`. I show one `BpMarkerPatch` per point, whose `BpMarker`, size and color may vary from point to point: the numbers of `c:` are mapped to colors through a color map.
 
 ## Examples
 
@@ -12,13 +12,13 @@ BpScatterPlot exampleInteraction
 
 ## Design Rationale
 
-- My setters are `s:` (size in points squared, 36 by default), `c:` (a color, one per point, or numbers), `marker:`, `colorMap:`, `vMin:`, `vMax:`, `alpha:`, `lineWidths:`, `edgeColors:` ('face' by default, 'none', or colors) and `label:`. My results are `offsets` and `patches`.
+- My setters are `s:` (size in points squared, 36 by default), `c:` (a color, one per point, or numbers), `marker:`, `colorMap:`, `vMin:`, `vMax:`, `alpha:`, `lineWidths:`, `edgeColors:` (nil, the face color, by default; `Color transparent` for no edge; a color or one per point) and `label:`. My results are `offsets` and `patches`.
 - Alpha applies to the faces and to the edges, and an unfilled marker ('+', 'x', an asterisk) is drawn with the face color.
-- Numbers of `c:` are normalized between `vMin` and `vMax` (their smallest and largest by default), clipped, then mapped by the colormap: a name known by `BpColors class>>colorMap:` or a block.
+- Numbers of `c:` are normalized between `vMin` and `vMax` (their smallest and largest by default), clipped, then mapped by the color map: a `BpInterpolatedPalette` (`BpInterpolatedPalette class>>viridis` by default) or a block.
 
 ## Usage
 
-1. `BpAxes>>scatterX:y:` creates me with `x:y:` and adds me to the axes (see `BpArtist`).
+1. `BpChart>>scatterX:y:` creates me with `x:y:` and adds me to the chart (see `BpArtist`).
 2. My patches answer their `index`, `dataPoint`, `area` and `amount` (the number of `c:`), which interaction handlers given to `whenPatch:do:` use.
 
 ## Implementation Notes
@@ -98,7 +98,7 @@ BpScatterPlot class >> instanceColoredPoints [
 	"Answer a scatter of five points colored by a number through viridis, with growing sizes."
 
 	<sampleInstance>
-	^ ((BpAxes new
+	^ ((BpChart new
 		    extent: 400 @ 300;
 		    yourself) scatterX: #( 1 2 3 4 5 ) y: #( 2 4 3 5 1 ))
 		  c: #( 1 2 3 4 5 );
@@ -117,26 +117,18 @@ BpScatterPlot class >> x: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 
 { #category : 'accessing - options' }
 BpScatterPlot >> c: aColorOrCollection [
-	"Set the color of the markers: one color or color name, one per point, or one number per point mapped through my colormap."
+	"Set the color of the markers: one color, one per point, or one number per point mapped through my color map."
 
 	c := aColorOrCollection.
 	self refresh
 ]
 
 { #category : 'accessing - options' }
-BpScatterPlot >> colorMap: aNameOrBlock [
-	"Set the colormap mapping the numbers of c: a name such as #viridis, or a block from a fraction between 0 and 1 to a color."
+BpScatterPlot >> colorMap: aPaletteOrBlock [
+	"Set what maps the numbers of c to colors: a `BpInterpolatedPalette`, or a block from a fraction between 0 and 1 to a color."
 
-	colorMap := aNameOrBlock.
+	colorMap := aPaletteOrBlock.
 	self refresh
-]
-
-{ #category : 'private - computing' }
-BpScatterPlot >> colorMapBlock [
-
-	^ colorMap isBlock
-		  ifTrue: [ colorMap ]
-		  ifFalse: [ BpColors colorMap: colorMap ]
 ]
 
 { #category : 'private - computing' }
@@ -157,14 +149,14 @@ BpScatterPlot >> edgeColorAt: anIndex [
 	| edge |
 	marker isFilled ifFalse: [ ^ faceColors at: anIndex ].
 	edge := self setting: edgeColors at: anIndex.
-	edge = 'face' ifTrue: [ ^ faceColors at: anIndex ].
-	edge = 'none' ifTrue: [ ^ nil ].
+	edge ifNil: [ ^ faceColors at: anIndex ].
+	edge isTransparent ifTrue: [ ^ nil ].
 	^ self colorOf: edge
 ]
 
 { #category : 'accessing - options' }
 BpScatterPlot >> edgeColors: anObject [
-	"Set the edge color of the markers: 'face' (the face color, the default), 'none', a color or color name, or one per point."
+	"Set the edge color of the markers, one for all or one per point. Without it (nil) the edge has the face color; `Color transparent` draws no edge."
 
 	edgeColors := anObject.
 	self refresh
@@ -174,7 +166,7 @@ BpScatterPlot >> edgeColors: anObject [
 BpScatterPlot >> faceColorAt: anIndex [
 
 	c ifNil: [ ^ self colorOf: defaultColors first ].
-	self hasValues ifTrue: [ ^ self colorOf: (self colorMapBlock value: (self normalized: (c at: anIndex))) ].
+	self hasValues ifTrue: [ ^ self colorOf: (self mappedColorAt: (self normalized: (c at: anIndex))) ].
 	^ self colorOf: (self setting: c at: anIndex)
 ]
 
@@ -192,9 +184,8 @@ BpScatterPlot >> initialize [
 	x := #(  ).
 	y := #(  ).
 	marker := BpMarker on: 'o'.
-	colorMap := #viridis.
+	colorMap := BpInterpolatedPalette viridis.
 	lineWidths := 1.5.
-	edgeColors := 'face'.
 	offsets := #(  ).
 	sizes := #(  ).
 	values := #(  ).
@@ -215,6 +206,14 @@ BpScatterPlot >> lineWidths: aNumberOrCollection [
 
 	lineWidths := aNumberOrCollection.
 	self refresh
+]
+
+{ #category : 'private - computing' }
+BpScatterPlot >> mappedColorAt: aFraction [
+
+	^ colorMap isBlock
+		  ifTrue: [ colorMap value: aFraction ]
+		  ifFalse: [ colorMap colorAt: aFraction ]
 ]
 
 { #category : 'accessing - options' }

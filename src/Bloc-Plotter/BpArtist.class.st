@@ -1,23 +1,23 @@
 "
-I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`), the area between two curves (`BpFillBetween`), a stack plot (`BpStackPlot`), a step curve (`BpStairs`), a violin plot (`BpViolinPlot`) or points with error bars (`BpErrorBar`, a `BpLine`). I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpChart`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`), the area between two curves (`BpFillBetween`), a stack plot (`BpStackPlot`), a step curve (`BpStairs`), a violin plot (`BpViolinPlot`) or points with error bars (`BpErrorBar`, a `BpLine`). I compute what my data show and build patches (`BpPatch`) that my chart places in its plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
 ```
-BpArtist exampleArtistsInOneAxes
+BpArtist exampleArtistsInOneChart
 ```
 
 ## Design Rationale
 
-- I only know what my axes need: my patches (`allPatches`), my legend entries, the values autoscaling must cover besides my patches (`requiredValuesOn:`) and must not go past (`stickyValuesOn:`), the ticks I place myself (`managedTicksOn:`), the axes I put on a log scale (`logAxes`), how many colors of the color cycle I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The axes ignore the kind of plot.
+- I only know what my chart needs: my patches (`allPatches`), my legend entries, the values autoscaling must cover besides my patches (`requiredValuesOn:`) and must not go past (`stickyValuesOn:`), the ticks I place myself (`managedTicksOn:`), the axes I put on a log scale (`logAxes`), how many colors of its palette I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The chart ignores the kind of plot.
 - Each change recomputes everything (`refresh`): subclasses define `compute` and `newPatches`, and new patches replace the previous ones. Handlers given to `whenPatch:do:` are kept and given to each new patch.
 - Style settings take one value or one per dataset or point (`setting:at:`).
-- My Live inspector pane (`TBpLiveInspection`) shows the figure of my axes, or a new figure holding me when I have no axes yet.
+- My Live inspector pane (`TBpLiveInspection`) shows the figure of my chart, or a new figure holding me when I have no chart yet.
 
 ## Usage
 
-1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
-2. Each setter calls `refresh`, which tells the axes (`BpAxes>>artistChanged:`); they rebuild their limits, patches, legend and ticks.
+1. A plotting method of `BpChart` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`) creates the artist, and `BpChart>>addArtist:` gives it its chart and its colors of the palette (`defaultColors:`).
+2. Each setter calls `refresh`, which tells the chart (`BpChart>>artistChanged:`); it rebuilds its limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
 "
@@ -27,16 +27,16 @@ Class {
 	#traits : 'TBpLiveInspection',
 	#classTraits : 'TBpLiveInspection classTrait',
 	#instVars : [
-		'axes',
 		'patchHandlers',
 		'patches',
 		'defaultColors',
 		'alpha',
-		'label'
+		'label',
+		'chart'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'private - demo' }
@@ -59,11 +59,11 @@ BpArtist class >> dashPatterns [
 ]
 
 { #category : 'examples' }
-BpArtist class >> exampleArtistsInOneAxes [
-	"Show two kinds of artists in the same axes: a histogram and a scatter plot of its counts (see `BpFigure class>>instanceArtistsInOneAxes`)."
+BpArtist class >> exampleArtistsInOneChart [
+	"Show two kinds of artists in the same chart: a histogram and a scatter plot of its counts (see `BpFigure class>>instanceArtistsInOneChart`)."
 
 	<example>
-	^ BpFigure instanceArtistsInOneAxes show: 'Artists'
+	^ BpFigure instanceArtistsInOneChart show: 'Artists'
 ]
 
 { #category : 'constants' }
@@ -137,34 +137,32 @@ BpArtist >> alpha: aNumberOrNil [
 	self refresh
 ]
 
-{ #category : 'axes' }
-BpArtist >> axes [
+{ #category : 'accessing' }
+BpArtist >> chart [
 
-	^ axes
+	^ chart
 ]
 
-{ #category : 'axes' }
-BpArtist >> axes: anAxes [
+{ #category : 'accessing' }
+BpArtist >> chart: aChart [
 
-	axes := anAxes
+	chart := aChart
 ]
 
 { #category : 'axes' }
 BpArtist >> colorCount [
-	"Answer how many colors of the color cycle of my axes I take."
+	"Answer how many colors of the palette of my chart I take."
 
 	^ 1
 ]
 
 { #category : 'private - style' }
-BpArtist >> colorOf: aColorOrName [
-	"Answer the color aColorOrName names (a `Color` or a name known by `BpColors`), made transparent by my alpha."
+BpArtist >> colorOf: aColor [
+	"Answer aColor made transparent by my alpha. A transparent color stays so: it draws nothing."
 
-	| color |
-	color := aColorOrName isColor
-		         ifTrue: [ aColorOrName ]
-		         ifFalse: [ BpColors named: aColorOrName ].
-	^ alpha ifNil: [ color ] ifNotNil: [ color alpha: alpha ]
+	^ (alpha isNil or: [ aColor isTransparent ])
+		  ifTrue: [ aColor ]
+		  ifFalse: [ aColor alpha: alpha ]
 ]
 
 { #category : 'private - computing' }
@@ -176,7 +174,7 @@ BpArtist >> compute [
 
 { #category : 'axes' }
 BpArtist >> defaultColors: aCollectionOfColors [
-	"Set the colors my axes give me from their color cycle, one per color I need (colorCount)."
+	"Set the colors my chart gives me from its palette, one per color I need (colorCount)."
 
 	defaultColors := aCollectionOfColors.
 	self refresh
@@ -188,7 +186,7 @@ BpArtist >> initialize [
 	super initialize.
 	patchHandlers := OrderedCollection new.
 	patches := #(  ).
-	defaultColors := BpColors tab10
+	defaultColors := BpPalette default colors
 ]
 
 { #category : 'axes' }
@@ -196,17 +194,6 @@ BpArtist >> isAboveGrid [
 	"Answer whether my patches are drawn above the grid: the patches of bars and scatter points are drawn below it, lines above it."
 
 	^ false
-]
-
-{ #category : 'private - style' }
-BpArtist >> isColorName: aString [
-	"Answer whether aString is a color name known by BpColors ('tan', 'C1', 'tab:red'), rather than a format string."
-
-	^ [
-		  BpColors named: aString.
-		  true ]
-		  on: Error
-		  do: [ false ]
 ]
 
 { #category : 'private - style' }
@@ -233,12 +220,12 @@ BpArtist >> legendEntries [
 
 { #category : 'inspector extensions' }
 BpArtist >> liveElement [
-	"Answer the figure showing me. When I have no axes yet, I am added to the axes of a new figure."
+	"Answer the figure showing me. When I have no chart yet, I am added to the chart of a new figure."
 
 	| figure |
-	axes ifNotNil: [ ^ axes liveElement ].
+	chart ifNotNil: [ ^ chart liveElement ].
 	figure := BpFigure new.
-	figure axes first addArtist: self.
+	figure charts first addArtist: self.
 	^ figure
 ]
 
@@ -251,7 +238,7 @@ BpArtist >> logAxes [
 
 { #category : 'axes' }
 BpArtist >> managedTicksOn: anAxis [
-	"Answer the ticks I place on anAxis, as location -> label associations, or nil to let my axes choose them."
+	"Answer the ticks I place on anAxis, as location -> label associations, or nil to let my chart choose them."
 
 	^ nil
 ]
@@ -264,11 +251,23 @@ BpArtist >> newPatches [
 ]
 
 { #category : 'private - style' }
-BpArtist >> paintOf: aColorOrName [
-	"Answer the color of aColorOrName with my alpha, transparent for 'none'."
+BpArtist >> paintOf: aColorOrNil [
+	"Answer aColorOrNil with my alpha, transparent for nil."
 
-	(aColorOrName isNil or: [ aColorOrName = 'none' ]) ifTrue: [ ^ Color transparent ].
-	^ self colorOf: aColorOrName
+	^ aColorOrNil ifNil: [ Color transparent ] ifNotNil: [ self colorOf: aColorOrNil ]
+]
+
+{ #category : 'axes' }
+BpArtist >> palette [
+	"Answer the palette of my chart, or the default one while I am in no chart."
+
+	^ chart ifNil: [ BpPalette default ] ifNotNil: [ chart palette ]
+]
+
+{ #category : 'axes' }
+BpArtist >> paletteColorAt: anIndex [
+
+	^ self palette colorAt: anIndex
 ]
 
 { #category : 'accessing' }
@@ -280,11 +279,11 @@ BpArtist >> patches [
 
 { #category : 'private - computing' }
 BpArtist >> refresh [
-	"Recompute my data and my patches, and let my axes show them."
+	"Recompute my data and my patches, and let my chart show them."
 
 	self compute.
 	patches := self newPatches.
-	axes ifNotNil: [ axes artistChanged: self ]
+	chart ifNotNil: [ chart artistChanged: self ]
 ]
 
 { #category : 'axes' }

@@ -20,6 +20,16 @@ BpLineTest >> ppp [
 	^ BpArtist pixelsPerPoint
 ]
 
+{ #category : 'tests - style' }
+BpLineTest >> testAlphaKeepsATransparentColorTransparent [
+
+	self assert: (self line
+		 format: 'o';
+		 alpha: 0.5;
+		 markerFaceColor: Color transparent;
+		 yourself) markerPatches first background paint color isTransparent
+]
+
 { #category : 'tests' }
 BpLineTest >> testAlphaMakesTheLineTransparent [
 
@@ -29,13 +39,19 @@ BpLineTest >> testAlphaMakesTheLineTransparent [
 ]
 
 { #category : 'tests' }
-BpLineTest >> testColorAcceptsColorNames [
+BpLineTest >> testColorIsTheColorOfTheLine [
 
 	self
 		assert: (self line
-			 color: 'r';
+			 color: Color red;
 			 yourself) linePatch border paint color
-		equals: (BpColors named: 'r')
+		equals: Color red
+]
+
+{ #category : 'tests - errors' }
+BpLineTest >> testColorNameRaisesError [
+
+	self should: [ self line color: 'red' ] raise: Error
 ]
 
 { #category : 'tests' }
@@ -54,7 +70,7 @@ BpLineTest >> testDashesGrowWithTheLineWidth [
 { #category : 'tests' }
 BpLineTest >> testDefaultColorIsTheFirstColorOfTheCycle [
 
-	self assert: self line linePatch border paint color equals: BpColors tab10 first
+	self assert: self line linePatch border paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests' }
@@ -82,45 +98,13 @@ BpLineTest >> testDefaultMarkerSizeIsSixPoints [
 ]
 
 { #category : 'tests - format' }
-BpLineTest >> testFormatColorOnlyKeepsTheSolidLine [
-
-	| line |
-	line := self line
-		        format: 'r';
-		        yourself.
-	self assert: line linePatch border style dashArray isEmpty.
-	self assert: line markerPatches isEmpty
-]
-
-{ #category : 'tests - format' }
-BpLineTest >> testFormatCycleColor [
-
-	self
-		assert: (self line
-			 format: 'C1';
-			 yourself) linePatch border paint color
-		equals: BpColors tab10 second
-]
-
-{ #category : 'tests - format' }
 BpLineTest >> testFormatDashedLine [
 
-	| line |
-	line := self line
-		        format: 'k--';
-		        yourself.
-	self assert: line linePatch border paint color equals: (BpColors named: 'k').
-	self assert: line linePatch border style dashArray size equals: 2
-]
-
-{ #category : 'tests - format' }
-BpLineTest >> testFormatFullColorName [
-
 	self
 		assert: (self line
-			 format: 'tan';
-			 yourself) linePatch border paint color
-		equals: (BpColors named: 'tan')
+			 format: '--';
+			 yourself) linePatch border style dashArray size
+		equals: 2
 ]
 
 { #category : 'tests - format' }
@@ -128,10 +112,21 @@ BpLineTest >> testFormatInAnyOrder [
 
 	| line |
 	line := self line
-		        format: '^k:';
+		        format: ':^';
 		        yourself.
 	self assert: line markerPatches first marker vertices size equals: 3.
-	self assert: line linePatch border paint color equals: (BpColors named: 'k')
+	self deny: line linePatch border style dashArray isEmpty
+]
+
+{ #category : 'tests - format' }
+BpLineTest >> testFormatKeepsTheColor [
+
+	self
+		assert: (self line
+			 color: Color black;
+			 format: 'o--';
+			 yourself) linePatch border paint color
+		equals: Color black
 ]
 
 { #category : 'tests - format' }
@@ -144,15 +139,27 @@ BpLineTest >> testFormatReadsDashDotBeforeDash [
 		equals: 4
 ]
 
+{ #category : 'tests - errors' }
+BpLineTest >> testFormatWithAColorLetterRaisesError [
+
+	self should: [ self line format: 'r--' ] raise: Error
+]
+
+{ #category : 'tests - errors' }
+BpLineTest >> testFormatWithACycleNameRaisesError [
+
+	self should: [ self line format: 'C1' ] raise: Error
+]
+
 { #category : 'tests - format' }
 BpLineTest >> testFormatWithAMarkerOnlyDrawsNoLine [
 
 	| line |
 	line := self line
-		        format: 'ro';
+		        format: 'o';
 		        yourself.
 	self assert: line linePatch isNil.
-	self assert: line markerPatches first background paint color equals: (BpColors named: 'r')
+	self assert: line markerPatches size equals: 3
 ]
 
 { #category : 'tests - format' }
@@ -236,11 +243,11 @@ BpLineTest >> testMarkerColorsCanBeGiven [
 	| marker |
 	marker := (self line
 		           marker: 'o';
-		           markerFaceColor: 'w';
-		           markerEdgeColor: 'k';
+		           markerFaceColor: Color white;
+		           markerEdgeColor: Color black;
 		           yourself) markerPatches first.
-	self assert: marker background paint color equals: (BpColors named: 'w').
-	self assert: marker border paint color equals: (BpColors named: 'k')
+	self assert: marker background paint color equals: Color white.
+	self assert: marker border paint color equals: Color black
 ]
 
 { #category : 'tests' }
@@ -267,12 +274,11 @@ BpLineTest >> testMarkerSizeIsInPoints [
 BpLineTest >> testMarkersTakeTheColorOfTheLine [
 
 	| marker |
-	marker := (self line
-		           color: 'g';
+	marker := (self line color: Color green;
 		           marker: 's';
 		           yourself) markerPatches first.
-	self assert: marker background paint color equals: (BpColors named: 'g').
-	self assert: marker border paint color equals: (BpColors named: 'g')
+	self assert: marker background paint color equals: Color green.
+	self assert: marker border paint color equals: Color green
 ]
 
 { #category : 'tests' }
@@ -291,17 +297,6 @@ BpLineTest >> testPatchesAreTheLineThenTheMarkers [
 	self assert: line patches asArray equals: { line linePatch } , line markerPatches asArray
 ]
 
-{ #category : 'tests - format' }
-BpLineTest >> testSettersAfterTheFormatWin [
-
-	self
-		assert: (self line
-			 format: 'r--';
-			 color: 'b';
-			 yourself) linePatch border paint color
-		equals: (BpColors named: 'b')
-]
-
 { #category : 'tests' }
 BpLineTest >> testSolidLineHasNoDashes [
 
@@ -311,7 +306,7 @@ BpLineTest >> testSolidLineHasNoDashes [
 { #category : 'tests - errors' }
 BpLineTest >> testUnknownFormatCharacterRaisesError [
 
-	self should: [ self line format: 'rz' ] raise: Error
+	self should: [ self line format: '-z' ] raise: Error
 ]
 
 { #category : 'tests - errors' }

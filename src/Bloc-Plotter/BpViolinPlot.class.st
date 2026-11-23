@@ -1,5 +1,5 @@
 "
-I am a violin plot, added by `BpAxes>>violinPlot:` and `BpAxes>>violinPlot:positions:`: for each dataset, a body showing the estimated density of its values on both sides of its position, with lines at its extrema and, on demand, at its mean, median and quantiles. Where a `BpBoxPlot` summarizes a dataset by its quartiles, I show the shape of its distribution, such as two groups of values. A `BpViolinStatistics` per dataset computes what I draw; I draw it with `BpPolygonPatch`es that `parts` gives by role.
+I am a violin plot, added by `BpChart>>violinPlot:` and `BpChart>>violinPlot:positions:`: for each dataset, a body showing the estimated density of its values on both sides of its position, with lines at its extrema and, on demand, at its mean, median and quantiles. Where a `BpBoxPlot` summarizes a dataset by its quartiles, I show the shape of its distribution, such as two groups of values. A `BpViolinStatistics` per dataset computes what I draw; I draw it with `BpPolygonPatch`es that `parts` gives by role.
 
 ## Examples
 
@@ -15,14 +15,14 @@ BpViolinPlot exampleInteraction
 - Each body is scaled on its own: its highest density is half its width (`widths:`, 0.5 by default) away from its position. Bodies show shapes, not densities that could be compared across violins.
 - The body spans only the values of the dataset, from its minimum to its maximum, even though the density estimate goes on beyond them.
 - `side: #low` or `#high` draws only half of each violin, so that two `BpViolinPlot`s at the same positions compare two groups side by side.
-- All violins share one color of the axes cycle: the bodies are filled with it at 0.3 opacity (`alpha:` changes it) and the lines are drawn with it opaque. `faceColor:` and `lineColor:` take one color, or one per violin.
+- All violins share one color of the palette of their chart: the bodies are filled with it at 0.3 opacity (`alpha:` changes it) and the lines are drawn with it opaque. `faceColor:` and `lineColor:` take one color, or one per violin.
 - The extrema are shown by default, the means, medians and quantiles are not: `showExtrema:`, `showMeans:`, `showMedians:` and `quantiles:` choose them. `quantiles:` takes fractions for all violins, or one collection of fractions per violin.
 
 ## Usage
 
-1. `BpAxes>>violinPlot:` and `BpAxes>>violinPlot:positions:` create me with my data (`x:`) and add me to the axes (see `BpArtist`), which give me one color of their cycle.
+1. `BpChart>>violinPlot:` and `BpChart>>violinPlot:positions:` create me with my data (`x:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette.
 2. Each setter recomputes my statistics and rebuilds my patches.
-3. My axes read my patches for autoscaling and my `legendEntries` (a rectangle filled as my bodies).
+3. My chart reads my patches for autoscaling and my `legendEntries` (a rectangle filled as my bodies).
 
 ## Implementation Notes
 
@@ -76,11 +76,11 @@ BpViolinPlot class >> basicsData [
 ]
 
 { #category : 'private - demo' }
-BpViolinPlot class >> customViolinsIn: anAxes data: someDatasets number: anInteger horizontal: aBoolean [
-	"Configure in anAxes the violins anInteger (1, 2 or 4) of the gallery violin plot basics, vertical or horizontal."
+BpViolinPlot class >> customViolinsIn: aChart data: someDatasets number: anInteger horizontal: aBoolean [
+	"Configure in aChart the violins anInteger (1, 2 or 4) of the gallery violin plot basics, vertical or horizontal."
 
 	| violins |
-	violins := anAxes violinPlot: someDatasets positions: #( 1 2 4 5 7 8 ).
+	violins := aChart violinPlot: someDatasets positions: #( 1 2 4 5 7 8 ).
 	aBoolean ifTrue: [ violins orientation: #horizontal ].
 	anInteger = 1 ifTrue: [
 		violins
@@ -103,7 +103,7 @@ BpViolinPlot class >> customViolinsIn: anAxes data: someDatasets number: anInteg
 			showMedians: true;
 			quantiles: #( #( 0.1 ) #(  ) #(  ) #( 0.175 0.954 ) #( 0.75 ) #( 0.25 ) );
 			bandwidth: 0.5 ].
-	anAxes title: ('Custom violin {1}' format: { anInteger })
+	aChart title: ('Custom violin {1}' format: { anInteger })
 ]
 
 { #category : 'examples' }
@@ -140,12 +140,12 @@ BpViolinPlot class >> exampleViolinPlotBasics [
 
 { #category : 'instances' }
 BpViolinPlot class >> instanceViolins [
-	"Answer two violins, with their medians, in new axes."
+	"Answer two violins, with their medians, in a new chart."
 
 	<sampleInstance>
 	| random |
 	random := Random seed: 42.
-	^ ((BpAxes new
+	^ ((BpChart new
 		    extent: 400 @ 300;
 		    yourself) violinPlot: {
 			   (self
@@ -203,7 +203,7 @@ BpViolinPlot >> bandwidth: aSymbolOrNumber [
 { #category : 'private - style' }
 BpViolinPlot >> bodyColorAt: anIndex [
 
-	^ (self opaqueColorOf: (self setting: (faceColor ifNil: [ defaultColors first ]) at: anIndex)) alpha: (alpha ifNil: [ 0.3 ])
+	^ (self setting: (faceColor ifNil: [ defaultColors first ]) at: anIndex) alpha: (alpha ifNil: [ 0.3 ])
 ]
 
 { #category : 'private - computing' }
@@ -222,10 +222,10 @@ BpViolinPlot >> compute [
 ]
 
 { #category : 'accessing' }
-BpViolinPlot >> faceColor: aColorOrNameOrCollection [
+BpViolinPlot >> faceColor: aColorOrCollection [
 	"Set the color of the bodies: one for all violins or one per violin."
 
-	faceColor := aColorOrNameOrCollection.
+	faceColor := aColorOrCollection.
 	self refresh
 ]
 
@@ -258,10 +258,10 @@ BpViolinPlot >> legendEntries [
 ]
 
 { #category : 'accessing' }
-BpViolinPlot >> lineColor: aColorOrNameOrCollection [
+BpViolinPlot >> lineColor: aColorOrCollection [
 	"Set the color of the lines (extrema, means, medians and quantiles): one for all violins or one per violin."
 
-	lineColor := aColorOrNameOrCollection.
+	lineColor := aColorOrCollection.
 	self refresh
 ]
 
@@ -349,15 +349,6 @@ BpViolinPlot >> newPatches [
 	^ roles flatCollect: [ :each | parts at: each ]
 ]
 
-{ #category : 'private - style' }
-BpViolinPlot >> opaqueColorOf: aColorOrName [
-	"Answer the color aColorOrName names, without my alpha: it makes only the bodies transparent."
-
-	^ aColorOrName isColor
-		  ifTrue: [ aColorOrName ]
-		  ifFalse: [ BpColors named: aColorOrName ]
-]
-
 { #category : 'accessing' }
 BpViolinPlot >> orientation: aSymbol [
 	"Set #vertical violins (the default) or #horizontal ones, whose values are on the x axis."
@@ -389,10 +380,10 @@ BpViolinPlot >> paintBody: anElement dataset: anIndex [
 
 { #category : 'private - style' }
 BpViolinPlot >> paintLine: anElement dataset: anIndex [
-	"Stroke anElement in the line color of the violin anIndex."
+	"Stroke anElement in the line color of the violin anIndex, without my alpha: it makes only the bodies transparent."
 
 	anElement border: (self
-		 strokeColor: (self opaqueColorOf: (self setting: (lineColor ifNil: [ defaultColors first ]) at: anIndex))
+		 strokeColor: (self setting: (lineColor ifNil: [ defaultColors first ]) at: anIndex)
 		 width: (lineWidth ifNil: [ 1.5 ])
 		 style: #solid)
 ]

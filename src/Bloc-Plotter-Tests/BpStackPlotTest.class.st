@@ -1,5 +1,5 @@
 "
-I check `BpStackPlot`, as `BpAxes>>stackPlotX:ys:` creates it: the stacks and the vertices of each layer, the four baselines, the colors of the cycle and given colors, outlines, transparency, legend entries and handlers.
+I check `BpStackPlot`, as `BpChart>>stackPlotX:ys:` creates it: the stacks and the vertices of each layer, the four baselines, the colors of the cycle and given colors, outlines, transparency, legend entries and handlers.
 
 ## Implementation Notes
 
@@ -39,16 +39,6 @@ BpStackPlotTest >> testAlphaMakesTheLayersTransparent [
 ]
 
 { #category : 'tests' }
-BpStackPlotTest >> testAxesStackPlotAddsTheStack [
-
-	| axes stack |
-	axes := BpAxes new.
-	stack := axes stackPlotX: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) ).
-	self assert: axes artists last identicalTo: stack.
-	self assert: stack stacks equals: #( #( 1 2 3 ) #( 3 4 5 ) )
-]
-
-{ #category : 'tests' }
 BpStackPlotTest >> testBaselineShiftsTheStacks [
 
 	self assert: (self stackWithBaseline: #wiggle) stacks first equals: {
@@ -58,27 +48,37 @@ BpStackPlotTest >> testBaselineShiftsTheStacks [
 ]
 
 { #category : 'tests' }
+BpStackPlotTest >> testChartStackPlotAddsTheStack [
+
+	| chart stack |
+	chart := BpChart new.
+	stack := chart stackPlotX: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) ).
+	self assert: chart artists last identicalTo: stack.
+	self assert: stack stacks equals: #( #( 1 2 3 ) #( 3 4 5 ) )
+]
+
+{ #category : 'tests' }
 BpStackPlotTest >> testColorsAreRepeatedWhenTooFew [
 
 	self
-		assert: ((self stack
-			  colors: #( 'r' );
+		assert: ((self stack colors: { Color red };
 			  yourself) patches collect: [ :each | each background paint color ] as: Array)
 		equals: {
-			(BpColors named: 'r').
-			(BpColors named: 'r') }
+			Color red.
+			Color red }
 ]
 
 { #category : 'tests' }
 BpStackPlotTest >> testColorsGiveOneColorPerLayer [
 
 	self
-		assert: ((self stack
-			  colors: #( 'r' 'k' );
+		assert: ((self stack colors: {
+	Color red.
+	Color black };
 			  yourself) patches collect: [ :each | each background paint color ] as: Array)
 		equals: {
-			(BpColors named: 'r').
-			(BpColors named: 'k') }
+			Color red.
+			Color black }
 ]
 
 { #category : 'tests' }
@@ -98,22 +98,21 @@ BpStackPlotTest >> testEachLayerGoesFromThePreviousStackToItsTop [
 { #category : 'tests' }
 BpStackPlotTest >> testEachLayerTakesTheNextColorOfTheCycle [
 
-	| axes stack |
-	axes := BpAxes new.
-	stack := axes stackPlotX: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) ).
-	self assert: (stack patches collect: [ :each | each background paint color ] as: Array) equals: (BpColors tab10 first: 2).
-	self assert: (axes plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: BpColors tab10 third
+	| chart stack |
+	chart := BpChart new.
+	stack := chart stackPlotX: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) ).
+	self assert: (stack patches collect: [ :each | each background paint color ] as: Array) equals: (BpPalette default colors first: 2).
+	self assert: (chart plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: (BpPalette default colorAt: 3)
 ]
 
 { #category : 'tests' }
 BpStackPlotTest >> testEdgeColorOutlinesTheLayers [
 
 	| polygon |
-	polygon := (self stack
-		            edgeColor: 'k';
+	polygon := (self stack edgeColor: Color black;
 		            lineWidth: 2;
 		            yourself) patches second.
-	self assert: polygon border paint color equals: (BpColors named: 'k').
+	self assert: polygon border paint color equals: Color black.
 	self assert: (polygon border width closeTo: 2 * BpArtist pixelsPerPoint)
 ]
 

@@ -9,13 +9,13 @@ BpFigure instanceTwoByTwo inspect
 
 ## Design Rationale
 
-- The pane shows `liveElement`: the topmost ancestor of an element, so that a patch or an axes is seen in its figure. An artist (`BpArtist>>liveElement`) shows the figure of its axes, or a new figure holding it; a marker (`BpMarker>>liveElement`) shows a patch drawing it.
+- The pane shows `liveElement`: the topmost ancestor of an element, so that a patch or a chart is seen in its figure. An artist (`BpArtist>>liveElement`) shows the figure of its chart, or a new figure holding it; a marker (`BpMarker>>liveElement`) shows a patch drawing it.
 - A Bloc element has one parent: the pane takes the element from where it is. It takes it from another Live pane, but not from a space shown in its own window, whose user would see it vanish; the pane then shows a snapshot.
 - `prepareForLiveView` lets the element choose how it sits in the pane: centered by default, filling the pane for a `BpFigure`.
 
 ## Usage
 
-1. The root classes of the visual hierarchies use me: `BpFigure`, `BpAxes`, `BpPlotArea`, `BpPatch`, `BpGridLine`, `BpLegend`, `BpText`, `BpPie`, `BpPieWedge`, `BpPieWedgeShadow`, `BpArtist` and `BpMarker`.
+1. The root classes of the visual hierarchies use me: `BpFigure`, `BpChart`, `BpPlotArea`, `BpPatch`, `BpGridLine`, `BpLegend`, `BpText`, `BpPie`, `BpPieWedge`, `BpPieWedgeShadow`, `BpArtist` and `BpMarker`.
 2. The inspector sends `inspectionLive:` (`<inspectorPresentationOrder: 0 title: 'Live'>`), which builds a `SpBlSpaceInMorphPresenter` holding the element.
 
 ## Implementation Notes

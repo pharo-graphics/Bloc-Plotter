@@ -1,5 +1,5 @@
 "
-I am a histogram, added by `BpAxes>>hist:`. I bin one or several datasets with a `BpHistogramBinning`, compute the values of the bins (density, stacking, cumulative sums), and build the patches that draw them: bars (`BpRectanglePatch`) or outlines (`BpPolygonPatch`). `whenPatch:do:` adds an interaction handler to all my patches.
+I am a histogram, added by `BpChart>>hist:`. I bin one or several datasets with a `BpHistogramBinning`, compute the values of the bins (density, stacking, cumulative sums), and build the patches that draw them: bars (`BpRectanglePatch`) or outlines (`BpPolygonPatch`). `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -20,8 +20,8 @@ BpHistogram exampleInteraction
 
 ## Usage
 
-1. `BpAxes>>hist:` creates me with the data (`x:`) and adds me to the axes (see `BpArtist`), which take one color of their cycle per dataset (`colorCount`).
-2. My axes read my `stickyValuesOn:` (the bottoms of the bins) and `logAxes` (the value axis when `log:` is true).
+1. `BpChart>>hist:` creates me with the data (`x:`) and adds me to the chart (see `BpArtist`), which takes one color of its palette per dataset (`colorCount`).
+2. My chart reads my `stickyValuesOn:` (the bottoms of the bins) and `logAxes` (the value axis when `log:` is true).
 
 - The style setters take one value or one per dataset.
 
@@ -130,12 +130,12 @@ BpHistogram class >> histTypes [
 
 { #category : 'instances' }
 BpHistogram class >> instanceStepFilled [
-	"Answer a filled step histogram of 100 normal samples, in new axes."
+	"Answer a filled step histogram of 100 normal samples, in a new chart."
 
 	<sampleInstance>
 	| random |
 	random := Random seed: 19680801.
-	^ ((BpAxes new
+	^ ((BpChart new
 		    extent: 400 @ 300;
 		    yourself) hist: ((1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ]))
 		  bins: 20;
@@ -301,7 +301,7 @@ BpHistogram >> color [
 
 { #category : 'accessing - style' }
 BpHistogram >> color: aColorOrCollection [
-	"Set the color of the datasets: one color, or one per dataset. Without it, the datasets take the next colors of the color cycle of my axes."
+	"Set the color of the datasets: one color, or one per dataset. Without it, the datasets take the next colors of the palette of my chart."
 
 	color := aColorOrCollection.
 	self refresh
@@ -315,7 +315,7 @@ BpHistogram >> colorAt: aDatasetIndex [
 
 { #category : 'axes' }
 BpHistogram >> colorCount [
-	"Answer one color of the cycle per dataset."
+	"Answer one color of the palette per dataset."
 
 	^ datasets size
 ]
@@ -565,7 +565,7 @@ BpHistogram >> log [
 
 { #category : 'accessing - options' }
 BpHistogram >> log: aBoolean [
-	"When true, the value axis of my axes uses a log scale."
+	"When true, the value axis of my chart uses a log scale."
 
 	log := aBoolean.
 	self refresh

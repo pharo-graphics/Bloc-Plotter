@@ -10,8 +10,8 @@ BpPatch exampleBarsAndSteps
 ## Usage
 
 1. `BpHistogram>>newBarAt:dataset:amount:bounds:`, `BpHistogram>>newStepFor:top:base:shift:`, `BpBarPlot>>newBarAt:`, `BpScatterPlot>>newPatches`, `BpLine>>newLinePatch`, `BpLine>>newMarkerPatchAt:index:`, `BpBoxPlot>>newPolygon:closed:dataset:`, `BpBoxPlot>>newMarkerAt:properties:dataset:`, `BpStemPlot>>newLineThrough:color:style:`, `BpStemPlot>>newMarkerAt:index:marker:color:`, `BpFillBetween>>newPolygonThrough:`, `BpStackPlot>>newPolygonFor:tops:bottoms:`, `BpStairs>>newPatches`, `BpViolinPlot>>newPatch:through:dataset:style:`, `BpErrorBar>>newBarFrom:to:index:` and `BpErrorBar>>newCap:at:index:` create patches, style them and add the handlers given to `BpArtist>>whenPatch:do:`.
-2. `BpAxes>>rebuild` shows them in its plot area, and `BpAxes>>autoScale:` reads their `dataBounds`.
-3. `BpPlotAreaLayout` sends `measureWith:` with the data transform of the axes, then places them at their `pixelBounds`.
+2. `BpChart>>rebuild` shows them in its plot area, and `BpChart>>autoScale:` reads their `dataBounds`.
+3. `BpPlotAreaLayout` sends `measureWith:` with the data transform of the chart, then places them at their `pixelBounds`.
 
 - A patch shows one computation of its artist: it is not updated when the artist changes, it is replaced.
 "
@@ -25,9 +25,9 @@ Class {
 		'dataset',
 		'pixelBounds'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'examples' }

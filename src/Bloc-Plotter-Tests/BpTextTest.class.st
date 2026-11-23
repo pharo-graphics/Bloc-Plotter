@@ -1,5 +1,5 @@
 "
-I check that `BpText` shows one line per line break and that a `BpAxes` title uses it.
+I check that `BpText` shows one line per line break and that a `BpChart` title uses it.
 "
 Class {
 	#name : 'BpTextTest',
@@ -9,13 +9,13 @@ Class {
 }
 
 { #category : 'tests' }
-BpTextTest >> testAxesTitleWithALineBreakHasTwoLines [
+BpTextTest >> testChartTitleWithALineBreakHasTwoLines [
 
-	| axes |
-	axes := BpAxes new.
-	axes title: (String cr join: #( 'a' 'b' )).
-	self assert: axes titleElement children size equals: 2.
-	self assert: axes title equals: (String cr join: #( 'a' 'b' ))
+	| chart |
+	chart := BpChart new.
+	chart title: (String cr join: #( 'a' 'b' )).
+	self assert: chart titleElement children size equals: 2.
+	self assert: chart title equals: (String cr join: #( 'a' 'b' ))
 ]
 
 { #category : 'tests' }

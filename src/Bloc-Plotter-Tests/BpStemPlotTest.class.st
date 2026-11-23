@@ -1,5 +1,5 @@
 "
-I check `BpStemPlot`: the stems from the bottom to the heads, the markers on the heads, the baseline across the locations, the default colors and widths, the three format strings, horizontal stems, the legend entry and the color cycle left untouched.
+I check `BpStemPlot`: the stems from the bottom to the heads, the markers on the heads, the baseline across the locations, the default colors and widths, the three format strings, horizontal stems, the legend entry and the colors of the palette.
 
 ## Implementation Notes
 
@@ -29,24 +29,14 @@ BpStemPlotTest >> stems [
 ]
 
 { #category : 'tests' }
-BpStemPlotTest >> testAxesStemLocationsHeadsAddsAStemPlot [
-
-	| axes stems |
-	axes := BpAxes new.
-	stems := axes stemLocations: #( 1 2 ) heads: #( 3 4 ).
-	self assert: stems axes identicalTo: axes.
-	self assert: (axes artists includes: stems).
-	self assert: stems markerLine size equals: 2
-]
-
-{ #category : 'tests' }
-BpStemPlotTest >> testBaseFormatStylesTheBaseline [
+BpStemPlotTest >> testBaseFormatAndColorStyleTheBaseline [
 
 	| baseline |
 	baseline := (self stems
-		             baseFormat: 'k:';
+		             baseFormat: ':';
+		             baseColor: Color black;
 		             yourself) baseLine.
-	self assert: baseline border paint color equals: (BpColors named: 'k').
+	self assert: baseline border paint color equals: Color black.
 	self deny: baseline border style dashArray isEmpty
 ]
 
@@ -85,9 +75,20 @@ BpStemPlotTest >> testBottomMovesTheStemsAndTheBaseline [
 ]
 
 { #category : 'tests' }
-BpStemPlotTest >> testDefaultBaselineIsC3 [
+BpStemPlotTest >> testChartStemLocationsHeadsAddsAStemPlot [
 
-	self assert: self stems baseLine border paint color equals: (BpColors named: 'C3')
+	| chart stems |
+	chart := BpChart new.
+	stems := chart stemLocations: #( 1 2 ) heads: #( 3 4 ).
+	self assert: stems chart identicalTo: chart.
+	self assert: (chart artists includes: stems).
+	self assert: stems markerLine size equals: 2
+]
+
+{ #category : 'tests - palette' }
+BpStemPlotTest >> testDefaultBaselineIsTheFourthColorOfThePalette [
+
+	self assert: self stems baseLine border paint color equals: (BpQualitativePalette tab10 colorAt: 4)
 ]
 
 { #category : 'tests' }
@@ -101,14 +102,26 @@ BpStemPlotTest >> testDefaultSizes [
 ]
 
 { #category : 'tests' }
-BpStemPlotTest >> testDefaultStemsAndMarkersAreC0Circles [
+BpStemPlotTest >> testDefaultStemsAndMarkersAreCirclesOfTheFirstColor [
 
 	| stems marker |
 	stems := self stems.
 	marker := stems markerLine first.
-	self assert: stems stemLines first border paint color equals: BpColors tab10 first.
-	self assert: marker background paint color equals: BpColors tab10 first.
+	self assert: stems stemLines first border paint color equals: (BpPalette default colorAt: 1).
+	self assert: marker background paint color equals: (BpPalette default colorAt: 1).
 	self assert: marker marker isCircle
+]
+
+{ #category : 'tests - palette' }
+BpStemPlotTest >> testDefaultStyleTakesTheColorsOfThePalette [
+
+	| chart palette stems |
+	palette := BpQualitativePalette set1.
+	chart := BpChart new.
+	chart palette: palette.
+	stems := chart stem: #( 1 2 ).
+	self assert: stems stemLines first border paint color equals: (palette colorAt: 1).
+	self assert: stems baseLine border paint color equals: (palette colorAt: 4)
 ]
 
 { #category : 'tests' }
@@ -118,7 +131,7 @@ BpStemPlotTest >> testHandlersAreKeptWhenTheStemsAreRebuilt [
 	stems := self stems.
 	clicked := nil.
 	stems whenPatch: BlClickEvent do: [ :event :patch | clicked := patch ].
-	stems lineFormat: 'r'.
+	stems lineFormat: '--'.
 	BlEvent fireEvent: BlClickEvent new target: stems markerLine second.
 	self assert: clicked identicalTo: stems markerLine second
 ]
@@ -161,25 +174,22 @@ BpStemPlotTest >> testLabelGivesALegendEntry [
 ]
 
 { #category : 'tests' }
-BpStemPlotTest >> testLineFormatCanBeAColorName [
-
-	self
-		assert: (self stems
-			 lineFormat: 'grey';
-			 yourself) stemLines first border paint color
-		equals: (BpColors named: 'grey')
-]
-
-{ #category : 'tests' }
-BpStemPlotTest >> testLineFormatStylesTheStemsAndColorsTheMarkers [
+BpStemPlotTest >> testLineColorColorsTheStemsAndTheMarkers [
 
 	| stems |
 	stems := self stems
-		         lineFormat: 'r--';
+		         lineColor: Color red;
 		         yourself.
-	self assert: stems stemLines first border paint color equals: (BpColors named: 'r').
-	self deny: stems stemLines first border style dashArray isEmpty.
-	self assert: stems markerLine first background paint color equals: (BpColors named: 'r')
+	self assert: stems stemLines first border paint color equals: Color red.
+	self assert: stems markerLine first background paint color equals: Color red
+]
+
+{ #category : 'tests' }
+BpStemPlotTest >> testLineFormatStylesTheStems [
+
+	self deny: (self stems
+		 lineFormat: '--';
+		 yourself) stemLines first border style dashArray isEmpty
 ]
 
 { #category : 'tests - errors' }
@@ -189,25 +199,35 @@ BpStemPlotTest >> testLocationsAndHeadsOfDifferentSizesRaiseError [
 ]
 
 { #category : 'tests' }
-BpStemPlotTest >> testMarkerFaceColorNoneMakesHollowMarkers [
+BpStemPlotTest >> testMarkerColorColorsOnlyTheMarkers [
 
-	| marker |
-	marker := (self stems
-		           markerFaceColor: 'none';
-		           yourself) markerLine first.
-	self assert: marker background paint color equals: Color transparent.
-	self assert: marker border paint color equals: BpColors tab10 first
+	| stems |
+	stems := self stems
+		         markerColor: Color red;
+		         yourself.
+	self assert: stems markerLine first background paint color equals: Color red.
+	self assert: stems stemLines first border paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests' }
-BpStemPlotTest >> testMarkerFormatGivesMarkerAndColor [
+BpStemPlotTest >> testMarkerFaceColorTransparentMakesHollowMarkers [
 
 	| marker |
 	marker := (self stems
-		           markerFormat: 'gD';
+		           markerFaceColor: Color transparent;
 		           yourself) markerLine first.
-	self assert: marker marker vertices size equals: 4.
-	self assert: marker background paint color equals: (BpColors named: 'g')
+	self assert: marker background paint color equals: Color transparent.
+	self assert: marker border paint color equals: (BpPalette default colorAt: 1)
+]
+
+{ #category : 'tests' }
+BpStemPlotTest >> testMarkerFormatGivesTheMarker [
+
+	self
+		assert: (self stems
+			 markerFormat: 'D';
+			 yourself) markerLine first marker vertices size
+		equals: 4
 ]
 
 { #category : 'tests' }
@@ -259,10 +279,10 @@ BpStemPlotTest >> testStemsAreAboveTheGrid [
 { #category : 'tests' }
 BpStemPlotTest >> testStemsTakeNoColorOfTheCycle [
 
-	| axes |
-	axes := BpAxes new.
-	axes stem: #( 1 2 ).
-	self assert: (axes plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: BpColors tab10 first
+	| chart |
+	chart := BpChart new.
+	chart stem: #( 1 2 ).
+	self assert: (chart plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests - errors' }

@@ -1,5 +1,5 @@
 "
-I am a text of a plot on one or several lines: each line break of my text starts a new line, centered under the previous one. A `BpAxes` shows its title with me, so a title can be written on two lines.
+I am a text of a plot on one or several lines: each line break of my text starts a new line, centered under the previous one. A `BpChart` shows its title with me, so a title can be written on two lines.
 
 ## Examples
 
@@ -14,7 +14,7 @@ BpText instanceTwoLines
 
 ## Usage
 
-1. `BpAxes>>initialize` creates me as its title element; `BpAxes>>title:` sets my text. `BpPieText`, my subclass, places pie labels.
+1. `BpChart>>initialize` creates me as its title element; `BpChart>>title:` sets my text. `BpPieText`, my subclass, places pie labels.
 2. `text:` replaces my lines: I am mutable, and my size follows my text.
 "
 Class {

@@ -11,7 +11,7 @@ BpPie exampleInteraction
 
 ## Design Rationale
 
-- `autoPct:` takes a printf string or a block, and the default colors are the tab10 cycle (`BpColors tab10`).
+- `autoPct:` takes a printf string or a block, and the default colors are the ones of `BpPalette class>>default`; `palette:` takes the ones of another `BpEnumeratedPalette`.
 - Angles are in degrees, counterclockwise from the right. The wedges convert them to the clockwise angles of `BlAnnulusSectorGeometry`.
 - Every setter rebuilds all my children. It keeps me simple, at the price of losing the handlers added directly to a wedge: `whenWedge:do:` keeps them across rebuilds.
 - A pie of radius 1 fills 1/1.25 of my half side. Nothing is drawn outside me, so I shrink when an exploded wedge or a text would get out of my bounds.
@@ -63,13 +63,6 @@ Class {
 	#tag : 'Pie'
 }
 
-{ #category : 'defaults' }
-BpPie class >> defaultColors [
-	"Answer the colors given in turn to the wedges: the tab10 cycle."
-
-	^ BpColors tab10
-]
-
 { #category : 'private - demo' }
 BpPie class >> demoCellFor: aPie caption: aString [
 	"Answer an element showing aPie, 300 pixels wide, under aString."
@@ -97,7 +90,7 @@ BpPie class >> demoOpen: aCollectionOfAssociations title: aString [
 	| grid space |
 	grid := BlElement new
 		        layout: (BlGridLayout horizontal columnCount: 4);
-		        background: Color white;
+		        background: ((BpSequentialPalette greys: 9) colorAt: 1);
 		        constraintsDo: [ :c |
 			        c horizontal fitContent.
 			        c vertical fitContent ];
@@ -108,7 +101,7 @@ BpPie class >> demoOpen: aCollectionOfAssociations title: aString [
 		title: aString;
 		extent: 1260 @ 700.
 	space root
-		background: Color white;
+		background: ((BpSequentialPalette greys: 9) colorAt: 1);
 		addChild: grid.
 	space show.
 	^ space
@@ -149,7 +142,7 @@ BpPie class >> exampleInteraction [
 		title: 'Pie interaction';
 		extent: 440 @ 480.
 	space root
-		background: Color white;
+		background: ((BpSequentialPalette greys: 9) colorAt: 1);
 		addChild: container.
 	space show.
 	^ space
@@ -212,11 +205,11 @@ BpPie class >> instanceAutoPct [
 
 { #category : 'instances' }
 BpPie class >> instanceColors [
-	"Answer a pie with its labels and chosen wedge colors: olive drab, rosy brown, gray and saddle brown."
+	"Answer a pie with its labels and the wedge colors of the palette set2."
 
 	<sampleInstance>
 	^ self frogsPie
-		  colors: (#( '6b8e23' 'bc8f8f' '808080' '8b4513' ) collect: [ :each | Color fromHexString: each ]);
+		  palette: BpQualitativePalette set2;
 		  yourself
 ]
 
@@ -318,7 +311,7 @@ BpPie class >> instancePieLabelTextStyle [
 		  textStyle: [ :text |
 			  text
 				  fontSize: 18;
-				  foreground: Color white ];
+				  foreground: ((BpSequentialPalette greys: 9) colorAt: 1) ];
 		  yourself
 ]
 
@@ -362,7 +355,7 @@ BpPie class >> instanceWedgeStyle [
 
 	<sampleInstance>
 	^ self frogsPie
-		  wedgeStyle: [ :wedge | wedge border: (BlBorder paint: Color white width: 3) ];
+		  wedgeStyle: [ :wedge | wedge border: (BlBorder paint: ((BpSequentialPalette greys: 9) colorAt: 1) width: 3) ];
 		  yourself
 ]
 
@@ -543,7 +536,7 @@ BpPie >> initialize [
 	super initialize.
 	values := #(  ).
 	explode := #(  ).
-	colors := self class defaultColors.
+	colors := BpPalette default colors.
 	pctDistance := 0.6.
 	labelDistance := 1.1.
 	startAngle := 0.
@@ -645,6 +638,13 @@ BpPie >> normalize: aBoolean [
 
 	normalize := aBoolean.
 	self rebuild
+]
+
+{ #category : 'accessing' }
+BpPie >> palette: anEnumeratedPalette [
+	"Give my wedges the colors of anEnumeratedPalette in turn."
+
+	self colors: anEnumeratedPalette colors
 ]
 
 { #category : 'accessing - parts' }

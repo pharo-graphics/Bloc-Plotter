@@ -1,5 +1,5 @@
 "
-I check `BpStairs`, as `BpAxes>>stairs:` and `BpAxes>>stairs:edges:` create it: the vertices of the outline for each kind of baseline and for horizontal steps, the default edges, filled and unfilled styles, colors, line widths and styles, sticky baselines, the legend entry and handlers.
+I check `BpStairs`, as `BpChart>>stairs:` and `BpChart>>stairs:edges:` create it: the vertices of the outline for each kind of baseline and for horizontal steps, the default edges, filled and unfilled styles, colors, line widths and styles, sticky baselines, the legend entry and handlers.
 
 ## Implementation Notes
 
@@ -35,16 +35,6 @@ BpStairsTest >> testAlphaMakesTheOutlineTransparent [
 
 	self assert:
 		((self stairsWith: [ :stairs | stairs alpha: 0.3 ]) patches first border paint color alpha closeTo: 0.3 precision: 0.01)
-]
-
-{ #category : 'tests' }
-BpStairsTest >> testAxesStairsEdgesAddsTheStairs [
-
-	| axes stairs |
-	axes := BpAxes new.
-	stairs := axes stairs: #( 1 3 2 ) edges: #( 0 1 3 6 ).
-	self assert: axes artists last identicalTo: stairs.
-	self assert: stairs edges asArray equals: #( 0 1 3 6 )
 ]
 
 { #category : 'tests' }
@@ -98,21 +88,31 @@ BpStairsTest >> testBaselineOfAnotherSizeRaisesError [
 ]
 
 { #category : 'tests' }
+BpStairsTest >> testChartStairsEdgesAddsTheStairs [
+
+	| chart stairs |
+	chart := BpChart new.
+	stairs := chart stairs: #( 1 3 2 ) edges: #( 0 1 3 6 ).
+	self assert: chart artists last identicalTo: stairs.
+	self assert: stairs edges asArray equals: #( 0 1 3 6 )
+]
+
+{ #category : 'tests' }
 BpStairsTest >> testColorSetsTheFillWhenFilled [
 
 	| patch |
 	patch := (self stairsWith: [ :stairs |
 		          stairs
 			          fill: true;
-			          color: 'r' ]) patches first.
-	self assert: patch background paint color equals: (BpColors named: 'r').
+			          color: Color red ]) patches first.
+	self assert: patch background paint color equals: Color red.
 	self assert: patch border width isZero
 ]
 
 { #category : 'tests' }
 BpStairsTest >> testColorSetsTheOutlineWhenUnfilled [
 
-	self assert: (self stairsWith: [ :stairs | stairs color: 'r' ]) patches first border paint color equals: (BpColors named: 'r')
+	self assert: (self stairsWith: [ :stairs | stairs color: Color red ]) patches first border paint color equals: Color red
 ]
 
 { #category : 'tests' }
@@ -147,7 +147,7 @@ BpStairsTest >> testFillFillsWithTheCycleColorWithoutOutline [
 	| patch |
 	patch := (self stairsWith: [ :stairs | stairs fill: true ]) patches first.
 	self assert: patch isClosed.
-	self assert: patch background paint color equals: BpColors tab10 first.
+	self assert: patch background paint color equals: (BpPalette default colorAt: 1).
 	self assert: patch border width isZero
 ]
 
@@ -201,11 +201,11 @@ BpStairsTest >> testLineWidthOutlinesTheFill [
 	patch := (self stairsWith: [ :stairs |
 		          stairs
 			          fill: true;
-			          faceColor: 'y';
-			          edgeColor: 'k';
+			          faceColor: Color yellow;
+			          edgeColor: Color black;
 			          lineWidth: 2 ]) patches first.
-	self assert: patch background paint color equals: (BpColors named: 'y').
-	self assert: patch border paint color equals: (BpColors named: 'k').
+	self assert: patch background paint color equals: Color yellow.
+	self assert: patch border paint color equals: Color black.
 	self assert: (patch border width closeTo: 2 * BpArtist pixelsPerPoint)
 ]
 
@@ -258,10 +258,10 @@ BpStairsTest >> testStairsAreBelowTheGrid [
 { #category : 'tests' }
 BpStairsTest >> testStairsTakeTheNextColorOfTheCycle [
 
-	| axes |
-	axes := BpAxes new.
-	axes plotX: #( 0 1 ) y: #( 0 1 ).
-	self assert: (axes stairs: #( 1 2 )) patches first border paint color equals: BpColors tab10 second
+	| chart |
+	chart := BpChart new.
+	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	self assert: (chart stairs: #( 1 2 )) patches first border paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests' }
@@ -271,7 +271,7 @@ BpStairsTest >> testUnfilledIsAnOpenOutlineInTheCycleColor [
 	patch := self stairs patches first.
 	self deny: patch isClosed.
 	self assert: patch background paint color equals: Color transparent.
-	self assert: patch border paint color equals: BpColors tab10 first.
+	self assert: patch border paint color equals: (BpPalette default colorAt: 1).
 	self assert: (patch border width closeTo: BpArtist pixelsPerPoint)
 ]
 

@@ -4,7 +4,7 @@ I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), 
 ## Examples
 
 ```
-BpAxes instanceHistogram
+BpChart instanceHistogram
 ```
 
 ## Design Rationale
@@ -18,19 +18,19 @@ BpAxes instanceHistogram
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:` and `errorBarX:y:xErr:yErr:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the tab10 cycle of `BpColors`).
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:` and `errorBarX:y:xErr:yErr:` create an artist, and `addArtist:` gives it the next colors of my palette (`nextColors:`). `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
-4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
+4. `BpChartLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
 - Nil limits mean autoscaling, and a tick formatter is a block answering the label of a value.
 - I am mutable and keep my artists, but each rebuild replaces the ticks, legend and patches I show.
 
 ## Implementation Notes
 
-- Not supported yet: axis labels, shared axes, a layout fitting the axes to their labels, colorbars, the style of the plot types page (small figure, grid below the data).
+- Not supported yet: axis labels, shared axes, a layout fitting the charts to their labels, colorbars, the style of the plot types page (small figure, grid below the data).
 "
 Class {
-	#name : 'BpAxes',
+	#name : 'BpChart',
 	#superclass : 'BlElement',
 	#traits : 'TBpLiveInspection',
 	#classTraits : 'TBpLiveInspection classTrait',
@@ -53,52 +53,53 @@ Class {
 		'yTickFormatter',
 		'showGrid',
 		'xTicks',
-		'yTicks'
+		'yTicks',
+		'palette'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instances' }
-BpAxes class >> instanceHistogram [
-	"Answer axes showing a histogram, with a title."
+BpChart class >> instanceHistogram [
+	"Answer a chart showing a histogram, with a title."
 
 	<sampleInstance>
-	| random axes |
+	| random chart |
 	random := Random seed: 19680801.
-	axes := self new
-		        extent: 400 @ 300;
-		        yourself.
-	(axes hist: ((1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ])) bins: 20.
-	axes title: 'normal samples'.
-	^ axes
+	chart := self new
+		         extent: 400 @ 300;
+		         yourself.
+	(chart hist: ((1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ])) bins: 20.
+	chart title: 'normal samples'.
+	^ chart
 ]
 
 { #category : 'plotting' }
-BpAxes >> addArtist: anArtist [
-	"Show anArtist, giving it the next colors of my color cycle. Answer anArtist."
+BpChart >> addArtist: anArtist [
+	"Show anArtist, giving it the next colors of my palette. Answer anArtist."
 
 	artists add: anArtist.
-	anArtist axes: self.
-	anArtist defaultColors: (self nextColors: anArtist colorCount).
+	anArtist chart: self.
+	self giveColorsTo: anArtist.
 	^ anArtist
 ]
 
 { #category : 'plotting' }
-BpAxes >> artistChanged: anArtist [
+BpChart >> artistChanged: anArtist [
 
 	self rebuild
 ]
 
 { #category : 'accessing' }
-BpAxes >> artists [
+BpChart >> artists [
 
 	^ artists
 ]
 
 { #category : 'private - building' }
-BpAxes >> autoScale: anAxis [
+BpChart >> autoScale: anAxis [
 	"Answer the limits of anAxis (#x or #y) covering all patches, with a margin on each side."
 
 	| values |
@@ -113,7 +114,7 @@ BpAxes >> autoScale: anAxis [
 ]
 
 { #category : 'plotting' }
-BpAxes >> barX: aCollectionOrValue height: aCollectionOrNumber [
+BpChart >> barX: aCollectionOrValue height: aCollectionOrNumber [
 	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured with width:, bottom:, align:, color:, tickLabel:, ... (see `BpBarPlot`)."
 
 	^ self addArtist: (BpBarPlot new
@@ -122,7 +123,7 @@ BpAxes >> barX: aCollectionOrValue height: aCollectionOrNumber [
 ]
 
 { #category : 'plotting' }
-BpAxes >> barhY: aCollectionOrValue width: aCollectionOrNumber [
+BpChart >> barhY: aCollectionOrValue width: aCollectionOrNumber [
 	"Add horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, and answer them, the horizontal counterpart of `barX:height:`. They keep the vocabulary of `barX:height:`: their thickness is width:, their start is bottom:."
 
 	^ self addArtist: (BpBarPlot new
@@ -132,7 +133,7 @@ BpAxes >> barhY: aCollectionOrValue width: aCollectionOrNumber [
 ]
 
 { #category : 'plotting' }
-BpAxes >> boxPlot: aCollection [
+BpChart >> boxPlot: aCollection [
 	"Add a box plot of aCollection (numbers for one box, or one collection of numbers per box) and answer it, to be configured with notch:, whiskers:, positions:, widths:, patchArtist:, ... (see `BpBoxPlot`)."
 
 	^ self addArtist: (BpBoxPlot new
@@ -141,7 +142,7 @@ BpAxes >> boxPlot: aCollection [
 ]
 
 { #category : 'layout' }
-BpAxes >> computePlotBoundsIn: anExtent [
+BpChart >> computePlotBoundsIn: anExtent [
 	"Compute the bounds of my plot area in anExtent, leaving room for the tick labels on the left and at the bottom, and for my title at the top. My tick labels and title must be measured."
 
 	| leftTicks bottomTicks left bottom top right |
@@ -157,14 +158,14 @@ BpAxes >> computePlotBoundsIn: anExtent [
 ]
 
 { #category : 'accessing' }
-BpAxes >> dataTransform [
+BpChart >> dataTransform [
 	"Answer the transform from data coordinates to the pixels of my plot area."
 
 	^ transform
 ]
 
 { #category : 'private - building' }
-BpAxes >> dataValuesOn: anAxis [
+BpChart >> dataValuesOn: anAxis [
 	"Answer the lowest and highest coordinates on anAxis of every patch, and the values my artists require."
 
 	^ (self patches flatCollect: [ :each |
@@ -182,7 +183,7 @@ BpAxes >> dataValuesOn: anAxis [
 ]
 
 { #category : 'private - building' }
-BpAxes >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
+BpChart >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 
 	^ (self scaleOf: anAxis) = #log
 		  ifTrue: [ BpTickLocator logLabelsFor: aCollectionOfLocations ]
@@ -190,7 +191,7 @@ BpAxes >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 ]
 
 { #category : 'plotting' }
-BpAxes >> errorBarX: xValues y: yValues xErr: anXErrorOrNil yErr: aYErrorOrNil [
+BpChart >> errorBarX: xValues y: yValues xErr: anXErrorOrNil yErr: aYErrorOrNil [
 	"Draw the points of xValues and yValues joined by a line, with error bars on x and y (a number for every point, one number per point, or the lower then the upper errors; nil for none), and answer them, to be configured with format:, capSize:, errorColor:, upperLimits:, ... (see `BpErrorBar`)."
 
 	^ self addArtist: ((BpErrorBar x: xValues y: yValues)
@@ -200,7 +201,7 @@ BpAxes >> errorBarX: xValues y: yValues xErr: anXErrorOrNil yErr: aYErrorOrNil [
 ]
 
 { #category : 'plotting' }
-BpAxes >> errorBarX: xValues y: yValues yErr: anErrorOrNil [
+BpChart >> errorBarX: xValues y: yValues yErr: anErrorOrNil [
 	"Draw the points of xValues and yValues joined by a line, with error bars of anErrorOrNil on y, and answer them (see `errorBarX:y:xErr:yErr:`)."
 
 	^ self
@@ -211,14 +212,14 @@ BpAxes >> errorBarX: xValues y: yValues yErr: anErrorOrNil [
 ]
 
 { #category : 'plotting' }
-BpAxes >> fillBetweenX: aCollection y1: aCollectionOrNumber [
+BpChart >> fillBetweenX: aCollection y1: aCollectionOrNumber [
 	"Fill the area between the curve aCollectionOrNumber over aCollection and 0, and answer it (see `fillBetweenX:y1:y2:`)."
 
 	^ self fillBetweenX: aCollection y1: aCollectionOrNumber y2: 0
 ]
 
 { #category : 'plotting' }
-BpAxes >> fillBetweenX: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber [
+BpChart >> fillBetweenX: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber [
 	"Fill the area between two curves over aCollection (one value per x, or one for all) and answer it, to be configured with where:, interpolate:, step:, color:, alpha:, ... (see `BpFillBetween`)."
 
 	^ self addArtist: (BpFillBetween new
@@ -227,14 +228,14 @@ BpAxes >> fillBetweenX: aCollection y1: aCollectionOrNumber y2: anotherCollectio
 ]
 
 { #category : 'plotting' }
-BpAxes >> fillBetweenY: aCollection x1: aCollectionOrNumber [
+BpChart >> fillBetweenY: aCollection x1: aCollectionOrNumber [
 	"Fill the area between the curve aCollectionOrNumber over the y values aCollection and 0, and answer it (see `fillBetweenY:x1:x2:`)."
 
 	^ self fillBetweenY: aCollection x1: aCollectionOrNumber x2: 0
 ]
 
 { #category : 'plotting' }
-BpAxes >> fillBetweenY: aCollection x1: aCollectionOrNumber x2: anotherCollectionOrNumber [
+BpChart >> fillBetweenY: aCollection x1: aCollectionOrNumber x2: anotherCollectionOrNumber [
 	"Fill the area between two curves over the y values aCollection and answer it, the horizontal counterpart of `fillBetweenX:y1:y2:`. The fill keeps the vocabulary of `fillBetweenX:y1:y2:`: y is its x, x1 and x2 its y1 and y2."
 
 	^ self addArtist: (BpFillBetween new
@@ -243,8 +244,14 @@ BpAxes >> fillBetweenY: aCollection x1: aCollectionOrNumber x2: anotherCollectio
 		   yourself)
 ]
 
+{ #category : 'private - building' }
+BpChart >> giveColorsTo: anArtist [
+
+	anArtist defaultColors: (self nextColors: anArtist colorCount)
+]
+
 { #category : 'plotting' }
-BpAxes >> grid: aBoolean [
+BpChart >> grid: aBoolean [
 	"Show or hide lines across the plot area at each tick."
 
 	showGrid := aBoolean.
@@ -252,7 +259,7 @@ BpAxes >> grid: aBoolean [
 ]
 
 { #category : 'plotting' }
-BpAxes >> hist: aCollection [
+BpChart >> hist: aCollection [
 	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured with bins:, density:, histType:, ... (see `BpHistogram`)."
 
 	^ self addArtist: (BpHistogram new
@@ -261,7 +268,7 @@ BpAxes >> hist: aCollection [
 ]
 
 { #category : 'initialization' }
-BpAxes >> initialize [
+BpChart >> initialize [
 
 	super initialize.
 	artists := OrderedCollection new.
@@ -272,6 +279,7 @@ BpAxes >> initialize [
 	yScale := #linear.
 	xTickCount := 6.
 	yTickCount := 8.
+	palette := BpPalette default.
 	colorIndex := 0.
 	plotBounds := 0 @ 0 corner: 1 @ 1.
 	transform := BpDataTransform new.
@@ -280,7 +288,7 @@ BpAxes >> initialize [
 		            yourself.
 	titleElement := BpText new.
 	self
-		layout: BpAxesLayout new;
+		layout: BpChartLayout new;
 		background: Color white;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
@@ -292,7 +300,7 @@ BpAxes >> initialize [
 ]
 
 { #category : 'plotting' }
-BpAxes >> legend [
+BpChart >> legend [
 	"Show a legend with the label of each dataset that has one."
 
 	showLegend := true.
@@ -300,13 +308,13 @@ BpAxes >> legend [
 ]
 
 { #category : 'accessing' }
-BpAxes >> legendElement [
+BpChart >> legendElement [
 
 	^ plotArea legend
 ]
 
 { #category : 'private - building' }
-BpAxes >> limitsFrom: aLow to: aHigh on: anAxis [
+BpChart >> limitsFrom: aLow to: aHigh on: anAxis [
 	"Answer aLow and aHigh widened by 5% of their distance, the margins stopping at the sticky values of the artists (0 for the bars of a histogram)."
 
 	| margin stickies |
@@ -322,7 +330,7 @@ BpAxes >> limitsFrom: aLow to: aHigh on: anAxis [
 ]
 
 { #category : 'private - building' }
-BpAxes >> limitsOn: anAxis [
+BpChart >> limitsOn: anAxis [
 
 	^ anAxis = #x
 		  ifTrue: [ transform xLimits ]
@@ -330,7 +338,7 @@ BpAxes >> limitsOn: anAxis [
 ]
 
 { #category : 'private - building' }
-BpAxes >> logLimitsOf: aCollectionOfPositiveValues [
+BpChart >> logLimitsOf: aCollectionOfPositiveValues [
 	"Answer limits covering the values with a margin of 5% on each side, measured in decades."
 
 	| low high margin |
@@ -346,7 +354,7 @@ BpAxes >> logLimitsOf: aCollectionOfPositiveValues [
 ]
 
 { #category : 'private - building' }
-BpAxes >> managedTicksOn: anAxis [
+BpChart >> managedTicksOn: anAxis [
 	"Answer the ticks an artist places on anAxis, unless ticks were fixed with xTicks: or yTicks:."
 
 	(anAxis = #x
@@ -357,7 +365,7 @@ BpAxes >> managedTicksOn: anAxis [
 ]
 
 { #category : 'private - building' }
-BpAxes >> newLegend [
+BpChart >> newLegend [
 
 	| entries |
 	showLegend ifFalse: [ ^ nil ].
@@ -367,7 +375,7 @@ BpAxes >> newLegend [
 ]
 
 { #category : 'private - building' }
-BpAxes >> newTicksOn: anAxis [
+BpChart >> newTicksOn: anAxis [
 	"Answer the ticks of anAxis: at its fixed locations, or the ones an artist manages (a box plot), or chosen for my current limits and scale, labeled by its formatter."
 
 	| managed locations labels formatter |
@@ -384,51 +392,65 @@ BpAxes >> newTicksOn: anAxis [
 ]
 
 { #category : 'plotting' }
-BpAxes >> nextColors: anInteger [
-	"Answer the next anInteger colors of my color cycle, the tab10 colors of `BpColors`."
+BpChart >> nextColors: anInteger [
+	"Answer the next anInteger colors of my palette."
 
-	| cycle colors |
-	cycle := BpColors tab10.
-	colors := (1 to: anInteger) collect: [ :index | cycle at: colorIndex + index - 1 \\ cycle size + 1 ].
+	| colors |
+	colors := (1 to: anInteger) collect: [ :index | palette colorAt: colorIndex + index ].
 	colorIndex := colorIndex + anInteger.
 	^ colors
 ]
 
 { #category : 'accessing' }
-BpAxes >> patches [
+BpChart >> palette [
+
+	^ palette
+]
+
+{ #category : 'accessing' }
+BpChart >> palette: anEnumeratedPalette [
+	"Take the colors of my artists from anEnumeratedPalette: the artists I already show are recolored, in the order they were added."
+
+	palette := anEnumeratedPalette.
+	colorIndex := 0.
+	artists do: [ :each | self giveColorsTo: each ]
+]
+
+{ #category : 'accessing' }
+BpChart >> patches [
 
 	^ artists flatCollect: [ :each | each allPatches ]
 ]
 
 { #category : 'accessing' }
-BpAxes >> plotArea [
+BpChart >> plotArea [
 
 	^ plotArea
 ]
 
 { #category : 'accessing' }
-BpAxes >> plotBounds [
+BpChart >> plotBounds [
 	"Answer the bounds of my plot area, as computed by my layout."
 
 	^ plotBounds
 ]
 
 { #category : 'accessing' }
-BpAxes >> plotBounds: aRectangle [
+BpChart >> plotBounds: aRectangle [
 
 	plotBounds := aRectangle.
 	transform extent: (aRectangle extent max: 1 @ 1)
 ]
 
 { #category : 'plotting' }
-BpAxes >> plotX: xValues y: yValues [
+BpChart >> plotX: xValues y: yValues [
 	"Draw a line through the points of xValues and yValues. Answer the `BpLine`, to set its style."
 
 	^ self addArtist: (BpLine x: xValues y: yValues)
 ]
 
 { #category : 'plotting' }
-BpAxes >> plotX: xValues y: yValues format: aString [
+BpChart >> plotX: xValues y: yValues format: aString [
 	"Draw the points of xValues and yValues with the format aString ('o-', 'r--', 'x', ...; see `BpLine>>format:`). Answer the `BpLine`."
 
 	^ (self plotX: xValues y: yValues)
@@ -437,7 +459,7 @@ BpAxes >> plotX: xValues y: yValues format: aString [
 ]
 
 { #category : 'private - building' }
-BpAxes >> rebuild [
+BpChart >> rebuild [
 	"Recompute my scales and limits from my artists, then show their patches, my legend, my ticks and my grid."
 
 	self updateScales.
@@ -455,7 +477,7 @@ BpAxes >> rebuild [
 ]
 
 { #category : 'private - building' }
-BpAxes >> rebuildTicks [
+BpChart >> rebuildTicks [
 	"Replace my ticks by the ones of my current limits and scales."
 
 	ticks do: [ :each | self removeChildren: each elements ].
@@ -464,7 +486,7 @@ BpAxes >> rebuildTicks [
 ]
 
 { #category : 'private - building' }
-BpAxes >> scaleOf: anAxis [
+BpChart >> scaleOf: anAxis [
 
 	^ anAxis = #x
 		  ifTrue: [ xScale ]
@@ -472,14 +494,14 @@ BpAxes >> scaleOf: anAxis [
 ]
 
 { #category : 'plotting' }
-BpAxes >> scatterX: xValues y: yValues [
+BpChart >> scatterX: xValues y: yValues [
 	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured with s:, c:, marker:, alpha:, ... (see `BpScatterPlot`)."
 
 	^ self addArtist: (BpScatterPlot x: xValues y: yValues)
 ]
 
 { #category : 'plotting' }
-BpAxes >> stackPlotX: aCollection ys: aCollectionOfCollections [
+BpChart >> stackPlotX: aCollection ys: aCollectionOfCollections [
 	"Stack the layers aCollectionOfCollections (one value per x each) over aCollection and answer the stack, to be configured with baseline:, colors:, label:, alpha:, ... (see `BpStackPlot`)."
 
 	^ self addArtist: (BpStackPlot new
@@ -488,14 +510,14 @@ BpAxes >> stackPlotX: aCollection ys: aCollectionOfCollections [
 ]
 
 { #category : 'plotting' }
-BpAxes >> stairs: aCollection [
+BpChart >> stairs: aCollection [
 	"Draw steps of the heights aCollection between the edges 0, 1, 2, ... and answer them (see `stairs:edges:`)."
 
 	^ self stairs: aCollection edges: nil
 ]
 
 { #category : 'plotting' }
-BpAxes >> stairs: aCollection edges: aCollectionOrNil [
+BpChart >> stairs: aCollection edges: aCollectionOrNil [
 	"Draw steps of the heights aCollection between the edges aCollectionOrNil (one more than the heights, nil for 0, 1, 2, ...) and answer them, to be configured with baseline:, fill:, orientation:, color:, ... (see `BpStairs`)."
 
 	^ self addArtist: (BpStairs new
@@ -504,7 +526,7 @@ BpAxes >> stairs: aCollection edges: aCollectionOrNil [
 ]
 
 { #category : 'plotting' }
-BpAxes >> stem: aCollection [
+BpChart >> stem: aCollection [
 	"Add a stem plot of the heads aCollection, located at 0, 1, 2, ..., and answer it, to be configured with lineFormat:, markerFormat:, baseFormat:, bottom:, orientation:, ... (see `BpStemPlot`)."
 
 	^ self addArtist: (BpStemPlot new
@@ -513,7 +535,7 @@ BpAxes >> stem: aCollection [
 ]
 
 { #category : 'plotting' }
-BpAxes >> stemLocations: aCollection heads: anotherCollection [
+BpChart >> stemLocations: aCollection heads: anotherCollection [
 	"Add a stem plot of the heads anotherCollection at the locations aCollection and answer it (see `stem:`)."
 
 	^ self addArtist: (BpStemPlot new
@@ -522,7 +544,7 @@ BpAxes >> stemLocations: aCollection heads: anotherCollection [
 ]
 
 { #category : 'private - building' }
-BpAxes >> tickCountOn: anAxis [
+BpChart >> tickCountOn: anAxis [
 
 	^ anAxis = #x
 		  ifTrue: [ xTickCount ]
@@ -530,7 +552,7 @@ BpAxes >> tickCountOn: anAxis [
 ]
 
 { #category : 'private - building' }
-BpAxes >> tickLocationsOn: anAxis [
+BpChart >> tickLocationsOn: anAxis [
 
 	| fixed limits |
 	fixed := anAxis = #x
@@ -544,32 +566,32 @@ BpAxes >> tickLocationsOn: anAxis [
 ]
 
 { #category : 'accessing' }
-BpAxes >> ticks [
+BpChart >> ticks [
 
 	^ ticks
 ]
 
 { #category : 'accessing' }
-BpAxes >> title [
+BpChart >> title [
 
 	^ titleElement text asString
 ]
 
 { #category : 'accessing' }
-BpAxes >> title: aString [
+BpChart >> title: aString [
 	"Set the title shown above my plot area; a line break gives a title on several lines."
 
 	titleElement text: (aString asRopedText fontSize: 14)
 ]
 
 { #category : 'accessing' }
-BpAxes >> titleElement [
+BpChart >> titleElement [
 
 	^ titleElement
 ]
 
 { #category : 'private - building' }
-BpAxes >> updateScales [
+BpChart >> updateScales [
 	"Put on a log scale the axes my artists ask for, such as the value axis of a histogram with log: true."
 
 	artists do: [ :each |
@@ -580,14 +602,14 @@ BpAxes >> updateScales [
 ]
 
 { #category : 'plotting' }
-BpAxes >> violinPlot: aCollection [
+BpChart >> violinPlot: aCollection [
 	"Draw violins of the data aCollection (a collection of numbers for one violin, or one collection per violin) at the positions 1, 2, 3, ... and answer them (see `violinPlot:positions:`)."
 
 	^ self violinPlot: aCollection positions: nil
 ]
 
 { #category : 'plotting' }
-BpAxes >> violinPlot: aCollection positions: aCollectionOrNil [
+BpChart >> violinPlot: aCollection positions: aCollectionOrNil [
 	"Draw violins of the data aCollection (a collection of numbers for one violin, or one collection per violin) at the positions aCollectionOrNil (nil for 1, 2, 3, ...) and answer them, to be configured with widths:, showMeans:, showMedians:, quantiles:, side:, ... (see `BpViolinPlot`)."
 
 	^ self addArtist: (BpViolinPlot new
@@ -597,14 +619,14 @@ BpAxes >> violinPlot: aCollection positions: aCollectionOrNil [
 ]
 
 { #category : 'accessing' }
-BpAxes >> xLimits [
+BpChart >> xLimits [
 	"Answer the data values shown at the left and right of my plot area."
 
 	^ transform xLimits
 ]
 
 { #category : 'accessing' }
-BpAxes >> xLimits: aCollectionOrNil [
+BpChart >> xLimits: aCollectionOrNil [
 	"Set the left and right data values; nil computes them from the data."
 
 	xLimits := aCollectionOrNil.
@@ -612,13 +634,13 @@ BpAxes >> xLimits: aCollectionOrNil [
 ]
 
 { #category : 'accessing' }
-BpAxes >> xScale [
+BpChart >> xScale [
 
 	^ xScale
 ]
 
 { #category : 'accessing' }
-BpAxes >> xScale: aSymbol [
+BpChart >> xScale: aSymbol [
 	"Set #linear or #log."
 
 	xScale := aSymbol.
@@ -626,13 +648,13 @@ BpAxes >> xScale: aSymbol [
 ]
 
 { #category : 'accessing' }
-BpAxes >> xTickCount [
+BpChart >> xTickCount [
 
 	^ xTickCount
 ]
 
 { #category : 'accessing' }
-BpAxes >> xTickCount: anInteger [
+BpChart >> xTickCount: anInteger [
 	"Set the largest number of intervals between x ticks."
 
 	xTickCount := anInteger.
@@ -640,7 +662,7 @@ BpAxes >> xTickCount: anInteger [
 ]
 
 { #category : 'accessing' }
-BpAxes >> xTickFormatter: aBlockOrNil [
+BpChart >> xTickFormatter: aBlockOrNil [
 	"Set a block answering the label of an x tick from its value; nil prints the values."
 
 	xTickFormatter := aBlockOrNil.
@@ -648,7 +670,7 @@ BpAxes >> xTickFormatter: aBlockOrNil [
 ]
 
 { #category : 'accessing' }
-BpAxes >> xTicks: aCollectionOfNumbers [
+BpChart >> xTicks: aCollectionOfNumbers [
 	"Put the ticks of the x axis at aCollectionOfNumbers instead of choosing them; nil chooses them again."
 
 	xTicks := aCollectionOfNumbers ifNotNil: [ aCollectionOfNumbers asArray ].
@@ -656,13 +678,13 @@ BpAxes >> xTicks: aCollectionOfNumbers [
 ]
 
 { #category : 'accessing' }
-BpAxes >> yLimits [
+BpChart >> yLimits [
 
 	^ transform yLimits
 ]
 
 { #category : 'accessing' }
-BpAxes >> yLimits: aCollectionOrNil [
+BpChart >> yLimits: aCollectionOrNil [
 	"Set the bottom and top data values; nil computes them from the data."
 
 	yLimits := aCollectionOrNil.
@@ -670,13 +692,13 @@ BpAxes >> yLimits: aCollectionOrNil [
 ]
 
 { #category : 'accessing' }
-BpAxes >> yScale [
+BpChart >> yScale [
 
 	^ yScale
 ]
 
 { #category : 'accessing' }
-BpAxes >> yScale: aSymbol [
+BpChart >> yScale: aSymbol [
 	"Set #linear or #log."
 
 	yScale := aSymbol.
@@ -684,13 +706,13 @@ BpAxes >> yScale: aSymbol [
 ]
 
 { #category : 'accessing' }
-BpAxes >> yTickCount [
+BpChart >> yTickCount [
 
 	^ yTickCount
 ]
 
 { #category : 'accessing' }
-BpAxes >> yTickCount: anInteger [
+BpChart >> yTickCount: anInteger [
 	"Set the largest number of intervals between y ticks."
 
 	yTickCount := anInteger.
@@ -698,7 +720,7 @@ BpAxes >> yTickCount: anInteger [
 ]
 
 { #category : 'accessing' }
-BpAxes >> yTickFormatter: aBlockOrNil [
+BpChart >> yTickFormatter: aBlockOrNil [
 	"Set a block answering the label of a y tick from its value; nil prints the values."
 
 	yTickFormatter := aBlockOrNil.
@@ -706,7 +728,7 @@ BpAxes >> yTickFormatter: aBlockOrNil [
 ]
 
 { #category : 'accessing' }
-BpAxes >> yTicks: aCollectionOfNumbers [
+BpChart >> yTicks: aCollectionOfNumbers [
 	"Put the ticks of the y axis at aCollectionOfNumbers instead of choosing them; nil chooses them again."
 
 	yTicks := aCollectionOfNumbers ifNotNil: [ aCollectionOfNumbers asArray ].

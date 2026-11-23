@@ -69,7 +69,7 @@ BpHistogramTest >> testBarsUseTheFirstCycleColor [
 		assert: (BpHistogram new
 			 x: #( 1 );
 			 yourself) patches first background paint color
-		equals: BpColors tab10 first
+		equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests - bars' }
@@ -172,7 +172,7 @@ BpHistogramTest >> testDatasetsUseTheNextCycleColors [
 		assert: (BpHistogram new
 			 x: #( #( 1 ) #( 2 ) );
 			 yourself) patches second first background paint color
-		equals: BpColors tab10 second
+		equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests - counts' }
@@ -407,7 +407,7 @@ BpHistogramTest >> testStepIsDrawnWithColorNotFaceColor [
 		         histType: #step;
 		         faceColor: Color green;
 		         yourself) patches first.
-	self assert: step border paint color equals: BpColors tab10 first.
+	self assert: step border paint color equals: (BpPalette default colorAt: 1).
 	self assert: step background paint color equals: Color transparent
 ]
 

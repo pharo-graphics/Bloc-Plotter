@@ -1,5 +1,5 @@
 "
-I am the inside of a `BpAxes`: the white rectangle framed by the spines, where the patches of the artists, the grid lines and the legend are shown, clipped to my bounds (`showChildren`). From bottom to top: the patches of bars and scatter points, the grid lines, the patches of lines (`BpArtist>>isAboveGrid`), then the legend. My `BpPlotAreaLayout` places the patches where their data are.
+I am the inside of a `BpChart`: the white rectangle framed by the spines, where the patches of the artists, the grid lines and the legend are shown, clipped to my bounds (`showChildren`). From bottom to top: the patches of bars and scatter points, the grid lines, the patches of lines (`BpArtist>>isAboveGrid`), then the legend. My `BpPlotAreaLayout` places the patches where their data are.
 
 ## Examples
 
@@ -9,8 +9,8 @@ BpPlotArea instanceOfHistogram
 
 ## Usage
 
-1. `BpAxes>>initialize` creates me and gives me its `BpDataTransform`.
-2. `BpAxes>>rebuild` gives me the patches of its artists (`patches:`), its legend (`legend:`) and its grid lines (`gridLines:`), replacing the previous ones.
+1. `BpChart>>initialize` creates me and gives me its `BpDataTransform`.
+2. `BpChart>>rebuild` gives me the patches of its artists (`patches:`), its legend (`legend:`) and its grid lines (`gridLines:`), replacing the previous ones.
 "
 Class {
 	#name : 'BpPlotArea',
@@ -23,16 +23,16 @@ Class {
 		'legend',
 		'gridLines'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instances' }
 BpPlotArea class >> instanceOfHistogram [
 
 	<sampleInstance>
-	^ BpAxes instanceHistogram plotArea
+	^ BpChart instanceHistogram plotArea
 ]
 
 { #category : 'accessing' }

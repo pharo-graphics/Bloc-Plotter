@@ -1,5 +1,5 @@
 "
-I am one line of the grid of a `BpAxes` (`BpAxes>>grid:`): a light gray line across the plot area at the location of a tick, vertical for the x axis and horizontal for the y axis.
+I am one line of the grid of a `BpChart` (`BpChart>>grid:`): a light gray line across the plot area at the location of a tick, vertical for the x axis and horizontal for the y axis.
 
 ## Examples
 
@@ -13,8 +13,8 @@ BpGridLine instanceVertical
 
 ## Usage
 
-1. `BpAxes>>rebuild` creates me with `axis:location:` for each tick when `BpAxes>>grid:` was sent true, and gives me to its `BpPlotArea` (`gridLines:`).
-2. `BpPlotAreaLayout` places me with `boundsWith:in:`; the axes replace me at each rebuild.
+1. `BpChart>>rebuild` creates me with `axis:location:` for each tick when `BpChart>>grid:` was sent true, and gives me to its `BpPlotArea` (`gridLines:`).
+2. `BpPlotAreaLayout` places me with `boundsWith:in:`; the chart replaces me at each rebuild.
 "
 Class {
 	#name : 'BpGridLine',
@@ -25,9 +25,9 @@ Class {
 		'axis',
 		'location'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instance creation' }

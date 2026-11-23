@@ -1,5 +1,5 @@
 "
-I check `BpFillBetween`, as `BpAxes>>fillBetweenX:y1:y2:` and `BpAxes>>fillBetweenY:x1:x2:` create it: the vertices of the polygons (including the regions selected by where, the interpolated crossings and the three step styles), the broadcasting of single values, horizontal fills, colors and outlines, the legend entry and the color cycle.
+I check `BpFillBetween`, as `BpChart>>fillBetweenX:y1:y2:` and `BpChart>>fillBetweenY:x1:x2:` create it: the vertices of the polygons (including the regions selected by where, the interpolated crossings and the three step styles), the broadcasting of single values, horizontal fills, colors and outlines, the legend entry and the colors of the palette.
 
 ## Implementation Notes
 
@@ -55,20 +55,20 @@ BpFillBetweenTest >> testAlphaMakesTheFillTransparent [
 ]
 
 { #category : 'tests' }
-BpFillBetweenTest >> testAxesFillBetweenXY1FillsDownToZero [
+BpFillBetweenTest >> testChartFillBetweenXY1FillsDownToZero [
 
-	| axes fill |
-	axes := BpAxes new.
-	fill := axes fillBetweenX: #( 0 1 ) y1: #( 2 3 ).
-	self assert: (axes artists includes: fill).
+	| chart fill |
+	chart := BpChart new.
+	fill := chart fillBetweenX: #( 0 1 ) y1: #( 2 3 ).
+	self assert: (chart artists includes: fill).
 	self assert: fill patches first dataVertices first equals: 0 @ 0
 ]
 
 { #category : 'tests' }
-BpFillBetweenTest >> testAxesFillBetweenYX1X2FillsHorizontally [
+BpFillBetweenTest >> testChartFillBetweenYX1X2FillsHorizontally [
 
 	| fill |
-	fill := BpAxes new fillBetweenY: #( 0 1 ) x1: 0 x2: #( 2 3 ).
+	fill := BpChart new fillBetweenY: #( 0 1 ) x1: 0 x2: #( 2 3 ).
 	self assert: fill orientation equals: #horizontal.
 	self assert: fill patches first dataVertices second equals: 0 @ 0.
 	self assert: fill patches first dataVertices fourth equals: 3 @ 1
@@ -78,22 +78,20 @@ BpFillBetweenTest >> testAxesFillBetweenYX1X2FillsHorizontally [
 BpFillBetweenTest >> testColorSetsTheFillAndTheOutline [
 
 	| polygon |
-	polygon := (self fill
-		            color: 'C3';
+	polygon := (self fill color: (BpPalette default colorAt: 4);
 		            yourself) patches first.
-	self assert: polygon background paint color equals: BpColors tab10 fourth.
-	self assert: polygon border paint color equals: BpColors tab10 fourth
+	self assert: polygon background paint color equals: (BpPalette default colorAt: 4).
+	self assert: polygon border paint color equals: (BpPalette default colorAt: 4)
 ]
 
 { #category : 'tests' }
 BpFillBetweenTest >> testEdgeColorAndLineWidthOutlineTheFill [
 
 	| polygon |
-	polygon := (self fill
-		            edgeColor: 'k';
+	polygon := (self fill edgeColor: Color black;
 		            lineWidth: 2;
 		            yourself) patches first.
-	self assert: polygon border paint color equals: (BpColors named: 'k').
+	self assert: polygon border paint color equals: Color black.
 	self assert: (polygon border width closeTo: 2 * BpArtist pixelsPerPoint)
 ]
 
@@ -101,10 +99,9 @@ BpFillBetweenTest >> testEdgeColorAndLineWidthOutlineTheFill [
 BpFillBetweenTest >> testFaceColorSetsOnlyTheFill [
 
 	| polygon |
-	polygon := (self fill
-		            faceColor: 'C3';
+	polygon := (self fill faceColor: (BpPalette default colorAt: 4);
 		            yourself) patches first.
-	self assert: polygon background paint color equals: BpColors tab10 fourth.
+	self assert: polygon background paint color equals: (BpPalette default colorAt: 4).
 	self assert: polygon border width equals: 0
 ]
 
@@ -123,10 +120,10 @@ BpFillBetweenTest >> testFillIsBelowTheGrid [
 { #category : 'tests' }
 BpFillBetweenTest >> testFillTakesTheNextColorOfTheCycle [
 
-	| axes |
-	axes := BpAxes new.
-	axes plotX: #( 0 1 ) y: #( 0 1 ).
-	self assert: (axes fillBetweenX: #( 0 1 ) y1: #( 1 2 )) patches first background paint color equals: BpColors tab10 second
+	| chart |
+	chart := BpChart new.
+	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	self assert: (chart fillBetweenX: #( 0 1 ) y1: #( 1 2 )) patches first background paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests' }
@@ -136,7 +133,7 @@ BpFillBetweenTest >> testHandlersAreKeptWhenTheFillIsRebuilt [
 	fill := self fill.
 	clicked := nil.
 	fill whenPatch: BlClickEvent do: [ :event :polygon | clicked := polygon ].
-	fill color: 'C3'.
+	fill color: (BpPalette default colorAt: 4).
 	BlEvent fireEvent: BlClickEvent new target: fill patches first.
 	self assert: clicked identicalTo: fill patches first
 ]
@@ -205,8 +202,7 @@ BpFillBetweenTest >> testLabelGivesALegendEntry [
 BpFillBetweenTest >> testLineWidthZeroRemovesTheOutline [
 
 	self
-		assert: (self fill
-			 color: 'C3';
+		assert: (self fill color: (BpPalette default colorAt: 4);
 			 lineWidth: 0;
 			 yourself) patches first border width
 		equals: 0

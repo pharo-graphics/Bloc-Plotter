@@ -1,5 +1,5 @@
 "
-I am a stem plot, added by `BpAxes>>stem:` and `BpAxes>>stemLocations:heads:`. For each location I draw a vertical line (a stem) from a baseline to its head, and a marker on the head; a horizontal baseline joins the first and the last location. Three format strings style these parts: `lineFormat:` the stems, `markerFormat:` the markers and `baseFormat:` the baseline.
+I am a stem plot, added by `BpChart>>stem:` and `BpChart>>stemLocations:heads:`. For each location I draw a vertical line (a stem) from a baseline to its head, and a marker on the head; a horizontal baseline joins the first and the last location. Three format strings style these parts: `lineFormat:` the stems, `markerFormat:` the markers and `baseFormat:` the baseline.
 
 ## Examples
 
@@ -12,14 +12,14 @@ BpStemPlot exampleInteraction
 ## Design Rationale
 
 - My parts are `stemLines` (one open `BpPolygonPatch` of two vertices per stem), `markerLine` (one `BpMarkerPatch` per head) and `baseLine` (one `BpPolygonPatch`, nil when hidden). They are drawn in that order, above the grid, as lines.
-- I take no color of the color cycle (`colorCount` is 0): stems and markers are 'C0' and the baseline 'C3' unless a format string gives another color, and markers take the color of the stems by default.
-- The formats are read by `BpLine class>>formatPartsOf:`, so they accept what `BpLine>>format:` accepts, plus a whole color name ('grey') for any of them; a blank base format (' ') hides the baseline.
-- `markerFaceColor:` sets the fill of the markers, the only part style the gallery changes; 'none' gives hollow markers.
+- I take no color of the palette in turn (`colorCount` is 0): stems and markers are drawn in its first color and the baseline in its fourth, unless `lineColor:`, `markerColor:` or `baseColor:` gives another. Markers take the color of the stems by default.
+- The formats are read by `BpLine class>>formatPartsOf:`, so they accept what `BpLine>>format:` accepts; a blank base format (' ') hides the baseline.
+- `markerFaceColor:` sets the fill of the markers, the only part style the gallery changes; `Color transparent` gives hollow markers.
 
 ## Usage
 
-1. `BpAxes>>stem:` (heads only, located from 0) and `BpAxes>>stemLocations:heads:` create me with my data (`locations:heads:`) and add me to the axes (see `BpArtist`).
-2. My axes read `isAboveGrid` (true) and my `legendEntries`: a stem with its marker on a piece of baseline.
+1. `BpChart>>stem:` (heads only, located from 0) and `BpChart>>stemLocations:heads:` create me with my data (`locations:heads:`) and add me to the chart (see `BpArtist`).
+2. My chart reads `isAboveGrid` (true) and my `legendEntries`: a stem with its marker on a piece of baseline.
 
 ## Implementation Notes
 
@@ -45,7 +45,10 @@ Class {
 		'stemLines',
 		'markerLine',
 		'baseLine',
-		'locations'
+		'locations',
+		'lineColor',
+		'markerColor',
+		'baseColor'
 	],
 	#category : 'Bloc-Plotter-Stem',
 	#package : 'Bloc-Plotter',
@@ -79,10 +82,10 @@ BpStemPlot class >> exampleStemPlot [
 
 { #category : 'instances' }
 BpStemPlot class >> instanceStems [
-	"Answer five stems going up and down from the baseline, in new axes."
+	"Answer five stems going up and down from the baseline, in a new chart."
 
 	<sampleInstance>
-	^ (BpAxes new
+	^ (BpChart new
 		   extent: 400 @ 300;
 		   yourself) stem: #( 3 -1 4 -1 5 )
 ]
@@ -94,6 +97,14 @@ BpStemPlot class >> stemPlotLocations [
 	^ self linspaceFrom: 0.1 to: 2 * Float pi count: 41
 ]
 
+{ #category : 'accessing - style' }
+BpStemPlot >> baseColor: aColor [
+	"Set the color of the baseline, the fourth color of my palette by default."
+
+	baseColor := aColor.
+	self refresh
+]
+
 { #category : 'accessing - options' }
 BpStemPlot >> baseFormat [
 
@@ -102,7 +113,7 @@ BpStemPlot >> baseFormat [
 
 { #category : 'accessing - options' }
 BpStemPlot >> baseFormat: aString [
-	"Set the color and line style of the baseline with a format string ('C3-' by default, see `BpLine>>format:`); a blank string hides it."
+	"Set the line style of the baseline with a format string ('-' by default, see `BpLine>>format:`); a blank string hides it."
 
 	baseFormat := aString.
 	self refresh
@@ -131,7 +142,7 @@ BpStemPlot >> bottom: aNumber [
 
 { #category : 'axes' }
 BpStemPlot >> colorCount [
-	"Answer 0: my default colors are fixed ('C0' and 'C3'), not taken from the color cycle."
+	"Answer 0: my default colors are fixed colors of the palette (the first and the fourth), not the next ones."
 
 	^ 0
 ]
@@ -140,9 +151,15 @@ BpStemPlot >> colorCount [
 BpStemPlot >> compute [
 	"Check my formats, so that a wrong one fails when it is set."
 
-	self partsOf: lineFormat.
-	self partsOf: markerFormat.
-	self isBaseLineHidden ifFalse: [ self partsOf: baseFormat ]
+	BpLine formatPartsOf: lineFormat.
+	BpLine formatPartsOf: markerFormat.
+	self isBaseLineHidden ifFalse: [ BpLine formatPartsOf: baseFormat ]
+]
+
+{ #category : 'private - style' }
+BpStemPlot >> headColor [
+
+	^ markerColor ifNil: [ self stemColor ] ifNotNil: [ self colorOf: markerColor ]
 ]
 
 { #category : 'accessing - data' }
@@ -162,9 +179,9 @@ BpStemPlot >> heads: aCollection [
 BpStemPlot >> initialize [
 
 	super initialize.
-	lineFormat := 'C0-'.
+	lineFormat := '-'.
 	markerFormat := 'o'.
-	baseFormat := 'C3-'.
+	baseFormat := '-'.
 	bottom := 0.
 	orientation := #vertical.
 	stemLines := #(  ).
@@ -197,6 +214,14 @@ BpStemPlot >> legendEntries [
 	^ { (label asString -> self newSwatch) }
 ]
 
+{ #category : 'accessing - style' }
+BpStemPlot >> lineColor: aColor [
+	"Set the color of the stems, the first color of my palette by default. The markers take it too, unless they have their own."
+
+	lineColor := aColor.
+	self refresh
+]
+
 { #category : 'accessing - options' }
 BpStemPlot >> lineFormat [
 
@@ -205,7 +230,7 @@ BpStemPlot >> lineFormat [
 
 { #category : 'accessing - options' }
 BpStemPlot >> lineFormat: aString [
-	"Set the color and line style of the stems with a format string ('C0-' by default, see `BpLine>>format:`) or a color name. The markers take this color unless the marker format gives one."
+	"Set the line style of the stems with a format string ('-' by default, see `BpLine>>format:`)."
 
 	lineFormat := aString.
 	self refresh
@@ -232,11 +257,12 @@ BpStemPlot >> locations: aCollectionOrNil heads: anotherCollection [
 	self refresh
 ]
 
-{ #category : 'private - style' }
-BpStemPlot >> markerColor [
-	"Answer the color of the marker format, else the color of the stems."
+{ #category : 'accessing - style' }
+BpStemPlot >> markerColor: aColor [
+	"Set the color of the markers, the color of the stems by default."
 
-	^ (self partsOf: markerFormat) at: #color ifPresent: [ :each | self paintOf: each ] ifAbsent: [ self stemColor ]
+	markerColor := aColor.
+	self refresh
 ]
 
 { #category : 'accessing - style' }
@@ -246,10 +272,10 @@ BpStemPlot >> markerFaceColor [
 ]
 
 { #category : 'accessing - style' }
-BpStemPlot >> markerFaceColor: aColorOrName [
-	"Set the fill color of the markers; 'none' gives hollow markers."
+BpStemPlot >> markerFaceColor: aColor [
+	"Set the fill color of the markers; `Color transparent` gives hollow markers."
 
-	markerFaceColor := aColorOrName.
+	markerFaceColor := aColor.
 	self refresh
 ]
 
@@ -277,23 +303,22 @@ BpStemPlot >> markerLine [
 { #category : 'private - style' }
 BpStemPlot >> markerShape [
 
-	^ BpMarker on: ((self partsOf: markerFormat) at: #marker ifAbsent: [ 'o' ])
+	^ BpMarker on: ((BpLine formatPartsOf: markerFormat) at: #marker ifAbsent: [ 'o' ])
 ]
 
 { #category : 'private - computing' }
 BpStemPlot >> newBaseLine [
 	"Answer my baseline from my first to my last location, or nil when hidden or empty."
 
-	| parts allLocations |
+	| allLocations |
 	allLocations := self locations.
 	(allLocations isEmpty or: [ self isBaseLineHidden ]) ifTrue: [ ^ nil ].
-	parts := self partsOf: baseFormat.
 	^ self
 		  newLineThrough: {
 			  (allLocations min @ bottom).
 			  (allLocations max @ bottom) }
-		  color: (self paintOf: (parts at: #color ifAbsent: [ 'C3' ]))
-		  style: (parts at: #lineStyle ifAbsent: [ #solid ])
+		  color: (self colorOf: (baseColor ifNil: [ self paletteColorAt: 4 ]))
+		  style: ((BpLine formatPartsOf: baseFormat) at: #lineStyle ifAbsent: [ #solid ])
 ]
 
 { #category : 'private - computing' }
@@ -340,7 +365,7 @@ BpStemPlot >> newPatches [
 	color := self stemColor.
 	style := self stemStyle.
 	marker := self markerShape.
-	headColor := self markerColor.
+	headColor := self headColor.
 	stemLines := allLocations with: (heads ifNil: [ #(  ) ]) collect: [ :location :head |
 		             self
 			             newLineThrough: {
@@ -375,7 +400,7 @@ BpStemPlot >> newSwatch [
 		          marker: self markerShape;
 		          yourself.
 	marker updateShape.
-	self style: marker color: self markerColor.
+	self style: marker color: self headColor.
 	side := marker marker extentWithSide: marker side.
 	marker
 		extent: side;
@@ -419,20 +444,9 @@ BpStemPlot >> oriented: aPoint [
 ]
 
 { #category : 'private - style' }
-BpStemPlot >> partsOf: aString [
-	"Answer the parts (#color, #lineStyle, #marker) of a format string, a whole color name giving only the color."
-
-	(self isColorName: aString) ifTrue: [
-		^ Dictionary new
-			  at: #color put: aString;
-			  yourself ].
-	^ BpLine formatPartsOf: aString
-]
-
-{ #category : 'private - style' }
 BpStemPlot >> stemColor [
 
-	^ self paintOf: ((self partsOf: lineFormat) at: #color ifAbsent: [ 'C0' ])
+	^ self colorOf: (lineColor ifNil: [ self paletteColorAt: 1 ])
 ]
 
 { #category : 'accessing - results' }
@@ -445,7 +459,7 @@ BpStemPlot >> stemLines [
 { #category : 'private - style' }
 BpStemPlot >> stemStyle [
 
-	^ (self partsOf: lineFormat) at: #lineStyle ifAbsent: [ #solid ]
+	^ (BpLine formatPartsOf: lineFormat) at: #lineStyle ifAbsent: [ #solid ]
 ]
 
 { #category : 'private - style' }

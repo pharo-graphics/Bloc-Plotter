@@ -1,5 +1,5 @@
 "
-I check `BpViolinPlot`, as `BpAxes>>violinPlot:` and `BpAxes>>violinPlot:positions:` create it: the bodies (shape, positions, widths, sides, orientation, resolution), the lines at the extrema, means, medians and quantiles, colors, line widths and alpha, the drawing order, the legend entry and handlers.
+I check `BpViolinPlot`, as `BpChart>>violinPlot:` and `BpChart>>violinPlot:positions:` create it: the bodies (shape, positions, widths, sides, orientation, resolution), the lines at the extrema, means, medians and quantiles, colors, line widths and alpha, the drawing order, the legend entry and handlers.
 
 ## Implementation Notes
 
@@ -21,16 +21,6 @@ BpViolinPlotTest >> testAlphaSetsTheOpacityOfTheBodies [
 ]
 
 { #category : 'tests' }
-BpViolinPlotTest >> testAxesViolinPlotPositionsAddsTheViolins [
-
-	| axes violins |
-	axes := BpAxes new.
-	violins := axes violinPlot: #( #( 1 2 3 ) #( 2 4 4 6 ) ) positions: #( 2 4 ).
-	self assert: axes artists last identicalTo: violins.
-	self assert: violins positions equals: #( 2 4 )
-]
-
-{ #category : 'tests' }
 BpViolinPlotTest >> testBandwidthIsGivenToTheStatistics [
 
 	self assert: (self violinsWith: [ :violins | violins bandwidth: 0.5 ]) statistics first factor equals: 0.5
@@ -42,7 +32,7 @@ BpViolinPlotTest >> testBodiesAreTheCycleColorWithAlpha [
 	| color |
 	color := (self violins parts at: #bodies) first background paint color.
 	self assert: (color alpha closeTo: 0.3 precision: 0.01).
-	self assert: (color alpha: 1) equals: (BpColors tab10 first alpha: 1)
+	self assert: (color alpha: 1) equals: ((BpPalette default colorAt: 1) alpha: 1)
 ]
 
 { #category : 'tests' }
@@ -63,6 +53,16 @@ BpViolinPlotTest >> testBodyIsHalfTheWidthWideAtTheHighestDensity [
 	self assert: ((xs at: 3) closeTo: 0.75).
 	self assert: ((xs at: 8) closeTo: 1.25).
 	self assert: xs min equals: (xs at: 3)
+]
+
+{ #category : 'tests' }
+BpViolinPlotTest >> testChartViolinPlotPositionsAddsTheViolins [
+
+	| chart violins |
+	chart := BpChart new.
+	violins := chart violinPlot: #( #( 1 2 3 ) #( 2 4 4 6 ) ) positions: #( 2 4 ).
+	self assert: chart artists last identicalTo: violins.
+	self assert: violins positions equals: #( 2 4 )
 ]
 
 { #category : 'tests' }
@@ -93,11 +93,13 @@ BpViolinPlotTest >> testExtremaOfOneSideReachThePositionAndHalfTheWidth [
 BpViolinPlotTest >> testFaceColorCanBeGivenPerViolin [
 
 	self
-		assert: (((self violinsWith: [ :violins | violins faceColor: #( 'r' 'g' ) ]) parts at: #bodies) collect: [ :each |
+		assert: (((self violinsWith: [ :violins | violins faceColor: {
+	Color red.
+	Color green } ]) parts at: #bodies) collect: [ :each |
 			 each background paint color alpha: 1 ])
 		equals: {
-			(BpColors named: 'r').
-			(BpColors named: 'g') }
+			Color red.
+			Color green }
 ]
 
 { #category : 'tests' }
@@ -141,8 +143,8 @@ BpViolinPlotTest >> testLabelGivesALegendEntry [
 BpViolinPlotTest >> testLineColorColorsTheLines [
 
 	self
-		assert: ((self violinsWith: [ :violins | violins lineColor: 'k' ]) parts at: #bars) first border paint color
-		equals: (BpColors named: 'k')
+		assert: ((self violinsWith: [ :violins | violins lineColor: Color black ]) parts at: #bars) first border paint color
+		equals: Color black
 ]
 
 { #category : 'tests' }
@@ -167,7 +169,7 @@ BpViolinPlotTest >> testLinesAreTheCycleColor [
 
 	| line |
 	line := (self violins parts at: #bars) first.
-	self assert: line border paint color equals: BpColors tab10 first.
+	self assert: line border paint color equals: (BpPalette default colorAt: 1).
 	self assert: (line border width closeTo: 1.5 * BpArtist pixelsPerPoint)
 ]
 
@@ -290,10 +292,10 @@ BpViolinPlotTest >> testUnknownSideRaisesError [
 { #category : 'tests' }
 BpViolinPlotTest >> testViolinsTakeTheNextColorOfTheCycle [
 
-	| axes |
-	axes := BpAxes new.
-	axes plotX: #( 0 1 ) y: #( 0 1 ).
-	self assert: ((axes violinPlot: #( 1 2 3 )) parts at: #bars) first border paint color equals: BpColors tab10 second
+	| chart |
+	chart := BpChart new.
+	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	self assert: ((chart violinPlot: #( 1 2 3 )) parts at: #bars) first border paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests - errors' }

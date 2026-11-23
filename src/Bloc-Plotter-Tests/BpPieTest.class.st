@@ -88,10 +88,12 @@ BpPieTest >> testColorsAreGivenToWedges [
 		Color green }
 ]
 
-{ #category : 'tests - wedges' }
-BpPieTest >> testDefaultColorsFollowTheTab10Cycle [
+{ #category : 'tests - palette' }
+BpPieTest >> testDefaultColorsAreTheDefaultPalette [
 
-	self assert: (pie wedges collect: [ :each | each background paint color ] as: Array) equals: (BpPie defaultColors first: 4)
+	self
+		assert: (pie wedges collect: [ :each | each background paint color ] as: Array)
+		equals: ((1 to: 4) collect: [ :each | BpPalette default colorAt: each ])
 ]
 
 { #category : 'tests - texts' }
@@ -248,6 +250,17 @@ BpPieTest >> testOutsideTextsStayInsideThePie [
 		addLabels: #( 'a long label' 'a long label' 'a long label' 'a long label' ) distance: 1.1.
 	self layOutPie.
 	self assert: (pie texts allSatisfy: [ :each | (0 @ 0 extent: pie extent) containsRect: each bounds inParent asRectangle ])
+]
+
+{ #category : 'tests - palette' }
+BpPieTest >> testPaletteGivesTheWedgeColors [
+
+	| palette |
+	palette := BpQualitativePalette set1.
+	pie palette: palette.
+	self
+		assert: (pie wedges collect: [ :each | each background paint color ] as: Array)
+		equals: ((1 to: 4) collect: [ :each | palette colorAt: each ])
 ]
 
 { #category : 'tests - layout' }

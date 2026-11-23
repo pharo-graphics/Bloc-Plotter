@@ -1,5 +1,5 @@
 "
-I am a box plot of one or several datasets, added by `BpAxes>>boxPlot:`: for each dataset, a box from the first to the third quartile crossed by the median, whiskers to the most extreme data within 1.5 interquartile ranges, caps at their ends, and the fliers beyond them as markers. I get the numbers from `BpBoxStatistics` and draw them with `BpPolygonPatch` lines and boxes and `BpMarkerPatch` fliers and means.
+I am a box plot of one or several datasets, added by `BpChart>>boxPlot:`: for each dataset, a box from the first to the third quartile crossed by the median, whiskers to the most extreme data within 1.5 interquartile ranges, caps at their ends, and the fliers beyond them as markers. I get the numbers from `BpBoxStatistics` and draw them with `BpPolygonPatch` lines and boxes and `BpMarkerPatch` fliers and means.
 
 ## Examples
 
@@ -11,16 +11,16 @@ BpBoxPlot examplePlotType
 
 ## Design Rationale
 
-- My settings are `notch:`, `whiskers:` (a factor of the interquartile range or a pair of percentiles), `positions:`, `widths:`, `capWidths:`, `orientation:` (`#vertical` or `#horizontal`), `flierSymbol:` (a format such as `'gD'`, `''` hides the fliers), `patchArtist:`, `showMeans:`, `meanLine:`, `showFliers:`, `showCaps:`, `showBox:`, `tickLabels:`.
-- Styles are dictionaries over defaults (`boxProperties:`, `medianProperties:`, `whiskerProperties:`, `capProperties:`, `flierProperties:` and `meanProperties:`): keys such as `#color`, `#faceColor`, `#edgeColor`, `#lineWidth`, `#lineStyle`, `#marker`, `#markerSize`. The defaults are a black box and whiskers, median in `'C1'`, mean as a `'C2'` triangle. The color `'none'` is transparent.
+- My settings are `notch:`, `whiskers:` (a factor of the interquartile range or a pair of percentiles), `positions:`, `widths:`, `capWidths:`, `orientation:` (`#vertical` or `#horizontal`), `flierSymbol:` (a marker such as `'D'`, `''` hides the fliers), `patchArtist:`, `showMeans:`, `meanLine:`, `showFliers:`, `showCaps:`, `showBox:`, `tickLabels:`.
+- Styles are dictionaries over defaults (`boxProperties:`, `medianProperties:`, `whiskerProperties:`, `capProperties:`, `flierProperties:` and `meanProperties:`): keys such as `#color`, `#faceColor`, `#edgeColor`, `#lineWidth`, `#lineStyle`, `#marker`, `#markerSize`. The defaults are a black box and whiskers, the face, the median and the mean in the first, second and third colors of the palette of my chart.
 - I keep the patches of each part apart (`parts` at `#boxes`, `#medians`, `#whiskers`, `#caps`, `#fliers`, `#means`) and draw them in that layered order: whiskers and caps under the boxes, medians and means over them.
 - I work in (position @ value) and swap the coordinates once, in `oriented:`, so horizontal boxes need no other code.
 - I put a tick at each position (`managedTicksOn:`) and require half a unit around the extreme positions (`requiredValuesOn:`), which autoscaling does not go past. Ticks fixed with `xTicks:` win.
-- I do not use the color cycle (`colorCount` is 0) and I am drawn above the grid.
+- I take no color of the palette in turn (`colorCount` is 0) and I am drawn above the grid.
 
 ## Usage
 
-1. `BpAxes>>boxPlot:` creates me with a collection of numbers (one box) or a collection of such collections (one box per collection).
+1. `BpChart>>boxPlot:` creates me with a collection of numbers (one box) or a collection of such collections (one box per collection).
 2. My setters rebuild me: `compute` asks `BpBoxStatistics` for the statistics of each dataset, `newPatches` builds the parts.
 3. `statistics` answers them, one per dataset; each patch knows its `dataset` index, so a handler given to `whenPatch:do:` finds the box it belongs to.
 
@@ -65,71 +65,6 @@ Class {
 	#package : 'Bloc-Plotter',
 	#tag : 'Box'
 }
-
-{ #category : 'constants' }
-BpBoxPlot class >> defaultBoxProperties [
-	"Answer the style of the boxes (the face is the patch color, used when the boxes are filled)."
-
-	^ {
-		  (#color -> 'black').
-		  (#faceColor -> 'C0').
-		  (#lineWidth -> 1).
-		  (#lineStyle -> #solid) } asDictionary
-]
-
-{ #category : 'constants' }
-BpBoxPlot class >> defaultCapProperties [
-
-	^ {
-		  (#color -> 'black').
-		  (#lineWidth -> 1).
-		  (#lineStyle -> #solid) } asDictionary
-]
-
-{ #category : 'constants' }
-BpBoxPlot class >> defaultFlierProperties [
-	"Answer the style of the fliers: unfilled black circles."
-
-	^ {
-		  (#marker -> 'o').
-		  (#markerFaceColor -> 'none').
-		  (#markerEdgeColor -> 'black').
-		  (#markerSize -> 6).
-		  (#markerEdgeWidth -> 1) } asDictionary
-]
-
-{ #category : 'constants' }
-BpBoxPlot class >> defaultMeanProperties [
-	"Answer the style of the means: green triangles, or a dashed green line."
-
-	^ {
-		  (#marker -> '^').
-		  (#markerFaceColor -> 'C2').
-		  (#markerEdgeColor -> 'C2').
-		  (#markerSize -> 6).
-		  (#markerEdgeWidth -> 1).
-		  (#color -> 'C2').
-		  (#lineWidth -> 1).
-		  (#lineStyle -> #dashed) } asDictionary
-]
-
-{ #category : 'constants' }
-BpBoxPlot class >> defaultMedianProperties [
-
-	^ {
-		  (#color -> 'C1').
-		  (#lineWidth -> 1).
-		  (#lineStyle -> #solid) } asDictionary
-]
-
-{ #category : 'constants' }
-BpBoxPlot class >> defaultWhiskerProperties [
-
-	^ {
-		  (#color -> 'black').
-		  (#lineWidth -> 1).
-		  (#lineStyle -> #solid) } asDictionary
-]
 
 { #category : 'examples' }
 BpBoxPlot class >> exampleBoxPlotDemo [
@@ -181,13 +116,13 @@ BpBoxPlot >> addPartsOf: aStatistics at: aPosition width: aWidth dataset: anInde
 			 newLine: {
 				 (aPosition @ aStatistics q1).
 				 (aPosition @ aStatistics whiskerLow) }
-			 properties: (self properties: whiskerProperties defaults: self class defaultWhiskerProperties)
+			 properties: (self properties: whiskerProperties defaults: self defaultWhiskerProperties)
 			 dataset: anIndex);
 		add: (self
 			 newLine: {
 				 (aPosition @ aStatistics q3).
 				 (aPosition @ aStatistics whiskerHigh) }
-			 properties: (self properties: whiskerProperties defaults: self class defaultWhiskerProperties)
+			 properties: (self properties: whiskerProperties defaults: self defaultWhiskerProperties)
 			 dataset: anIndex).
 	showCaps ifTrue: [
 		(parts at: #caps)
@@ -195,13 +130,13 @@ BpBoxPlot >> addPartsOf: aStatistics at: aPosition width: aWidth dataset: anInde
 				 newLine: {
 					 (aPosition - capHalf @ aStatistics whiskerLow).
 					 (aPosition + capHalf @ aStatistics whiskerLow) }
-				 properties: (self properties: capProperties defaults: self class defaultCapProperties)
+				 properties: (self properties: capProperties defaults: self defaultCapProperties)
 				 dataset: anIndex);
 			add: (self
 				 newLine: {
 					 (aPosition - capHalf @ aStatistics whiskerHigh).
 					 (aPosition + capHalf @ aStatistics whiskerHigh) }
-				 properties: (self properties: capProperties defaults: self class defaultCapProperties)
+				 properties: (self properties: capProperties defaults: self defaultCapProperties)
 				 dataset: anIndex) ].
 	showBox ifTrue: [
 		(parts at: #boxes) add: (self
@@ -213,7 +148,7 @@ BpBoxPlot >> addPartsOf: aStatistics at: aPosition width: aWidth dataset: anInde
 		 newLine: {
 			 (aPosition - medianHalf @ aStatistics median).
 			 (aPosition + medianHalf @ aStatistics median) }
-		 properties: (self properties: medianProperties defaults: self class defaultMedianProperties)
+		 properties: (self properties: medianProperties defaults: self defaultMedianProperties)
 		 dataset: anIndex).
 	showMeans ifTrue: [
 		(parts at: #means) add: (self
@@ -252,7 +187,7 @@ BpBoxPlot >> capWidths: aNumberOrCollection [
 
 { #category : 'axes' }
 BpBoxPlot >> colorCount [
-	"Answer 0: box plots are drawn in the colors of their properties, not with the color cycle."
+	"Answer 0: my default colors are fixed colors of the palette (the first three), not the next ones."
 
 	^ 0
 ]
@@ -263,6 +198,63 @@ BpBoxPlot >> compute [
 	statistics := datasets collect: [ :each | BpBoxStatistics of: each whiskers: whiskers ]
 ]
 
+{ #category : 'private - style' }
+BpBoxPlot >> defaultBoxProperties [
+	"Answer the style of the boxes; the face, the first color of my palette, is drawn when the boxes are filled."
+
+	^ (self solidLinePropertiesOf: Color black)
+		  at: #faceColor put: (self paletteColorAt: 1);
+		  yourself
+]
+
+{ #category : 'private - style' }
+BpBoxPlot >> defaultCapProperties [
+
+	^ self solidLinePropertiesOf: Color black
+]
+
+{ #category : 'private - style' }
+BpBoxPlot >> defaultFlierProperties [
+	"Answer the style of the fliers: unfilled black circles."
+
+	^ {
+		  (#marker -> 'o').
+		  (#markerFaceColor -> Color transparent).
+		  (#markerEdgeColor -> Color black).
+		  (#markerSize -> 6).
+		  (#markerEdgeWidth -> 1) } asDictionary
+]
+
+{ #category : 'private - style' }
+BpBoxPlot >> defaultMeanProperties [
+	"Answer the style of the means: triangles, or a dashed line, in the third color of my palette."
+
+	| color |
+	color := self paletteColorAt: 3.
+	^ {
+		  (#marker -> '^').
+		  (#markerFaceColor -> color).
+		  (#markerEdgeColor -> color).
+		  (#markerSize -> 6).
+		  (#markerEdgeWidth -> 1).
+		  (#color -> color).
+		  (#lineWidth -> 1).
+		  (#lineStyle -> #dashed) } asDictionary
+]
+
+{ #category : 'private - style' }
+BpBoxPlot >> defaultMedianProperties [
+	"Answer the style of the medians: a solid line in the second color of my palette."
+
+	^ self solidLinePropertiesOf: (self paletteColorAt: 2)
+]
+
+{ #category : 'private - style' }
+BpBoxPlot >> defaultWhiskerProperties [
+
+	^ self solidLinePropertiesOf: Color black
+]
+
 { #category : 'accessing' }
 BpBoxPlot >> flierProperties: aDictionary [
 	"Set the style of the fliers: #marker, #markerFaceColor, #markerEdgeColor, #markerSize and #markerEdgeWidth (points)."
@@ -271,25 +263,20 @@ BpBoxPlot >> flierProperties: aDictionary [
 	self refresh
 ]
 
-{ #category : 'private - computing' }
+{ #category : 'private - style' }
 BpBoxPlot >> flierStyle [
-	"Answer the style of the fliers: my flier properties, then the marker and color of my flier symbol, which colors both the face and the edge."
+	"Answer the style of the fliers: my flier properties, with the marker of my flier symbol if any."
 
-	| style symbol |
-	style := self properties: flierProperties defaults: self class defaultFlierProperties.
+	| style |
+	style := self properties: flierProperties defaults: self defaultFlierProperties.
 	flierSymbol ifNil: [ ^ style ].
-	symbol := BpLine formatPartsOf: flierSymbol.
-	symbol at: #marker ifPresent: [ :each | style at: #marker put: each ].
-	symbol at: #color ifPresent: [ :each |
-		style
-			at: #markerFaceColor put: each;
-			at: #markerEdgeColor put: each ].
+	(BpLine formatPartsOf: flierSymbol) at: #marker ifPresent: [ :each | style at: #marker put: each ].
 	^ style
 ]
 
 { #category : 'accessing' }
 BpBoxPlot >> flierSymbol: aString [
-	"Set the marker and color of the fliers with a format string such as 'gD' or 'rs' (see `BpLine>>format:`); '' hides the fliers."
+	"Set the marker of the fliers with a format string such as 'D' or 's' (see `BpLine>>format:`); '' hides the fliers."
 
 	flierSymbol := aString.
 	self refresh
@@ -405,7 +392,7 @@ BpBoxPlot >> newBoxOf: aStatistics at: aPosition half: aHalfWidth dataset: anInd
 				          (right @ aStatistics q1).
 				          (right @ aStatistics q3).
 				          (left @ aStatistics q3) } ].
-	style := self properties: boxProperties defaults: self class defaultBoxProperties.
+	style := self properties: boxProperties defaults: self defaultBoxProperties.
 	box := self newPolygon: points closed: true dataset: anIndex.
 	box
 		background: (patchArtist
@@ -460,7 +447,7 @@ BpBoxPlot >> newMarkerAt: aPoint properties: aStyle dataset: anIndex [
 BpBoxPlot >> newMeanOf: aStatistics at: aPosition half: aHalfWidth dataset: anIndex [
 
 	| style |
-	style := self properties: meanProperties defaults: self class defaultMeanProperties.
+	style := self properties: meanProperties defaults: self defaultMeanProperties.
 	^ meanLine
 		  ifTrue: [
 			  self
@@ -512,7 +499,7 @@ BpBoxPlot >> newSwatch [
 
 	| style |
 	patchArtist ifTrue: [
-		style := self properties: boxProperties defaults: self class defaultBoxProperties.
+		style := self properties: boxProperties defaults: self defaultBoxProperties.
 		^ BlElement new
 			  extent: 20 @ 10;
 			  background: (self paintOf: (style at: #faceColor));
@@ -520,7 +507,7 @@ BpBoxPlot >> newSwatch [
 				   paint: (self paintOf: (style at: #edgeColor ifAbsent: [ style at: #color ]))
 				   width: (style at: #lineWidth) * self class pixelsPerPoint);
 			  yourself ].
-	style := self properties: medianProperties defaults: self class defaultMedianProperties.
+	style := self properties: medianProperties defaults: self defaultMedianProperties.
 	^ BlElement new
 		  geometry: (BlLineGeometry from: 0 @ 5 to: 20 @ 5);
 		  border: (self
@@ -566,7 +553,7 @@ BpBoxPlot >> parts [
 
 { #category : 'accessing' }
 BpBoxPlot >> patchArtist: aBoolean [
-	"Fill the boxes (with the face color of the box properties, the first color of the cycle by default) instead of drawing only their outline."
+	"Fill the boxes (with the face color of the box properties, the first color of the palette by default) instead of drawing only their outline."
 
 	patchArtist := aBoolean.
 	self refresh
@@ -640,6 +627,15 @@ BpBoxPlot >> showMeans: aBoolean [
 
 	showMeans := aBoolean.
 	self refresh
+]
+
+{ #category : 'private - style' }
+BpBoxPlot >> solidLinePropertiesOf: aColor [
+
+	^ {
+		  (#color -> aColor).
+		  (#lineWidth -> 1).
+		  (#lineStyle -> #solid) } asDictionary
 ]
 
 { #category : 'accessing' }

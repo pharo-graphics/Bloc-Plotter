@@ -1,5 +1,5 @@
 "
-I am a step curve, added by `BpAxes>>stairs:` and `BpAxes>>stairs:edges:`: one horizontal step per value, between two consecutive `edges`, joined by vertical risers. I suit data that is constant over intervals, such as a histogram computed beforehand. I draw one `BpPolygonPatch`: an open outline, or a closed and filled polygon after `fill: true`.
+I am a step curve, added by `BpChart>>stairs:` and `BpChart>>stairs:edges:`: one horizontal step per value, between two consecutive `edges`, joined by vertical risers. I suit data that is constant over intervals, such as a histogram computed beforehand. I draw one `BpPolygonPatch`: an open outline, or a closed and filled polygon after `fill: true`.
 
 ## Examples
 
@@ -19,8 +19,8 @@ BpStairs exampleInteraction
 
 ## Usage
 
-1. `BpAxes>>stairs:` and `BpAxes>>stairs:edges:` create me with my data (`values:edges:`) and add me to the axes (see `BpArtist`), which give me one color of their cycle. I can also be created and given to `BpAxes>>addArtist:`.
-2. My axes read my polygon (`patches`) for autoscaling and my `legendEntries` (a rectangle drawn as my outline or fill).
+1. `BpChart>>stairs:` and `BpChart>>stairs:edges:` create me with my data (`values:edges:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette. I can also be created and given to `BpChart>>addArtist:`.
+2. My chart reads my polygon (`patches`) for autoscaling and my `legendEntries` (a rectangle drawn as my outline or fill).
 
 ## Implementation Notes
 
@@ -77,31 +77,31 @@ BpStairs class >> exampleStairsDemo [
 ]
 
 { #category : 'private - demo' }
-BpStairs class >> filledStepsIn: anAxes [
-	"Draw in anAxes the filled steps of the gallery stairs demo, with automatic edges, and horizontal steps over the edges 2 to 7."
+BpStairs class >> filledStepsIn: aChart [
+	"Draw in aChart the filled steps of the gallery stairs demo, with automatic edges, and horizontal steps over the edges 2 to 7."
 
-	(anAxes stairs: (1 to: 5))
+	(aChart stairs: (1 to: 5))
 		fill: true;
 		label: 'Filled histogram w/ automatic edges'.
-	(anAxes stairs: ((1 to: 5) collect: [ :each | each * 0.3 ]) edges: (2 to: 7))
+	(aChart stairs: ((1 to: 5) collect: [ :each | each * 0.3 ]) edges: (2 to: 7))
 		orientation: #horizontal;
 		label: 'Histogram w/ horizontal orientation'.
-	anAxes title: 'Filled histogram'
+	aChart title: 'Filled histogram'
 ]
 
 { #category : 'instances' }
 BpStairs class >> instanceSteps [
-	"Answer steps of heights 1, 3, 2 and 4 between the edges 0 to 4, in new axes."
+	"Answer steps of heights 1, 3, 2 and 4 between the edges 0 to 4, in a new chart."
 
 	<sampleInstance>
-	^ (BpAxes new
+	^ (BpChart new
 		   extent: 400 @ 300;
 		   yourself) stairs: #( 1 3 2 4 )
 ]
 
 { #category : 'private - demo' }
-BpStairs class >> stepHistogramsIn: anAxes [
-	"Draw in anAxes the step histograms of the gallery stairs demo: a histogram of 5000 normal samples (mean 5, deviation 3) on 19 bins between 0 and 10, then shifted by 5 on a baseline at 50, then shifted by 10 without baseline."
+BpStairs class >> stepHistogramsIn: aChart [
+	"Draw in aChart the step histograms of the gallery stairs demo: a histogram of 5000 normal samples (mean 5, deviation 3) on 19 bins between 0 and 10, then shifted by 5 on a baseline at 50, then shifted by 10 without baseline."
 
 	| random edges counts |
 	random := Random seed: 0.
@@ -110,14 +110,14 @@ BpStairs class >> stepHistogramsIn: anAxes [
 		          countsOf: ((1 to: 5000) collect: [ :each | random nextNormalMean: 5 deviation: 3 ])
 		          weights: nil
 		          in: edges.
-	(anAxes stairs: counts edges: edges) label: 'Simple histogram'.
-	(anAxes stairs: counts edges: (edges collect: [ :each | each + 5 ]))
+	(aChart stairs: counts edges: edges) label: 'Simple histogram'.
+	(aChart stairs: counts edges: (edges collect: [ :each | each + 5 ]))
 		baseline: 50;
 		label: 'Modified baseline'.
-	(anAxes stairs: counts edges: (edges collect: [ :each | each + 10 ]))
+	(aChart stairs: counts edges: (edges collect: [ :each | each + 10 ]))
 		baseline: nil;
 		label: 'No edges'.
-	anAxes title: 'Step Histograms'
+	aChart title: 'Step Histograms'
 ]
 
 { #category : 'accessing' }
@@ -129,10 +129,10 @@ BpStairs >> baseline: aNumberCollectionOrNil [
 ]
 
 { #category : 'accessing' }
-BpStairs >> color: aColorOrName [
+BpStairs >> color: aColor [
 	"Set the color of the outline, or of the fill when I am filled."
 
-	color := aColorOrName.
+	color := aColor.
 	self refresh
 ]
 
@@ -151,10 +151,10 @@ BpStairs >> compute [
 ]
 
 { #category : 'accessing' }
-BpStairs >> edgeColor: aColorOrName [
+BpStairs >> edgeColor: aColor [
 	"Set the color of the outline."
 
-	edgeColor := aColorOrName.
+	edgeColor := aColor.
 	self refresh
 ]
 
@@ -174,10 +174,10 @@ BpStairs >> edges: aCollectionOrNil [
 ]
 
 { #category : 'accessing' }
-BpStairs >> faceColor: aColorOrName [
+BpStairs >> faceColor: aColor [
 	"Set the fill color, used when I am filled."
 
-	faceColor := aColorOrName.
+	faceColor := aColor.
 	self refresh
 ]
 
@@ -264,7 +264,7 @@ BpStairs >> oriented: aPoint [
 
 { #category : 'private - style' }
 BpStairs >> outlineColor [
-	"Answer the color of my outline: the edge color, else my color when I am not filled (it is the fill color when I am), else the color my axes gave me."
+	"Answer the color of my outline: the edge color, else my color when I am not filled (it is the fill color when I am), else the color my chart gave me."
 
 	edgeColor ifNotNil: [ ^ edgeColor ].
 	(fill not and: [ color isNotNil ]) ifTrue: [ ^ color ].

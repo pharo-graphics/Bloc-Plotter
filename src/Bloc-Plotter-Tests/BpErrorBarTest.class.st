@@ -1,5 +1,5 @@
 "
-I check `BpErrorBar`, as `BpAxes>>errorBarX:y:yErr:` and `BpAxes>>errorBarX:y:xErr:yErr:` create it: the bars for each way of giving errors, caps, limits and their arrows, `errorEvery:`, colors and widths, the drawing order, the format, the legend swatch and handlers.
+I check `BpErrorBar`, as `BpChart>>errorBarX:y:yErr:` and `BpChart>>errorBarX:y:xErr:yErr:` create it: the bars for each way of giving errors, caps, limits and their arrows, `errorEvery:`, colors and widths, the drawing order, the format, the legend swatch and handlers.
 
 ## Implementation Notes
 
@@ -53,30 +53,6 @@ BpErrorBarTest >> testAsymmetricErrorsGiveTheLowerThenTheUpperErrors [
 BpErrorBarTest >> testAsymmetricErrorsOfAnotherSizeRaiseError [
 
 	self should: [ self errorBar yErr: #( #( 1 1 1 ) #( 1 1 ) ) ] raise: Error
-]
-
-{ #category : 'tests' }
-BpErrorBarTest >> testAxesErrorBarAddsItWithTheNextColor [
-
-	| axes errorBar |
-	axes := BpAxes new.
-	axes plotX: #( 0 1 ) y: #( 0 1 ).
-	errorBar := axes errorBarX: #( 1 2 ) y: #( 3 4 ) yErr: 0.5.
-	self assert: axes artists last identicalTo: errorBar.
-	self assert: errorBar barPatches first border paint color equals: BpColors tab10 second
-]
-
-{ #category : 'tests' }
-BpErrorBarTest >> testAxesErrorBarXErrYErr [
-
-	| errorBar |
-	errorBar := BpAxes new
-		            errorBarX: #( 1 2 )
-		            y: #( 3 4 )
-		            xErr: 0.1
-		            yErr: nil.
-	self assert: errorBar barPatches size equals: 2.
-	self assert: (self barsOf: errorBar) first first y equals: 3
 ]
 
 { #category : 'tests' }
@@ -142,6 +118,30 @@ BpErrorBarTest >> testCaretsHaveTheirBaseOnThePoint [
 ]
 
 { #category : 'tests' }
+BpErrorBarTest >> testChartErrorBarAddsItWithTheNextColor [
+
+	| chart errorBar |
+	chart := BpChart new.
+	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	errorBar := chart errorBarX: #( 1 2 ) y: #( 3 4 ) yErr: 0.5.
+	self assert: chart artists last identicalTo: errorBar.
+	self assert: errorBar barPatches first border paint color equals: (BpPalette default colorAt: 2)
+]
+
+{ #category : 'tests' }
+BpErrorBarTest >> testChartErrorBarXErrYErr [
+
+	| errorBar |
+	errorBar := BpChart new
+		            errorBarX: #( 1 2 )
+		            y: #( 3 4 )
+		            xErr: 0.1
+		            yErr: nil.
+	self assert: errorBar barPatches size equals: 2.
+	self assert: (self barsOf: errorBar) first first y equals: 3
+]
+
+{ #category : 'tests' }
 BpErrorBarTest >> testDataLineJoinsThePoints [
 
 	self assert: self errorBar linePatch dataVertices asArray equals: {
@@ -155,12 +155,11 @@ BpErrorBarTest >> testErrorColorColorsTheBarsAndCaps [
 
 	| errorBar |
 	errorBar := self errorBarWith: [ :bars |
-		            bars
-			            errorColor: 'k';
+		            bars errorColor: Color black;
 			            capSize: 2 ].
-	self assert: errorBar barPatches first border paint color equals: (BpColors named: 'k').
-	self assert: errorBar capPatches first border paint color equals: (BpColors named: 'k').
-	self assert: errorBar linePatch border paint color equals: BpColors tab10 first
+	self assert: errorBar barPatches first border paint color equals: Color black.
+	self assert: errorBar capPatches first border paint color equals: Color black.
+	self assert: errorBar linePatch border paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests' }
@@ -169,10 +168,10 @@ BpErrorBarTest >> testErrorColorIsTheLineColorByDefault [
 	| errorBar |
 	errorBar := self errorBarWith: [ :bars |
 		            bars
-			            format: 'r';
+			            color: Color red;
 			            capSize: 2 ].
-	self assert: errorBar barPatches first border paint color equals: (BpColors named: 'r').
-	self assert: errorBar capPatches first border paint color equals: (BpColors named: 'r')
+	self assert: errorBar barPatches first border paint color equals: Color red.
+	self assert: errorBar capPatches first border paint color equals: Color red
 ]
 
 { #category : 'tests' }

@@ -9,11 +9,11 @@ BpDataTransform instanceLogScale
 
 ## Usage
 
-1. `BpAxes>>initialize` creates me and gives me to its `BpPlotArea`.
-2. `BpAxes>>rebuild` sets my limits and scales, and `BpAxes>>plotBounds:` my extent.
+1. `BpChart>>initialize` creates me and gives me to its `BpPlotArea`.
+2. `BpChart>>rebuild` sets my limits and scales, and `BpChart>>plotBounds:` my extent.
 3. `BpRectanglePatch>>pixelBoundsWith:`, `BpPolygonPatch>>pixelBoundsWith:` and `BpTick>>layoutIn:context:` convert their data coordinates with me.
 
-- I am mutable and shared by the axes and their plot area: points computed from me are valid until the next rebuild or layout.
+- I am mutable and shared by the chart and its plot area: points computed from me are valid until the next rebuild or layout.
 
 ## Implementation Notes
 
@@ -29,9 +29,9 @@ Class {
 		'yScale',
 		'extent'
 	],
-	#category : 'Bloc-Plotter-Axes',
+	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
-	#tag : 'Axes'
+	#tag : 'Chart'
 }
 
 { #category : 'instances' }
