@@ -17,7 +17,7 @@ BpPalette examplePalettes
 1. The factory methods of my subclasses create palettes, for example `BpQualitativePalette class>>tab10` or `BpSequentialPalette class>>blues:`. `BpPalette class>>default` answers the one used when none is given.
 2. `BpFigure` and `BpChart` hold an enumerated palette (`palette`, `palette:`), the default one at first. A figure gives its palette to all its charts.
 3. `BpChart>>addArtist:` takes the next colors of the palette for the artist it adds (`nextColors:`). `BpChart>>palette:` gives colors again to the artists already added. Artists with fixed colors of the palette ask `BpArtist>>paletteColorAt:`.
-4. `BpPie>>palette:` gives the colors of an enumerated palette to the wedges. `BpScatterPlot>>colorMap:` takes an interpolated palette.
+4. `BpPie>>palette:` gives the colors of an enumerated palette to the wedges. `BpScatterPlot>>colorMap:` and `BpHexbin>>colorMap:` take an interpolated palette.
 
 - Once created a palette does not change, so several charts can share it.
 "

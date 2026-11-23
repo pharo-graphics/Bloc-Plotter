@@ -26,6 +26,13 @@ BpInterpolatedPaletteTest >> testFractionsAreClippedBetweenZeroAndOne [
 ]
 
 { #category : 'tests' }
+BpInterpolatedPaletteTest >> testInfernoEnds [
+
+	self assert: (BpInterpolatedPalette inferno colorAt: 0) equals: (BpPalette colorFromTriplet: #( 0 0 4 )).
+	self assert: (BpInterpolatedPalette inferno colorAt: 1) equals: (BpPalette colorFromTriplet: #( 252 255 164 ))
+]
+
+{ #category : 'tests' }
 BpInterpolatedPaletteTest >> testSampleColorsAreEvenlySpacedFromEndToEnd [
 
 	| palette samples |

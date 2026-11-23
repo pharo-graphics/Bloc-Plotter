@@ -9,7 +9,7 @@ BpViolinStatistics instanceTwoGroups
 
 ## Design Rationale
 
-- The kernel is a normal density whose deviation is the sample standard deviation of the values times a `factor`: Scott's rule n^(-1/5) (#scott, the default), Silverman's rule (3n/4)^(-1/5) (#silverman), or a given number. A larger factor gives a smoother shape.
+- The densities and the rules of their bandwidth are the ones of `BpKernelDensity`.
 - Quantiles interpolate linearly between the two closest sorted values, as the quartiles of a box plot do (`BpBoxStatistics class>>percentile:of:`).
 
 ## Usage
@@ -19,10 +19,6 @@ BpViolinStatistics instanceTwoGroups
 
 Instances are not changed after their creation.
 
-## Implementation Notes
-
-- The densities are computed directly, by summing one kernel per value at each coordinate: n values at p points cost n·p evaluations, which is fine for the size of plotted data.
-
 ## Invariants and Assumptions
 
 - The values hold at least two different numbers: equal values have no deviation, and creation raises an error.
@@ -31,8 +27,7 @@ Class {
 	#name : 'BpViolinStatistics',
 	#superclass : 'Object',
 	#instVars : [
-		'values',
-		'factor',
+		'kernelDensity',
 		'coordinates',
 		'densities',
 		'mean',
@@ -82,31 +77,11 @@ BpViolinStatistics >> densities [
 	^ densities
 ]
 
-{ #category : 'private - computing' }
-BpViolinStatistics >> densitiesAt: someCoordinates [
-	"Answer the Gaussian kernel density estimate of my values at someCoordinates: the mean of normal densities centered on each value, whose deviation is the sample standard deviation of the values times my factor."
-
-	| deviation scale |
-	deviation := ((values inject: 0 into: [ :sum :each | sum + (each - mean) squared ]) / (values size - 1)) sqrt * factor.
-	scale := values size * deviation * (2 * Float pi) sqrt.
-	^ someCoordinates collect: [ :x |
-		  (values inject: 0 into: [ :sum :each | sum + ((x - each / deviation) squared / -2) exp ]) / scale ]
-]
-
 { #category : 'accessing' }
 BpViolinStatistics >> factor [
+	"Answer by what the standard deviation is multiplied to get the width of the kernel."
 
-	^ factor
-]
-
-{ #category : 'private - computing' }
-BpViolinStatistics >> factorFor: aSymbolOrNumber [
-	"Answer the factor of the standard deviation giving the kernel width: Scott's rule n^(-1/5), Silverman's rule (3n/4)^(-1/5), or the given number."
-
-	aSymbolOrNumber isNumber ifTrue: [ ^ aSymbolOrNumber ].
-	aSymbolOrNumber = #scott ifTrue: [ ^ values size ** -0.2 ].
-	aSymbolOrNumber = #silverman ifTrue: [ ^ values size * 3 / 4 ** -0.2 ].
-	^ self error: 'Unknown bandwidth: ' , aSymbolOrNumber printString
+	^ kernelDensity factor
 ]
 
 { #category : 'accessing' }
@@ -143,15 +118,14 @@ BpViolinStatistics >> quantiles [
 BpViolinStatistics >> setValues: aCollectionOfNumbers points: anInteger bandwidth: aSymbolOrNumber quantiles: aCollectionOfFractions [
 
 	| sorted |
-	values := aCollectionOfNumbers asArray.
-	sorted := values sorted.
+	sorted := aCollectionOfNumbers asArray sorted.
 	minimum := sorted first.
 	maximum := sorted last.
 	minimum = maximum ifTrue: [ ^ self error: 'A violin needs at least two different values' ].
-	mean := values sum / values size.
+	mean := sorted sum / sorted size.
 	median := BpBoxStatistics percentile: 50 of: sorted.
 	quantiles := aCollectionOfFractions asArray collect: [ :each | BpBoxStatistics percentile: each * 100 of: sorted ].
-	factor := self factorFor: aSymbolOrNumber.
+	kernelDensity := BpKernelDensity of: sorted bandwidth: aSymbolOrNumber.
 	coordinates := BpArtist linspaceFrom: minimum to: maximum count: anInteger.
-	densities := self densitiesAt: coordinates
+	densities := coordinates collect: [ :each | kernelDensity densityAt: each ]
 ]

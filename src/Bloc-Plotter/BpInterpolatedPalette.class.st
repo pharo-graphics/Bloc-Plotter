@@ -1,5 +1,5 @@
 "
-I am a palette for continuous values: `colorAt:` takes a fraction between 0 and 1 and mixes the two anchors around it. `BpScatterPlot` maps the numbers of its `c:` through me, with `viridis` by default.
+I am a palette for continuous values: `colorAt:` takes a fraction between 0 and 1 and mixes the two anchors around it. `BpColorScale` maps numbers through me, with `viridis` by default.
 
 ## Examples
 
@@ -9,7 +9,7 @@ BpInterpolatedPalette exampleFifteenColors
 
 ## Implementation Notes
 
-- `viridis` mixes eleven samples of the original map of 256 colors, so a color in between can differ slightly from the original.
+- `viridis` and `inferno` mix eleven samples of the original maps of 256 colors, so a color in between can differ slightly from the original.
 
 ## Invariants and Assumptions
 
@@ -35,6 +35,24 @@ BpInterpolatedPalette class >> exampleFifteenColors [
 	^ self
 		  demoOpen: { (BpEnumeratedPalette name: 'viridis' colors: (self instanceViridis sampleColors: 15)) }
 		  title: 'Fifteen colors of viridis'
+]
+
+{ #category : 'instance creation' }
+BpInterpolatedPalette class >> inferno [
+	"Answer the inferno palette, from black to pale yellow through purple, red and orange, interpolated between eleven samples."
+
+	^ self
+		  name: 'inferno'
+		  anchors:
+			  (#( #( 0 0 4 ) #( 22 11 57 ) #( 66 10 104 ) #( 106 23 110 ) #( 147 38 103 ) #( 188 55 84 ) #( 221 81 58 ) #( 243 120 25 )
+			      #( 252 165 10 ) #( 246 215 70 ) #( 252 255 164 ) ) collect: [ :each | self colorFromTriplet: each ])
+]
+
+{ #category : 'instances' }
+BpInterpolatedPalette class >> instanceInferno [
+
+	<sampleInstance>
+	^ self inferno
 ]
 
 { #category : 'instances' }

@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpChart`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`), the area between two curves (`BpFillBetween`), a stack plot (`BpStackPlot`), a step curve (`BpStairs`), a violin plot (`BpViolinPlot`), points with error bars (`BpErrorBar`, a `BpLine`) or a row of a Kiviat chart (`BpKiviatRow`). I compute what my data show and build patches (`BpPatch`) that my chart places in its plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpChart`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`), the area between two curves (`BpFillBetween`), a stack plot (`BpStackPlot`), a step curve (`BpStairs`), a violin plot (`BpViolinPlot`), points with error bars (`BpErrorBar`, a `BpLine`), a hexbin (`BpHexbin`), a heatmap (`BpHeatmap`), a density plot (`BpDensityPlot`) or a row of a Kiviat chart (`BpKiviatRow`). I compute what my data show and build patches (`BpPatch`) that my chart places in its plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -9,14 +9,14 @@ BpArtist exampleArtistsInOneChart
 
 ## Design Rationale
 
-- I only know what my chart needs: my patches (`allPatches`), my legend entries, the values autoscaling must cover besides my patches (`requiredValuesOn:`) and must not go past (`stickyValuesOn:`), the ticks I place myself (`managedTicksOn:`), the axes I put on a log scale (`logAxes`), how many colors of its palette I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The chart ignores the kind of plot.
+- I only know what my chart needs: my patches (`allPatches`), my legend entries, the values autoscaling must cover besides my patches (`requiredValuesOn:`) and must not go past (`stickyValuesOn:`), the ticks I place myself (`managedTicksOn:`), the axes I put on a log scale (`logAxes`) or turn around (`invertedAxes`), how many colors of its palette I take (`colorCount`), whether my patches are drawn above the grid (`isAboveGrid`), and whether their colors show numbers (`showsNumbersByColors`), which a color bar can tell. The chart ignores the kind of plot.
 - Each change recomputes everything (`refresh`): subclasses define `compute` and `newPatches`, and new patches replace the previous ones. Handlers given to `whenPatch:do:` are kept and given to each new patch.
 - Style settings take one value or one per dataset or point (`setting:at:`).
 - My Live inspector pane (`TBpLiveInspection`) shows the figure of my chart, or a new figure holding me when I have no chart yet.
 
 ## Usage
 
-1. A plotting method of `BpChart` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`, `BpKiviat>>addRow:`) creates the artist, and `BpChart>>addArtist:` gives it its chart and its colors of the palette (`defaultColors:`).
+1. A plotting method of `BpChart` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:`, `densityPlot:`, `BpKiviat>>addRow:`) creates the artist, and `BpChart>>addArtist:` gives it its chart and its colors of the palette (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the chart (`BpChart>>artistChanged:`); it rebuilds its limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
@@ -190,6 +190,13 @@ BpArtist >> initialize [
 ]
 
 { #category : 'axes' }
+BpArtist >> invertedAxes [
+	"Answer the axes (#x, #y) I turn around: their values go down to the left or to the top, unless the limits of my chart are given."
+
+	^ #(  )
+]
+
+{ #category : 'axes' }
 BpArtist >> isAboveGrid [
 	"Answer whether my patches are drawn above the grid: the patches of bars and scatter points are drawn below it, lines above it."
 
@@ -300,6 +307,13 @@ BpArtist >> setting: aValueOrCollection at: anIndex [
 	^ (self isMany: aValueOrCollection)
 		  ifTrue: [ aValueOrCollection at: anIndex ]
 		  ifFalse: [ aValueOrCollection ]
+]
+
+{ #category : 'axes' }
+BpArtist >> showsNumbersByColors [
+	"Answer whether the colors of my patches show numbers, on the `BpColorScale` answered by colorScale: I can then have a color bar."
+
+	^ false
 ]
 
 { #category : 'axes' }

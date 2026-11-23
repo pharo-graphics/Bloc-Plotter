@@ -19,11 +19,15 @@ BpFigure exampleStairs.
 BpFigure exampleViolinPlot.
 BpFigure exampleErrorBar.
 BpFigure exampleBoxPlot.
+BpFigure exampleHexbin.
+BpFigure exampleHeatmap.
+BpFigure exampleColorBar.
+BpFigure exampleDensityPlot.
 BpFigure examplePolarBar.
 BpFigure exampleRadarChart
 ```
 
-More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs`, `BpViolinPlot`, `BpErrorBar`, `BpPolarChart` and `BpKiviat`.
+More figures of the gallery are shown by the examples of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs`, `BpViolinPlot`, `BpErrorBar`, `BpHexbin`, `BpHeatmap`, `BpColorBar`, `BpDensityPlot`, `BpPolarChart` and `BpKiviat`.
 
 ## Design Rationale
 
@@ -59,6 +63,51 @@ Class {
 	#package : 'Bloc-Plotter',
 	#tag : 'Chart'
 }
+
+{ #category : 'private - demo' }
+BpFigure class >> addColorBarsFirstRowTo: aFigure [
+	"Add to the first row of aFigure a hexbin on a log scale and a transparent scatter plot, with their color bars."
+
+	| hexbin scatter |
+	hexbin := BpHexbin show: (BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3) in: aFigure charts first.
+	hexbin
+		gridSize: 20;
+		bins: #log.
+	(aFigure charts first addColorBarFor: hexbin) label: 'points'.
+	aFigure charts first title: 'log scale, label:'.
+	scatter := aFigure charts second scatterX: (1 to: 60) y: ((1 to: 60) collect: [ :each | each * 17 \\ 61 ]).
+	scatter
+		c: (1 to: 60);
+		s: 80;
+		alpha: 0.5.
+	(aFigure charts second addColorBarFor: scatter) tickLocations: #( 1 20 40 60 ).
+	aFigure charts second title: 'alpha: 0.5, tickLocations:'
+]
+
+{ #category : 'private - demo' }
+BpFigure class >> addColorBarsSecondRowTo: aFigure [
+	"Add to the second row of aFigure a hexbin colored in steps and a heatmap under points, with their color bars."
+
+	| hexbin heatmap scatter |
+	hexbin := BpHexbin show: (BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3) in: aFigure charts third.
+	hexbin
+		gridSize: 20;
+		bins: 4.
+	(aFigure charts third addColorBarFor: hexbin)
+		tickCount: 3;
+		tickFormatter: [ :step | 'step ' , step printString ].
+	aFigure charts third title: 'bins: 4, tickFormatter:'.
+	heatmap := aFigure charts fourth heatmap: #( #( 1 2 3 ) #( 4 5 6 ) #( 7 8 9 ) ).
+	heatmap colorMap: (BpInterpolatedPalette name: 'Greys' anchors: (BpSequentialPalette greys: 9) colors).
+	scatter := aFigure charts fourth scatterX: #( 1 2 3 ) y: #( 1 2 3 ).
+	scatter
+		c: #( 10 50 100 );
+		s: 200;
+		colorMap: BpInterpolatedPalette inferno.
+	(aFigure charts fourth addColorBarFor: heatmap) label: 'cells'.
+	(aFigure charts fourth addColorBarFor: scatter) label: 'points'.
+	aFigure charts fourth title: 'two color bars'
+]
 
 { #category : 'private - demo' }
 BpFigure class >> addHistogramOptionsFirstRowTo: aFigure data: aCollection [
@@ -125,6 +174,22 @@ BpFigure class >> exampleBoxPlot [
 ]
 
 { #category : 'examples' }
+BpFigure class >> exampleColorBar [
+	"Show the color bars of hexbins, scatter plots and a heatmap (see `BpColorBar`)."
+
+	<example>
+	^ self instanceColorBars show: 'color bar'
+]
+
+{ #category : 'examples' }
+BpFigure class >> exampleDensityPlot [
+	"Show the densities of three samples (see `BpDensityPlot`)."
+
+	<example>
+	^ self instanceDensityPlot show: 'density plot'
+]
+
+{ #category : 'examples' }
 BpFigure class >> exampleErrorBar [
 	"Show the figure of the gallery error bar limits: upper and lower limits on all or some points (see `BpErrorBar`)."
 
@@ -138,6 +203,22 @@ BpFigure class >> exampleFillBetween [
 
 	<example>
 	^ self instanceFillBetweenDemo show: 'fill_between'
+]
+
+{ #category : 'examples' }
+BpFigure class >> exampleHeatmap [
+	"Show the figure of the gallery annotated heatmap (see `BpHeatmap`)."
+
+	<example>
+	^ self instanceHeatmap show: 'heatmap'
+]
+
+{ #category : 'examples' }
+BpFigure class >> exampleHexbin [
+	"Show the figure of the gallery hexagonal binned plot: 100000 points counted in hexagons (see `BpHexbin`)."
+
+	<example>
+	^ self instanceHexbinDemo show: 'hexbin'
 ]
 
 { #category : 'examples' }
@@ -483,6 +564,70 @@ BpFigure class >> instanceBoxPlotType [
 	^ figure
 ]
 
+{ #category : 'instances - color bar' }
+BpFigure class >> instanceColorBars [
+	"Color bars of a hexbin on a log scale, a transparent scatter plot, a hexbin in steps, and two artists of the same chart."
+
+	<sampleInstance>
+	| figure |
+	figure := self rows: 2 columns: 2.
+	figure extent: 900 @ 800.
+	self addColorBarsFirstRowTo: figure.
+	self addColorBarsSecondRowTo: figure.
+	^ figure
+]
+
+{ #category : 'instances - density' }
+BpFigure class >> instanceDensityPlot [
+	"The densities of three samples, with a legend."
+
+	<sampleInstance>
+	| figure chart |
+	figure := self new.
+	chart := figure charts first.
+	(chart densityPlot: BpDensityPlot threeSamples) label: #( 'first' 'second' 'third' ).
+	chart legend.
+	^ figure
+]
+
+{ #category : 'instances - density' }
+BpFigure class >> instanceDensityPlotOptions [
+	"Density plots of several bandwidths, stopped at the values, horizontal, and over a histogram."
+
+	<sampleInstance>
+	| figure values plot |
+	values := BpDensityPlot twoGroups.
+	figure := self rows: 2 columns: 2.
+	figure extent: 900 @ 700.
+	#( 0.1 #scott 1 ) do: [ :each |
+		plot := figure charts first densityPlot: values.
+		plot
+			bandwidth: each;
+			fill: false;
+			label: each printString ].
+	figure charts first
+		title: 'bandwidth:';
+		legend.
+	(figure charts second densityPlot: values)
+		cut: 0;
+		lineStyle: '--'.
+	figure charts second title: 'cut: 0, lineStyle: ''--'''.
+	(figure charts third densityPlot: BpDensityPlot threeSamples)
+		orientation: #horizontal;
+		alpha: 0.5.
+	figure charts third title: 'orientation: #horizontal, alpha: 0.5'.
+	(figure charts fourth hist: values)
+		bins: 25;
+		density: true;
+		color: ((BpSequentialPalette greys: 9) colorAt: 4).
+	(figure charts fourth densityPlot: values)
+		fill: false;
+		lineWidth: 3;
+		color: (BpQualitativePalette set1 colorAt: 1).
+	figure charts fourth title: 'over a histogram'.
+	^ figure
+]
+
 { #category : 'instances - error bar' }
 BpFigure class >> instanceErrorBarFeatures [
 	"Gallery: Different ways of specifying error bars (errorbar_features): symmetric errors varying with x, then asymmetric x errors on a log scale."
@@ -676,6 +821,121 @@ BpFigure class >> instanceFillBetweenX [
 	^ figure
 ]
 
+{ #category : 'instances - heatmap' }
+BpFigure class >> instanceHeatmap [
+	"The gallery annotated heatmap: the harvest of vegetables by farmers, with its numbers and a color bar."
+
+	<sampleInstance>
+	| figure chart heatmap |
+	figure := self new.
+	figure extent: 820 @ 520.
+	chart := figure charts first.
+	heatmap := BpHeatmap harvestIn: chart.
+	heatmap showAmounts: true.
+	chart title: 'Harvest of local farmers (in tonnes/year)'.
+	chart addColorBarFor: heatmap.
+	^ figure
+]
+
+{ #category : 'instances - heatmap' }
+BpFigure class >> instanceHeatmapOptions [
+	"Heatmaps with edges, a diverging color map, missing numbers, and a log scale with many cells."
+
+	<sampleInstance>
+	| figure heatmap |
+	figure := self rows: 2 columns: 2.
+	figure extent: 900 @ 800.
+	heatmap := figure charts first heatmap: #( #( 12 4 9 ) #( 7 16 1 ) #( 3 8 14 ) ).
+	heatmap
+		showAmounts: true;
+		colorMap: (BpInterpolatedPalette name: 'Blues' anchors: (BpSequentialPalette blues: 9) colors);
+		edgeColors: ((BpSequentialPalette greys: 9) colorAt: 1);
+		lineWidths: 3.
+	figure charts first title: 'edgeColors:, lineWidths: 3'.
+	heatmap := figure charts second heatmap: #( #( 1 0.8 -0.3 -0.7 ) #( 0.8 1 -0.1 -0.5 ) #( -0.3 -0.1 1 0.4 ) #( -0.7 -0.5 0.4 1 ) ).
+	heatmap
+		showAmounts: true;
+		colorMap: BpHeatmap divergingMap;
+		vMin: -1;
+		vMax: 1.
+	figure charts second title: 'vMin: -1, vMax: 1'.
+	figure charts second addColorBarFor: heatmap.
+	heatmap := figure charts third heatmap: #( #( 5 nil 2 ) #( nil 8 6 ) #( 1 3 nil ) ).
+	heatmap
+		showAmounts: true;
+		amountFormatter: [ :amount | amount printString , ' kg' ].
+	figure charts third title: 'nil cells, amountFormatter:'.
+	heatmap := BpHeatmap wavesIn: figure charts fourth.
+	heatmap
+		colorMap: BpInterpolatedPalette inferno;
+		scale: #log.
+	figure charts fourth title: 'scale: #log'.
+	figure charts fourth addColorBarFor: heatmap.
+	^ figure
+]
+
+{ #category : 'instances - hexbin' }
+BpFigure class >> instanceHexbinDemo [
+	"Gallery: Hexagonal binned plot (hexbin_demo): 100000 points, on a linear and on a logarithmic color scale."
+
+	<sampleInstance>
+	| figure points |
+	points := (BpHexbin correlatedPoints: 100000 slope: 3 deviation: 4) collect: [ :each | each + (0 @ 2) ].
+	figure := self rows: 1 columns: 2.
+	figure extent: 900 @ 400.
+	figure charts with: #( 'Hexagon binning' 'With a log color scale' ) do: [ :chart :title |
+		(BpHexbin show: points in: chart)
+			gridSize: 50;
+			colorMap: BpInterpolatedPalette inferno.
+		chart title: title ].
+	figure charts last artists first bins: #log.
+	^ figure
+]
+
+{ #category : 'instances - hexbin' }
+BpFigure class >> instanceHexbinOptions [
+	"Hexbins with few points hidden, colors in steps, the average of a third variable, and a log axis."
+
+	<sampleInstance>
+	| figure points |
+	points := BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3.
+	figure := self rows: 2 columns: 2.
+	figure extent: 900 @ 800.
+	(BpHexbin show: points in: figure charts first)
+		gridSize: 25;
+		minCount: 5.
+	figure charts first title: 'minCount: 5'.
+	(BpHexbin show: points in: figure charts second)
+		gridSize: 25;
+		bins: 4;
+		edgeColors: ((BpSequentialPalette greys: 9) colorAt: 1).
+	figure charts second title: 'bins: 4'.
+	(BpHexbin show: points in: figure charts third)
+		gridSize: 25;
+		c: (points collect: [ :each | each x sin ]).
+	figure charts third title: 'c: sin(x)'.
+	(BpHexbin show: (points collect: [ :each | (10 raisedTo: each x) @ each y ]) in: figure charts fourth)
+		gridSize: 25;
+		xScale: #log.
+	figure charts fourth title: 'xScale: #log'.
+	^ figure
+]
+
+{ #category : 'instances - hexbin' }
+BpFigure class >> instanceHexbinPlotType [
+	"Plot types: hexbin(x, y, C), five thousand points around a line."
+
+	<sampleInstance>
+	| figure chart |
+	figure := self new.
+	chart := figure charts first.
+	(BpHexbin show: (BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3) in: chart) gridSize: 20.
+	chart
+		xLimits: #( -2 2 );
+		yLimits: #( -3 3 ).
+	^ figure
+]
+
 { #category : 'instances - histogram' }
 BpFigure class >> instanceHistTypes [
 	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes)."
@@ -824,6 +1084,26 @@ BpFigure class >> instanceInteractiveBoxPlot [
 	^ figure
 ]
 
+{ #category : 'instances - density' }
+BpFigure class >> instanceInteractiveDensity [
+	"A density plot with interaction handlers on its areas: hovering an area darkens it, clicking it shows its sample in the title."
+
+	<sampleInstance>
+	| figure chart plot |
+	figure := self new.
+	chart := figure charts first.
+	plot := chart densityPlot: BpDensityPlot threeSamples.
+	chart title: 'Click an area'.
+	plot
+		whenPatch: BlMouseEnterEvent do: [ :event :patch | patch opacity: 0.6 ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch opacity: 1 ];
+		whenPatch: BlClickEvent do: [ :event :patch |
+			chart title: ('Sample {1}, bandwidth {2}' format: {
+				 patch dataset.
+				 ((plot estimates at: patch dataset) bandwidth printShowingDecimalPlaces: 2) }) ].
+	^ figure
+]
+
 { #category : 'instances - error bar' }
 BpFigure class >> instanceInteractiveErrorBars [
 	"Measures with error bars: hovering a bar thickens it, clicking it shows the measure in the title."
@@ -886,6 +1166,54 @@ BpFigure class >> instanceInteractiveFill [
 				chart title: ('from x = {1} to x = {2}' format: {
 					 ((polygon dataVertices collect: [ :each | each x ]) min printShowingDecimalPlaces: 2).
 					 ((polygon dataVertices collect: [ :each | each x ]) max printShowingDecimalPlaces: 2) }) ] ].
+	^ figure
+]
+
+{ #category : 'instances - heatmap' }
+BpFigure class >> instanceInteractiveHeatmap [
+	"A heatmap with interaction handlers on its cells: hovering a cell outlines it, clicking it shows its names and number in the title."
+
+	<sampleInstance>
+	| figure chart heatmap |
+	figure := self new.
+	figure extent: 820 @ 520.
+	chart := figure charts first.
+	heatmap := BpHeatmap harvestIn: chart.
+	chart title: 'Click a cell'.
+	heatmap
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :cell | cell border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :cell | cell border: (BlBorder paint: cell background paint width: 1) ];
+		whenPatch: BlClickEvent do: [ :event :cell |
+			chart title: ('{1}, {2}: {3}' format: {
+				 (heatmap rowNameAt: cell row).
+				 (heatmap columnNameAt: cell column).
+				 cell amount }) ].
+	^ figure
+]
+
+{ #category : 'instances - hexbin' }
+BpFigure class >> instanceInteractiveHexbin [
+	"A hexbin with interaction handlers on its hexagons: hovering a hexagon outlines it, clicking it shows its center and number of points in the title."
+
+	<sampleInstance>
+	| figure chart hexbin |
+	figure := self new.
+	chart := figure charts first.
+	hexbin := BpHexbin show: (BpHexbin correlatedPoints: 2000 slope: 1.2 deviation: 0.5) in: chart.
+	hexbin
+		gridSize: 20;
+		minCount: 1.
+	chart title: 'Click a hexagon'.
+	hexbin
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :hexagon | hexagon border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :hexagon | hexagon border: (BlBorder paint: hexagon background paint width: 1) ];
+		whenPatch: BlClickEvent do: [ :event :hexagon |
+			chart title: ('{1} points around ({2}, {3})' format: {
+				 hexagon count.
+				 (hexagon center x printShowingDecimalPlaces: 2).
+				 (hexagon center y printShowingDecimalPlaces: 2) }) ].
 	^ figure
 ]
 

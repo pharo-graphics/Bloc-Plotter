@@ -366,6 +366,19 @@ BpChartTest >> testPlotsTakeTheNextColorsOfTheCycle [
 	self assert: (chart plotX: #( 0 1 ) y: #( 1 2 )) linePatch border paint color equals: (BpPalette default colorAt: 2)
 ]
 
+{ #category : 'tests - ticks' }
+BpChartTest >> testReversedLimitsKeepTheTicks [
+	"Limits given from the largest to the smallest value turn the axis around."
+
+	| chart |
+	chart := self newChart.
+	chart plotX: #( 0 10 ) y: #( 0 10 ).
+	chart yLimits: #( 10 0 ).
+	self
+		assert: ((chart ticks select: [ :each | each axis = #y ]) collect: [ :each | each location ] as: Array)
+		equals: #( 0 2 4 6 8 10 )
+]
+
 { #category : 'tests - scatter' }
 BpChartTest >> testScatterAnswersAScatterOfTheChart [
 

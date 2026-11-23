@@ -14,12 +14,13 @@ BpScatterPlot exampleInteraction
 
 - My setters are `s:` (size in points squared, 36 by default), `c:` (a color, one per point, or numbers), `marker:`, `colorMap:`, `vMin:`, `vMax:`, `alpha:`, `lineWidths:`, `edgeColors:` (nil, the face color, by default; `Color transparent` for no edge; a color or one per point) and `label:`. My results are `offsets` and `patches`.
 - Alpha applies to the faces and to the edges, and an unfilled marker ('+', 'x', an asterisk) is drawn with the face color.
-- Numbers of `c:` are normalized between `vMin` and `vMax` (their smallest and largest by default), clipped, then mapped by the color map: a `BpInterpolatedPalette` (`BpInterpolatedPalette class>>viridis` by default) or a block.
+- Numbers of `c:` are mapped to colors by a `BpColorScale`: placed between `vMin` and `vMax` (their smallest and largest by default), clipped, then mapped by the color map, a `BpInterpolatedPalette` (`BpInterpolatedPalette class>>viridis` by default) or a block.
 
 ## Usage
 
 1. `BpChart>>scatterX:y:` creates me with `x:y:` and adds me to the chart (see `BpArtist`).
-2. My patches answer their `index`, `dataPoint`, `area` and `amount` (the number of `c:`), which interaction handlers given to `whenPatch:do:` use.
+2. `BpChart>>addColorBarFor:` tells the numbers of `c:` with a `BpColorBar`.
+3. My patches answer their `index`, `dataPoint`, `area` and `amount` (the number of `c:`), which interaction handlers given to `whenPatch:do:` use.
 
 ## Implementation Notes
 
@@ -45,9 +46,7 @@ Class {
 		'lineWidths',
 		'faceColors',
 		'edgeColors',
-		'colorMap',
-		'vMin',
-		'vMax'
+		'colorScale'
 	],
 	#category : 'Bloc-Plotter-Scatter',
 	#package : 'Bloc-Plotter',
@@ -127,8 +126,15 @@ BpScatterPlot >> c: aColorOrCollection [
 BpScatterPlot >> colorMap: aPaletteOrBlock [
 	"Set what maps the numbers of c to colors: a `BpInterpolatedPalette`, or a block from a fraction between 0 and 1 to a color."
 
-	colorMap := aPaletteOrBlock.
+	colorScale colorMap: aPaletteOrBlock.
 	self refresh
+]
+
+{ #category : 'axes' }
+BpScatterPlot >> colorScale [
+	"Answer what maps the numbers of c to colors."
+
+	^ colorScale
 ]
 
 { #category : 'private - computing' }
@@ -139,6 +145,7 @@ BpScatterPlot >> compute [
 	values := self hasValues
 		          ifTrue: [ c asArray ]
 		          ifFalse: [ Array new: offsets size ].
+	self hasValues ifTrue: [ colorScale fitTo: c ].
 	faceColors := (1 to: offsets size) collect: [ :index | self faceColorAt: index ]
 ]
 
@@ -166,7 +173,7 @@ BpScatterPlot >> edgeColors: anObject [
 BpScatterPlot >> faceColorAt: anIndex [
 
 	c ifNil: [ ^ self colorOf: defaultColors first ].
-	self hasValues ifTrue: [ ^ self colorOf: (self mappedColorAt: (self normalized: (c at: anIndex))) ].
+	self hasValues ifTrue: [ ^ self colorOf: (colorScale colorFor: (c at: anIndex)) ].
 	^ self colorOf: (self setting: c at: anIndex)
 ]
 
@@ -184,7 +191,7 @@ BpScatterPlot >> initialize [
 	x := #(  ).
 	y := #(  ).
 	marker := BpMarker on: 'o'.
-	colorMap := BpInterpolatedPalette viridis.
+	colorScale := BpColorScale new.
 	lineWidths := 1.5.
 	offsets := #(  ).
 	sizes := #(  ).
@@ -206,14 +213,6 @@ BpScatterPlot >> lineWidths: aNumberOrCollection [
 
 	lineWidths := aNumberOrCollection.
 	self refresh
-]
-
-{ #category : 'private - computing' }
-BpScatterPlot >> mappedColorAt: aFraction [
-
-	^ colorMap isBlock
-		  ifTrue: [ colorMap value: aFraction ]
-		  ifFalse: [ colorMap colorAt: aFraction ]
 ]
 
 { #category : 'accessing - options' }
@@ -258,17 +257,6 @@ BpScatterPlot >> newSwatch [
 	^ swatch
 ]
 
-{ #category : 'private - computing' }
-BpScatterPlot >> normalized: aNumber [
-	"Answer aNumber as a fraction between vMin and vMax, clipped between 0 and 1."
-
-	| low high |
-	low := vMin ifNil: [ c min ].
-	high := vMax ifNil: [ c max ].
-	high = low ifTrue: [ ^ 0 ].
-	^ (aNumber - low / (high - low) max: 0) min: 1
-]
-
 { #category : 'accessing - results' }
 BpScatterPlot >> offsets [
 	"Answer the points shown, in data coordinates."
@@ -292,6 +280,13 @@ BpScatterPlot >> setX: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 	self refresh
 ]
 
+{ #category : 'axes' }
+BpScatterPlot >> showsNumbersByColors [
+	"Answer whether c gives numbers."
+
+	^ self hasValues
+]
+
 { #category : 'private - style' }
 BpScatterPlot >> style: aPatch [
 	"Give aPatch the colors of its point and the interaction handlers of the patches."
@@ -313,7 +308,7 @@ BpScatterPlot >> style: aPatch [
 BpScatterPlot >> vMax: aNumber [
 	"Set the number of c mapped to the end of the colormap (the largest one by default)."
 
-	vMax := aNumber.
+	colorScale vMax: aNumber.
 	self refresh
 ]
 
@@ -321,6 +316,6 @@ BpScatterPlot >> vMax: aNumber [
 BpScatterPlot >> vMin: aNumber [
 	"Set the number of c mapped to the start of the colormap (the smallest one by default)."
 
-	vMin := aNumber.
+	colorScale vMin: aNumber.
 	self refresh
 ]

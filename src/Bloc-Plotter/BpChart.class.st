@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, or a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, a `BpHexbin` added by `hexbinX:y:`, a `BpHeatmap` added by `heatmap:`, or a `BpDensityPlot` added by `densityPlot:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -10,7 +10,7 @@ BpChart instanceHistogram
 ## Design Rationale
 
 - Autoscaling adds a margin of 5% on each side, stopped by the sticky values of the artists: the bars of a histogram start exactly at 0. Artists can also require values to be covered (`BpArtist>>requiredValuesOn:`): a box plot keeps half a unit around its positions.
-- My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale.
+- My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale. An artist can also turn an axis around (`BpArtist>>invertedAxes`), as the rows of a heatmap; limits given from the largest to the smallest value do it too.
 - Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box, a bar plot one at each category), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length: computing it from my size would change my children during the layout pass and trigger another layout.
 - My title is a `BpText`, so a line break gives a title on several lines.
 - The transform, the ticks, the grid lines and the place of the legend are created or chosen by methods of their own (`newTransform`, `newTickOn:location:text:`, `newGridLineFor:`, `showLegend:`), which `BpPolarChart` redefines, as well as the default settings (`initializeSettings`).
@@ -19,16 +19,16 @@ BpChart instanceHistogram
 ## Usage
 
 1. `BpFigure>>rows:columns:chartClass:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:` and `errorBarX:y:xErr:yErr:` create an artist, and `addArtist:` gives it the next colors of my palette (`nextColors:`). `palette:` changes the palette and recolors the artists already added.
-3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
-4. `BpChartLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:` and `densityPlot:` create an artist, and `addArtist:` gives it the next colors of my palette (`nextColors:`). `palette:` changes the palette and recolors the artists already added.
+3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`), color bars (`BpColorBar`, added by `addColorBarFor:`) and, after `grid: true`, grid lines (`BpGridLine`).
+4. `BpChartLayout` computes my plot bounds from the size of my tick labels, title and color bars, which gives its extent to my data transform.
 
 - Nil limits mean autoscaling, and a tick formatter is a block answering the label of a value.
 - I am mutable and keep my artists, but each rebuild replaces the ticks, legend and patches I show.
 
 ## Implementation Notes
 
-- Not supported yet: axis labels, shared axes, a layout fitting the charts to their labels, colorbars, the style of the plot types page (small figure, grid below the data).
+- Not supported yet: axis labels, shared axes, a layout fitting the charts to their labels, the style of the plot types page (small figure, grid below the data).
 "
 Class {
 	#name : 'BpChart',
@@ -55,7 +55,8 @@ Class {
 		'showGrid',
 		'xTicks',
 		'yTicks',
-		'palette'
+		'palette',
+		'colorBars'
 	],
 	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
@@ -88,6 +89,17 @@ BpChart >> addArtist: anArtist [
 ]
 
 { #category : 'plotting' }
+BpChart >> addColorBarFor: anArtist [
+	"Add beside my plot area a color bar telling which numbers anArtist (a heatmap, a hexbin or a scatter plot of numbers) shows by which colors, and answer it, to be configured with label:, tickCount:, ... (see `BpColorBar`)."
+
+	| bar |
+	bar := BpColorBar on: anArtist.
+	colorBars add: bar.
+	self addChild: bar.
+	^ bar
+]
+
+{ #category : 'plotting' }
 BpChart >> artistChanged: anArtist [
 
 	self rebuild
@@ -112,6 +124,17 @@ BpChart >> autoScale: anAxis [
 			  (values min - 0.5).
 			  (values max + 0.5) } ].
 	^ self limitsFrom: values min to: values max on: anAxis
+]
+
+{ #category : 'private - building' }
+BpChart >> automaticLimitsOn: anAxis [
+	"Answer the limits covering my artists, turned around when one of them asks for it."
+
+	| limits |
+	limits := self autoScale: anAxis.
+	^ (artists anySatisfy: [ :each | each invertedAxes includes: anAxis ])
+		  ifTrue: [ limits reversed ]
+		  ifFalse: [ limits ]
 ]
 
 { #category : 'plotting' }
@@ -142,9 +165,23 @@ BpChart >> boxPlot: aCollection [
 		   yourself)
 ]
 
+{ #category : 'accessing' }
+BpChart >> colorBars [
+
+	^ colorBars
+]
+
+{ #category : 'layout' }
+BpChart >> colorBarsWidth [
+	"Answer the width my color bars take on my right side, with the space before each one. They must be measured."
+
+	colorBars ifEmpty: [ ^ 0 ].
+	^ colorBars inject: 4 into: [ :sum :each | sum + 12 + each measuredExtent x ]
+]
+
 { #category : 'layout' }
 BpChart >> computePlotBoundsIn: anExtent [
-	"Compute the bounds of my plot area in anExtent, leaving room for the tick labels on the left and at the bottom, and for my title at the top. My tick labels and title must be measured."
+	"Compute the bounds of my plot area in anExtent, leaving room for the tick labels on the left and at the bottom, for my title at the top and for my color bars on the right. My tick labels, title and color bars must be measured."
 
 	| leftTicks bottomTicks left bottom top right |
 	leftTicks := ticks select: [ :each | each axis = #y ].
@@ -155,6 +192,7 @@ BpChart >> computePlotBoundsIn: anExtent [
 		       ifTrue: [ 10 ]
 		       ifFalse: [ titleElement measuredExtent y + 10 ].
 	right := bottomTicks ifEmpty: [ 12 ] ifNotEmpty: [ bottomTicks last label measuredExtent x / 2 + 4 max: 12 ].
+	right := right max: self colorBarsWidth.
 	self plotBounds: (left @ top corner: (anExtent x - right max: left + 1) @ (anExtent y - bottom max: top + 1))
 ]
 
@@ -189,6 +227,13 @@ BpChart >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 	^ (self scaleOf: anAxis) = #log
 		  ifTrue: [ BpTickLocator logLabelsFor: aCollectionOfLocations ]
 		  ifFalse: [ BpTickLocator labelsFor: aCollectionOfLocations ]
+]
+
+{ #category : 'plotting' }
+BpChart >> densityPlot: aCollection [
+	"Draw the estimated density of aCollection (numbers for one curve, or one collection of numbers per curve) and answer it, to be configured with bandwidth:, cut:, fill:, color:, orientation:, ... (see `BpDensityPlot`)."
+
+	^ self addArtist: (BpDensityPlot of: aCollection)
 ]
 
 { #category : 'plotting' }
@@ -260,6 +305,20 @@ BpChart >> grid: aBoolean [
 ]
 
 { #category : 'plotting' }
+BpChart >> heatmap: aCollectionOfRows [
+	"Add a heatmap of aCollectionOfRows, the rows of a matrix, whose numbers are shown by the colors of cells, and answer it, to be configured with rowNames:, columnNames:, showAmounts:, colorMap:, ... (see `BpHeatmap`)."
+
+	^ self addArtist: (BpHeatmap matrix: aCollectionOfRows)
+]
+
+{ #category : 'plotting' }
+BpChart >> hexbinX: xValues y: yValues [
+	"Add a hexbin of the points (xValues at: i) @ (yValues at: i), which shows how many there are in each hexagon of a grid, and answer it, to be configured with gridSize:, bins:, c:, colorMap:, ... (see `BpHexbin`)."
+
+	^ self addArtist: (BpHexbin x: xValues y: yValues)
+]
+
+{ #category : 'plotting' }
 BpChart >> hist: aCollection [
 	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured with bins:, density:, histType:, ... (see `BpHistogram`)."
 
@@ -295,6 +354,7 @@ BpChart >> initializeSettings [
 	"Give my settings their default values, before my parts are created."
 
 	artists := OrderedCollection new.
+	colorBars := OrderedCollection new.
 	ticks := #(  ).
 	showLegend := false.
 	showGrid := false.
@@ -305,6 +365,18 @@ BpChart >> initializeSettings [
 	palette := BpPalette default.
 	colorIndex := 0.
 	plotBounds := 0 @ 0 corner: 1 @ 1
+]
+
+{ #category : 'layout' }
+BpChart >> layoutColorBarsContext: aBlElementBoundsUpdater [
+	"Place my color bars along my right side."
+
+	| left |
+	left := self measuredExtent x - self colorBarsWidth.
+	colorBars do: [ :each |
+		left := left + 12.
+		each applyLayoutIn: (left @ plotBounds top extent: each measuredExtent) context: aBlElementBoundsUpdater.
+		left := left + each measuredExtent x ]
 ]
 
 { #category : 'layout' }
@@ -377,6 +449,13 @@ BpChart >> managedTicksOn: anAxis [
 		 ifFalse: [ yTicks ]) ifNotNil: [ ^ nil ].
 	artists do: [ :each | (each managedTicksOn: anAxis) ifNotNil: [ :managed | ^ managed ] ].
 	^ nil
+]
+
+{ #category : 'layout' }
+BpChart >> measureColorBars [
+	"Give my color bars the height of my plot area."
+
+	colorBars do: [ :each | each measure: (BlExtentMeasurementSpec exact: each measuredExtent x @ plotBounds height) ]
 ]
 
 { #category : 'private - building' }
@@ -502,21 +581,22 @@ BpChart >> plotX: xValues y: yValues format: aString [
 
 { #category : 'private - building' }
 BpChart >> rebuild [
-	"Recompute my scales and limits from my artists, then show their patches, my legend, my ticks and my grid."
+	"Recompute my scales and limits from my artists, then show their patches, my legend, my ticks, my grid and my color bars."
 
 	| patches |
 	self updateScales.
 	transform
 		xScale: xScale;
 		yScale: yScale;
-		xLimits: (xLimits ifNil: [ self autoScale: #x ]);
-		yLimits: (yLimits ifNil: [ self autoScale: #y ]).
+		xLimits: (xLimits ifNil: [ self automaticLimitsOn: #x ]);
+		yLimits: (yLimits ifNil: [ self automaticLimitsOn: #y ]).
 	patches := self patches.
 	patches do: [ :each | transform preparePatch: each ].
 	plotArea patches: patches.
 	self showLegend: self newLegend.
 	self rebuildTicks.
-	plotArea gridLines: self newGridLines
+	plotArea gridLines: self newGridLines.
+	colorBars do: [ :each | each refresh ]
 ]
 
 { #category : 'private - building' }
@@ -611,8 +691,8 @@ BpChart >> tickLocationsOn: anAxis [
 	fixed ifNotNil: [ ^ fixed ].
 	limits := self limitsOn: anAxis.
 	^ (self scaleOf: anAxis) = #log
-		  ifTrue: [ BpTickLocator logTicksFrom: limits first to: limits last ]
-		  ifFalse: [ BpTickLocator linearTicksFrom: limits first to: limits last count: (self tickCountOn: anAxis) ]
+		  ifTrue: [ BpTickLocator logTicksFrom: limits min to: limits max ]
+		  ifFalse: [ BpTickLocator linearTicksFrom: limits min to: limits max count: (self tickCountOn: anAxis) ]
 ]
 
 { #category : 'accessing' }

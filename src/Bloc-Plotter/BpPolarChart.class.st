@@ -161,13 +161,13 @@ BpPolarChart >> autoScale: anAxis [
 
 { #category : 'layout' }
 BpPolarChart >> computePlotBoundsIn: anExtent [
-	"Compute the largest square whose circle leaves room for the labels of the angles around it and for my title at the top. My labels and title must be measured."
+	"Compute the largest square whose circle leaves room for the labels of the angles around it, for my title at the top and for my color bars on the right. My labels, title and color bars must be measured."
 
 	| top area radius |
 	top := self title isEmpty
 		       ifTrue: [ 6 ]
 		       ifFalse: [ titleElement measuredExtent y + 10 ].
-	area := 6 @ top corner: anExtent - 6.
+	area := 6 @ top corner: anExtent - 6 - (self colorBarsWidth @ 0).
 	radius := self angleTicks
 		          inject: (area width min: area height) / 2
 		          into: [ :min :each | min min: (each maxRadiusIn: area extent with: transform) ].
