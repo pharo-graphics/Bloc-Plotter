@@ -45,6 +45,21 @@ BpTickLocatorTest >> testLogTicksArePowersOfTen [
 ]
 
 { #category : 'tests' }
+BpTickLocatorTest >> testStepAtLeastAnswersTheNextNiceStep [
+
+	self assert: (BpTickLocator stepAtLeast: 0.9) equals: 1.
+	self assert: (BpTickLocator stepAtLeast: 1.2) equals: 2.
+	self assert: (BpTickLocator stepAtLeast: 2.2) equals: 5 / 2.
+	self assert: (BpTickLocator stepAtLeast: 30) equals: 50
+]
+
+{ #category : 'tests' }
+BpTickLocatorTest >> testStepAtLeastKeepsANiceStep [
+
+	self assert: (BpTickLocator stepAtLeast: 5) equals: 5
+]
+
+{ #category : 'tests' }
 BpTickLocatorTest >> testTicksStayInsideTheLimits [
 
 	self assert: (BpTickLocator linearTicksFrom: 93.5 to: 306.5 count: 5) equals: #( 100 150 200 250 300 )

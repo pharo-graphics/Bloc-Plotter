@@ -9,7 +9,7 @@ BpPolarGridLine instanceCircle
 
 ## Usage
 
-`BpPolarChart>>newGridLineFor:` creates me.
+`BpPolarChart>>newGridLineFor:` and `BpKiviat>>newGridLines` create me.
 
 ## Implementation Notes
 

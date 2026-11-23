@@ -201,11 +201,16 @@ BpPolarChart >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 BpPolarChart >> initialize [
 
 	super initialize.
+	plotArea geometry: BlCircleGeometry new
+]
+
+{ #category : 'initialization' }
+BpPolarChart >> initializeSettings [
+
+	super initializeSettings.
 	radialLabelAngle := 22.5.
 	showGrid := true.
-	yTickCount := 5.
-	plotArea geometry: BlCircleGeometry new.
-	self rebuild
+	yTickCount := 5
 ]
 
 { #category : 'layout' }

@@ -19,10 +19,11 @@ BpFigure exampleStairs.
 BpFigure exampleViolinPlot.
 BpFigure exampleErrorBar.
 BpFigure exampleBoxPlot.
-BpFigure examplePolarBar
+BpFigure examplePolarBar.
+BpFigure exampleRadarChart
 ```
 
-More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs`, `BpViolinPlot`, `BpErrorBar` and `BpPolarChart`.
+More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs`, `BpViolinPlot`, `BpErrorBar`, `BpPolarChart` and `BpKiviat`.
 
 ## Design Rationale
 
@@ -33,7 +34,7 @@ More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatte
 
 ## Usage
 
-1. `rows:columns:` (also on the class side) creates my charts, row by row, in a `BlGridLayout`; `rows:columns:chartClass:` creates charts of another class, such as `BpPolarChart`.
+1. `rows:columns:` (also on the class side) creates my charts, row by row, in a `BlGridLayout`; `rows:columns:chartClass:` creates charts of another class, such as `BpPolarChart` or `BpKiviat`.
 2. Plots are added to my charts (`chartAtRow:column:`, `charts`), for example with `BpChart>>hist:`.
 3. `show:` opens me in a space of my extent.
 
@@ -185,6 +186,14 @@ BpFigure class >> examplePolarBar [
 
 	<example>
 	^ self instancePolarBar show: 'polar_bar'
+]
+
+{ #category : 'examples' }
+BpFigure class >> exampleRadarChart [
+	"Show the figure of the gallery radar chart: the profiles of five factors in four scenarios (see `BpKiviat`)."
+
+	<example>
+	^ self instanceRadarChart show: 'radar_chart'
 ]
 
 { #category : 'examples' }
@@ -1204,6 +1213,21 @@ BpFigure class >> instancePolarBar [
 		width: ((1 to: count) collect: [ :each | Float pi / 4 * random next ]);
 		color: (radii collect: [ :each | BpInterpolatedPalette viridis colorAt: each / 10 ]);
 		alpha: 0.5.
+	^ figure
+]
+
+{ #category : 'instances - polar' }
+BpFigure class >> instanceRadarChart [
+	"Gallery: Radar chart (aka spider or star chart) (radar_chart): the profiles of five factors in four scenarios."
+
+	<sampleInstance>
+	| figure |
+	figure := self rows: 2 columns: 2 chartClass: BpKiviat.
+	figure extent: 1100 @ 900.
+	figure charts with: BpKiviat factorProfiles do: [ :chart :profile |
+		BpKiviat showFactors: profile value in: chart.
+		chart title: profile key ].
+	figure charts first legend.
 	^ figure
 ]
 

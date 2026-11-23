@@ -13,7 +13,7 @@ BpChart instanceHistogram
 - My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale.
 - Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box, a bar plot one at each category), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length: computing it from my size would change my children during the layout pass and trigger another layout.
 - My title is a `BpText`, so a line break gives a title on several lines.
-- The transform, the ticks, the grid lines and the place of the legend are created or chosen by methods of their own (`newTransform`, `newTickOn:location:text:`, `newGridLineFor:`, `showLegend:`), which `BpPolarChart` redefines.
+- The transform, the ticks, the grid lines and the place of the legend are created or chosen by methods of their own (`newTransform`, `newTickOn:location:text:`, `newGridLineFor:`, `showLegend:`), which `BpPolarChart` redefines, as well as the default settings (`initializeSettings`).
 - I have one slot per setting, hence many slots.
 
 ## Usage
@@ -272,17 +272,7 @@ BpChart >> hist: aCollection [
 BpChart >> initialize [
 
 	super initialize.
-	artists := OrderedCollection new.
-	ticks := #(  ).
-	showLegend := false.
-	showGrid := false.
-	xScale := #linear.
-	yScale := #linear.
-	xTickCount := 6.
-	yTickCount := 8.
-	palette := BpPalette default.
-	colorIndex := 0.
-	plotBounds := 0 @ 0 corner: 1 @ 1.
+	self initializeSettings.
 	transform := self newTransform.
 	plotArea := BpPlotArea new
 		            dataTransform: transform;
@@ -298,6 +288,23 @@ BpChart >> initialize [
 			plotArea.
 			titleElement }.
 	self rebuild
+]
+
+{ #category : 'initialization' }
+BpChart >> initializeSettings [
+	"Give my settings their default values, before my parts are created."
+
+	artists := OrderedCollection new.
+	ticks := #(  ).
+	showLegend := false.
+	showGrid := false.
+	xScale := #linear.
+	yScale := #linear.
+	xTickCount := 6.
+	yTickCount := 8.
+	palette := BpPalette default.
+	colorIndex := 0.
+	plotBounds := 0 @ 0 corner: 1 @ 1
 ]
 
 { #category : 'layout' }

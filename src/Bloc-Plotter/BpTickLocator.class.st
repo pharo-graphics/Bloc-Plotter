@@ -67,16 +67,9 @@ BpTickLocator class >> labelsFor: aCollectionOfTicks [
 BpTickLocator class >> linearTicksFrom: aMinimum to: aMaximum count: anInteger [
 	"Answer at most anInteger + 1 ticks between aMinimum and aMaximum, multiples of a nice step (1, 2, 2.5 or 5 times a power of ten)."
 
-	| raw scale step first last |
+	| step first last |
 	aMaximum > aMinimum ifFalse: [ ^ { aMinimum } ].
-	raw := aMaximum - aMinimum / anInteger.
-	scale := 10 raisedTo: (raw log: 10) floor.
-	step := ({
-		         1.
-		         2.
-		         (5 / 2).
-		         5.
-		         10 } collect: [ :each | each * scale ]) detect: [ :each | each >= (raw * (1 - 1.0e-9)) ].
+	step := self stepAtLeast: aMaximum - aMinimum / anInteger.
 	first := (aMinimum / step - 1.0e-9) ceiling.
 	last := (aMaximum / step + 1.0e-9) floor.
 	^ (first to: last) collect: [ :each | self clean: each * step ]
@@ -95,6 +88,20 @@ BpTickLocator class >> logTicksFrom: aMinimum to: aMaximum [
 	"Answer the powers of ten between aMinimum and aMaximum, both positive."
 
 	^ (((aMinimum log: 10) - 1.0e-9) ceiling to: ((aMaximum log: 10) + 1.0e-9) floor) collect: [ :each | 10 raisedTo: each ]
+]
+
+{ #category : 'ticks' }
+BpTickLocator class >> stepAtLeast: aNumber [
+	"Answer the smallest nice step (1, 2, 2.5 or 5 times a power of ten) that is at least aNumber, which is positive."
+
+	| scale |
+	scale := 10 raisedTo: (aNumber log: 10) floor.
+	^ ({
+		   1.
+		   2.
+		   (5 / 2).
+		   5.
+		   10 } collect: [ :each | each * scale ]) detect: [ :each | each >= (aNumber * (1 - 1.0e-9)) ]
 ]
 
 { #category : 'labels' }

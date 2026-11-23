@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpChart`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`), the area between two curves (`BpFillBetween`), a stack plot (`BpStackPlot`), a step curve (`BpStairs`), a violin plot (`BpViolinPlot`) or points with error bars (`BpErrorBar`, a `BpLine`). I compute what my data show and build patches (`BpPatch`) that my chart places in its plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpChart`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`), the area between two curves (`BpFillBetween`), a stack plot (`BpStackPlot`), a step curve (`BpStairs`), a violin plot (`BpViolinPlot`), points with error bars (`BpErrorBar`, a `BpLine`) or a row of a Kiviat chart (`BpKiviatRow`). I compute what my data show and build patches (`BpPatch`) that my chart places in its plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -16,7 +16,7 @@ BpArtist exampleArtistsInOneChart
 
 ## Usage
 
-1. A plotting method of `BpChart` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`) creates the artist, and `BpChart>>addArtist:` gives it its chart and its colors of the palette (`defaultColors:`).
+1. A plotting method of `BpChart` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`, `BpKiviat>>addRow:`) creates the artist, and `BpChart>>addArtist:` gives it its chart and its colors of the palette (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the chart (`BpChart>>artistChanged:`); it rebuilds its limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
