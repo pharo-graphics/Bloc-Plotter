@@ -1,5 +1,5 @@
 "
-I am a patch of an artist: an element drawn in a `BpPlotArea` from data coordinates. I know my `artist`, the index of the `dataset` I show, my `dataBounds` and, once measured, my `pixelBounds`. My subclasses are the bars (`BpRectanglePatch`) and outlines (`BpPolygonPatch`) of a `BpHistogram`, the bars of a `BpBarPlot`, the markers (`BpMarkerPatch`) of a `BpScatterPlot`, the line (`BpPolygonPatch`) and markers of a `BpLine`, the lines and markers of a `BpBoxPlot`, the stems, baseline and markers of a `BpStemPlot`, and the polygons (`BpPolygonPatch`) of a `BpFillBetween`, a `BpStackPlot` or a `BpStairs`.
+I am a patch of an artist: an element drawn in a `BpPlotArea` from data coordinates. I know my `artist`, the index of the `dataset` I show, my `dataBounds` and, once measured, my `pixelBounds`. My subclasses are the bars (`BpRectanglePatch`) and outlines (`BpPolygonPatch`) of a `BpHistogram`, the bars of a `BpBarPlot`, the markers (`BpMarkerPatch`) of a `BpScatterPlot`, the line (`BpPolygonPatch`) and markers of a `BpLine`, the lines and markers of a `BpBoxPlot`, the stems, baseline and markers of a `BpStemPlot`, and the polygons (`BpPolygonPatch`) of a `BpFillBetween`, a `BpStackPlot` or a `BpStairs`, and the bodies and lines of a `BpViolinPlot`.
 
 ## Examples
 
@@ -9,7 +9,7 @@ BpPatch scriptBarsAndSteps
 
 ## Usage
 
-1. `BpHistogram>>newBarAt:dataset:amount:bounds:`, `BpHistogram>>newStepFor:top:base:shift:`, `BpBarPlot>>newBarAt:`, `BpScatterPlot>>newPatches`, `BpLine>>newLinePatch`, `BpLine>>newMarkerPatchAt:index:`, `BpBoxPlot>>newPolygon:closed:dataset:`, `BpBoxPlot>>newMarkerAt:properties:dataset:`, `BpStemPlot>>newLineThrough:color:style:`, `BpStemPlot>>newMarkerAt:index:marker:color:`, `BpFillBetween>>newPolygonThrough:`, `BpStackPlot>>newPolygonFor:tops:bottoms:` and `BpStairs>>newPatches` create patches, style them and add the handlers given to `BpArtist>>whenPatch:do:`.
+1. `BpHistogram>>newBarAt:dataset:amount:bounds:`, `BpHistogram>>newStepFor:top:base:shift:`, `BpBarPlot>>newBarAt:`, `BpScatterPlot>>newPatches`, `BpLine>>newLinePatch`, `BpLine>>newMarkerPatchAt:index:`, `BpBoxPlot>>newPolygon:closed:dataset:`, `BpBoxPlot>>newMarkerAt:properties:dataset:`, `BpStemPlot>>newLineThrough:color:style:`, `BpStemPlot>>newMarkerAt:index:marker:color:`, `BpFillBetween>>newPolygonThrough:`, `BpStackPlot>>newPolygonFor:tops:bottoms:`, `BpStairs>>newPatches` and `BpViolinPlot>>newPatch:through:dataset:style:` create patches, style them and add the handlers given to `BpArtist>>whenPatch:do:`.
 2. `BpAxes>>rebuild` shows them in its plot area, and `BpAxes>>autoScale:` reads their `dataBounds`.
 3. `BpPlotAreaLayout` sends `measureWith:` with the data transform of the axes, then places them at their `pixelBounds`.
 

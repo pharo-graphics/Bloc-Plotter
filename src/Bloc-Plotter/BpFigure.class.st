@@ -17,10 +17,11 @@ BpFigure scriptStem.
 BpFigure scriptFillBetween.
 BpFigure scriptStackPlot.
 BpFigure scriptStairs.
+BpFigure scriptViolinPlot.
 BpFigure scriptSave
 ```
 
-More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot` and `BpStairs`.
+More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs` and `BpViolinPlot`.
 
 ## Design Rationale
 
@@ -192,6 +193,14 @@ BpFigure class >> scriptTwoByTwo [
 
 	<example>
 	^ self exampleTwoByTwo show: 'Figure 2 x 2'
+]
+
+{ #category : 'script' }
+BpFigure class >> scriptViolinPlot [
+	"Show the figure of the gallery violin plot basics: points, widths, means, medians, bandwidths and quantiles (see `BpViolinPlot`)."
+
+	<example>
+	^ BpViolinPlot exampleViolinPlotBasics show: 'violinplot'
 ]
 
 { #category : 'accessing' }
