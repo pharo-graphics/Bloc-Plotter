@@ -4,7 +4,7 @@ I add a Live pane, the first one, to the inspector of every visual object of Blo
 ## Examples
 
 ```
-BpFigure exampleTwoByTwo inspect
+BpFigure instanceTwoByTwo inspect
 ```
 
 ## Design Rationale

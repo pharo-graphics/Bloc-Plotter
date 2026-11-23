@@ -4,7 +4,7 @@ I am a patch of an artist: an element drawn in a `BpPlotArea` from data coordina
 ## Examples
 
 ```
-BpPatch scriptBarsAndSteps
+BpPatch exampleBarsAndSteps
 ```
 
 ## Usage
@@ -30,12 +30,12 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'script' }
-BpPatch class >> scriptBarsAndSteps [
+{ #category : 'examples' }
+BpPatch class >> exampleBarsAndSteps [
 	"Show the two kinds of patches: bars (BpRectanglePatch) for the bar histogram types, outlines (BpPolygonPatch) for the step ones (see `BpHistogram>>histType:`)."
 
 	<example>
-	^ BpHistogram exampleHistTypes show: 'Bars and steps'
+	^ BpFigure instanceHistTypes show: 'Bars and steps'
 ]
 
 { #category : 'accessing' }

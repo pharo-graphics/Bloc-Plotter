@@ -4,11 +4,9 @@ I am a box plot of one or several datasets, added by `BpAxes>>boxPlot:`: for eac
 ## Examples
 
 ```
+BpBoxPlot exampleBoxPlotDemo.
+BpBoxPlot exampleInteraction.
 BpBoxPlot examplePlotType
-```
-
-```
-BpBoxPlot scriptBoxPlotDemo
 ```
 
 ## Design Rationale
@@ -135,108 +133,30 @@ BpBoxPlot class >> defaultWhiskerProperties [
 
 { #category : 'examples' }
 BpBoxPlot class >> exampleBoxPlotDemo [
-	"Answer the first figure of the gallery Boxplots (statistics/boxplot_demo): the same data drawn as a basic, a notched, a horizontal box plot, with other flier symbols, without fliers and with shorter whiskers."
+	"Show the six variants of the gallery Boxplots: basic, notched, other flier symbols, no fliers, horizontal, shorter whiskers."
 
-	<sampleInstance>
-	| random data figure settings |
-	random := Random seed: 19680801.
-	data := ((1 to: 50) collect: [ :each | random next * 100 ]) , (Array new: 25 withAll: 50)
-	        , ((1 to: 10) collect: [ :each | random next * 100 + 100 ]) , ((1 to: 10) collect: [ :each | random next * -100 ]).
-	figure := BpFigure rows: 2 columns: 3.
-	settings := {
-		            ('basic plot' -> [ :box |  ]).
-		            ('notched plot' -> [ :box | box notch: true ]).
-		            ((String cr join: #( 'change outlier' 'point symbols' )) -> [ :box | box flierSymbol: 'gD' ]).
-		            ((String cr join: #( 'don''t show' 'outlier points' )) -> [ :box | box flierSymbol: '' ]).
-		            ('horizontal boxes' -> [ :box |
-			             box
-				             flierSymbol: 'rs';
-				             orientation: #horizontal ]).
-		            ('change whisker length' -> [ :box |
-			             box
-				             flierSymbol: 'rs';
-				             orientation: #horizontal;
-				             whiskers: 0.75 ]) }.
-	settings withIndexDo: [ :each :index |
-		| axes |
-		axes := figure axesAtRow: index - 1 // 3 + 1 column: index - 1 \\ 3 + 1.
-		each value value: (axes boxPlot: data).
-		axes title: each key ].
-	^ figure
+	<example>
+	^ BpFigure instanceBoxPlotDemo show: 'boxplot_demo'
 ]
 
 { #category : 'examples' }
-BpBoxPlot class >> exampleInteractiveBoxPlot [
-	"Answer a figure of three filled boxes: hovering a part outlines it in red, clicking a part shows the statistics of its box in the title."
+BpBoxPlot class >> exampleInteraction [
+	"Show three boxes reacting to the mouse: hovering outlines a part, clicking shows the statistics of its box."
 
-	<sampleInstance>
-	| figure axes boxPlot names |
-	names := #( 'A' 'B' 'C' ).
-	figure := BpFigure new.
-	axes := figure axes first.
-	boxPlot := (axes boxPlot: (self exampleThreeBoxes statistics collect: [ :each | each values ]))
-		           patchArtist: true;
-		           showMeans: true;
-		           tickLabels: names;
-		           yourself.
-	axes title: 'Click a box'.
-	boxPlot
-		whenPatch: BlMouseEnterEvent do: [ :event :patch |
-			patch userData at: #border put: patch border.
-			patch border: (BlBorder paint: Color red width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch userData at: #border ifPresent: [ :border | patch border: border ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			| stats |
-			stats := boxPlot statistics at: patch dataset.
-			axes title: ('{1}: median {2}, quartiles {3} and {4}, mean {5}' format: {
-				 (names at: patch dataset).
-				 (stats median printShowingDecimalPlaces: 2).
-				 (stats q1 printShowingDecimalPlaces: 2).
-				 (stats q3 printShowingDecimalPlaces: 2).
-				 (stats mean printShowingDecimalPlaces: 2) }) ].
-	^ figure
+	<example>
+	^ BpFigure instanceInteractiveBoxPlot show: 'boxplot interaction'
 ]
 
 { #category : 'examples' }
 BpBoxPlot class >> examplePlotType [
-	"Answer the figure of the box plot type page (plot_types/stats/boxplot_plot): three filled boxes at 2, 4 and 6 without fliers, with white medians and edges."
+	"Show the figure of the box plot type page."
 
-	<sampleInstance>
-	| random columns figure axes |
-	random := Random seed: 10.
-	columns := #( #( 3 1.25 ) #( 5 1 ) #( 4 1.25 ) ) collect: [ :meanAndDeviation |
-		           (1 to: 100) collect: [ :each | random nextNormalMean: meanAndDeviation first deviation: meanAndDeviation last ] ].
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes boxPlot: columns)
-		positions: #( 2 4 6 );
-		widths: 1.5;
-		patchArtist: true;
-		showFliers: false;
-		medianProperties: {
-			(#color -> 'white').
-			(#lineWidth -> 0.5) } asDictionary;
-		boxProperties: {
-			(#faceColor -> 'C0').
-			(#edgeColor -> 'white').
-			(#lineWidth -> 0.5) } asDictionary;
-		whiskerProperties: {
-			(#color -> 'C0').
-			(#lineWidth -> 1.5) } asDictionary;
-		capProperties: {
-			(#color -> 'C0').
-			(#lineWidth -> 1.5) } asDictionary.
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
+	<example>
+	^ BpFigure instanceBoxPlotType show: 'boxplot'
 ]
 
-{ #category : 'examples' }
-BpBoxPlot class >> exampleThreeBoxes [
+{ #category : 'instances' }
+BpBoxPlot class >> instanceThreeBoxes [
 	"Answer a box plot of three normal samples."
 
 	<sampleInstance>
@@ -245,30 +165,6 @@ BpBoxPlot class >> exampleThreeBoxes [
 	^ self new
 		  x: (#( 3 5 4 ) collect: [ :mean | (1 to: 100) collect: [ :each | random nextNormalMean: mean deviation: 1 ] ]);
 		  yourself
-]
-
-{ #category : 'script' }
-BpBoxPlot class >> scriptBoxPlotDemo [
-	"Show the six variants of the gallery Boxplots: basic, notched, other flier symbols, no fliers, horizontal, shorter whiskers."
-
-	<example>
-	^ self exampleBoxPlotDemo show: 'boxplot_demo'
-]
-
-{ #category : 'script' }
-BpBoxPlot class >> scriptInteraction [
-	"Show three boxes reacting to the mouse: hovering outlines a part, clicking shows the statistics of its box."
-
-	<example>
-	^ self exampleInteractiveBoxPlot show: 'boxplot interaction'
-]
-
-{ #category : 'script' }
-BpBoxPlot class >> scriptPlotType [
-	"Show the figure of the box plot type page."
-
-	<example>
-	^ self examplePlotType show: 'boxplot'
 ]
 
 { #category : 'private - computing' }

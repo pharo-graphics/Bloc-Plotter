@@ -4,7 +4,7 @@ I am a text of a `BpPie`: a label or a percentage shown on the bisector of a `Bp
 ## Examples
 
 ```
-BpPieText exampleValueAndPercent
+BpPieText instanceValueAndPercent
 ```
 
 ## Design Rationale
@@ -35,12 +35,12 @@ Class {
 	#tag : 'Pie'
 }
 
-{ #category : 'examples' }
-BpPieText class >> exampleValueAndPercent [
+{ #category : 'instances' }
+BpPieText class >> instanceValueAndPercent [
 	"Answer the two-line text '36' and '45.0%' of the first wedge of a pie."
 
 	<sampleInstance>
-	^ BpPie examplePieLabelValuesAndPercents texts first
+	^ BpPie instancePieLabelValuesAndPercents texts first
 ]
 
 { #category : 'geometry' }

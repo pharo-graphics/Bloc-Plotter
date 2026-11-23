@@ -4,7 +4,7 @@ I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), 
 ## Examples
 
 ```
-BpAxes exampleHistogram
+BpAxes instanceHistogram
 ```
 
 ## Design Rationale
@@ -60,8 +60,8 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'examples' }
-BpAxes class >> exampleHistogram [
+{ #category : 'instances' }
+BpAxes class >> instanceHistogram [
 	"Answer axes showing a histogram, with a title."
 
 	<sampleInstance>

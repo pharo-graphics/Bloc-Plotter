@@ -4,8 +4,7 @@ I am the shape of a scatter marker: a circle, a polygon, lines (unfilled markers
 ## Examples
 
 ```
-BpMarker exampleStar.
-BpMarker scriptAllMarkers
+BpMarker exampleAllMarkers
 ```
 
 ## Design Rationale
@@ -94,11 +93,11 @@ BpMarker class >> commands: aCollectionOfCommands [
 ]
 
 { #category : 'examples' }
-BpMarker class >> exampleStar [
-	"Answer the star marker ('*')."
+BpMarker class >> exampleAllMarkers [
+	"Show every marker symbol, tuple and TeX shape known, one per column."
 
-	<sampleInstance>
-	^ self on: '*'
+	<example>
+	^ BpFigure instanceAllMarkers show: 'Markers'
 ]
 
 { #category : 'private - shapes' }
@@ -133,6 +132,14 @@ BpMarker class >> heartCommandsFlipped: aBoolean [
 		            { #Z } }.
 	aBoolean ifFalse: [ ^ commands ].
 	^ commands collect: [ :each | { each first } , (each allButFirst collect: [ :point | point x @ (point y negated * 0.8 + 0.1) ]) ]
+]
+
+{ #category : 'instances' }
+BpMarker class >> instanceStar [
+	"Answer the star marker ('*')."
+
+	<sampleInstance>
+	^ self on: '*'
 ]
 
 { #category : 'instance creation' }
@@ -254,28 +261,6 @@ BpMarker class >> rotated: aCollectionOfPoints by: aDegreeAngle [
 	radians := aDegreeAngle degreesToRadians.
 	^ aCollectionOfPoints collect: [ :each |
 		  each x * radians cos - (each y * radians sin) @ (each x * radians sin + (each y * radians cos)) ]
-]
-
-{ #category : 'script' }
-BpMarker class >> scriptAllMarkers [
-	"Show every marker symbol, tuple and TeX shape known, one per column."
-
-	<example>
-	| specifications figure axes |
-	specifications := #( 'o' '.' 's' '^' 'v' '<' '>' 'D' 'd' 'p' 'h' 'H' '8' '*' 'P' 'X' '+' 'x' '|' '_' #( 6 1 0 ) #( 6 2 0 )
-	                     '$\clubsuit$' '$\spadesuit$' '$\heartsuit$' '$\diamondsuit$' ).
-	figure := BpFigure new.
-	figure extent: 1000 @ 220.
-	axes := figure axes first.
-	specifications withIndexDo: [ :each :index |
-		(axes scatterX: { index } y: #( 0 ))
-			s: 200;
-			c: 'k';
-			marker: each ].
-	axes
-		title: 'Markers: o . s ^ v < > D d p h H 8 * P X + x | _ (6,1) (6,2) and the TeX card suits';
-		yTickCount: 1.
-	^ figure show: 'Markers'
 ]
 
 { #category : 'private - shapes' }

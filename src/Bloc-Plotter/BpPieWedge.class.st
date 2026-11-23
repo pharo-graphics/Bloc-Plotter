@@ -4,7 +4,7 @@ I am one wedge of a `BpPie`: the sector showing one of its values. I know my val
 ## Examples
 
 ```
-BpPieWedge exampleHogs
+BpPieWedge instanceHogs
 ```
 
 ## Design Rationale
@@ -38,12 +38,12 @@ Class {
 	#tag : 'Pie'
 }
 
-{ #category : 'examples' }
-BpPieWedge class >> exampleHogs [
-	"Answer the exploded 'Hogs' wedge of `BpPie class>>#exampleExplodeShadowRotate`."
+{ #category : 'instances' }
+BpPieWedge class >> instanceHogs [
+	"Answer the exploded 'Hogs' wedge of `BpPie class>>#instanceExplodeShadowRotate`."
 
 	<sampleInstance>
-	^ BpPie exampleExplodeShadowRotate wedgeAt: 2
+	^ BpPie instanceExplodeShadowRotate wedgeAt: 2
 ]
 
 { #category : 'accessing' }

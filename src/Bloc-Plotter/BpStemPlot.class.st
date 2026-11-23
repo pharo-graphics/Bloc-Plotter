@@ -4,10 +4,9 @@ I am a stem plot, added by `BpAxes>>stem:` and `BpAxes>>stemLocations:heads:`. F
 ## Examples
 
 ```
-BpStemPlot scriptPlotType.
-BpStemPlot scriptStemPlot.
-BpStemPlot scriptInteraction.
-BpStemPlot exampleStems
+BpStemPlot examplePlotType.
+BpStemPlot exampleStemPlot.
+BpStemPlot exampleInteraction
 ```
 
 ## Design Rationale
@@ -54,105 +53,38 @@ Class {
 }
 
 { #category : 'examples' }
-BpStemPlot class >> exampleInteractiveStems [
-	"Stems with interaction handlers: hovering a stem or a marker paints it red, clicking a marker shows its location and head in the title."
+BpStemPlot class >> exampleInteraction [
+	"Interaction handlers on stems: hover a stem or a marker to paint it red, click a marker to see its location and head."
 
-	<sampleInstance>
-	| figure axes stems |
-	figure := BpFigure new.
-	axes := figure axes first.
-	stems := axes stemLocations: (1 to: 10) heads: ((1 to: 10) collect: [ :each | (each / 2) sin * 5 ]).
-	axes title: 'Click a marker'.
-	stems
-		whenPatch: BlMouseEnterEvent do: [ :event :patch |
-			patch userData at: #border put: patch border.
-			patch border: (BlBorder paint: Color red width: 3) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch userData at: #border ifPresent: [ :border | patch border: border ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			(stems markerLine includes: patch) ifTrue: [
-				axes title: ('stem {1}: head {2}' format: {
-					 (stems locations at: patch index).
-					 ((stems heads at: patch index) printShowingDecimalPlaces: 2) }) ] ].
-	^ figure
+	<example>
+	^ BpFigure instanceInteractiveStems show: 'Stem interaction'
 ]
 
 { #category : 'examples' }
 BpStemPlot class >> examplePlotType [
-	"Plot types: stem(x, y), eight stems with fixed limits and ticks."
+	"Reproduce the plot type stem(x, y)."
 
-	<sampleInstance>
-	| figure axes |
-	figure := BpFigure new.
-	axes := figure axes first.
-	axes stemLocations: ((0 to: 7) collect: [ :each | each + 0.5 ]) heads: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ).
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
+	<example>
+	^ BpFigure instanceStemPlotType show: 'stem(x, y)'
 ]
 
 { #category : 'examples' }
 BpStemPlot class >> exampleStemPlot [
-	"Gallery: Stem plot (stem_plot), first figure: exp(sin(x)) at 41 locations between 0.1 and 2 pi."
+	"Reproduce the two figures of the gallery 'Stem plot': default stems, then grey stems with hollow diamonds on a baseline at 1.1."
 
-	<sampleInstance>
-	| figure |
-	figure := BpFigure new.
-	figure axes first stemLocations: self stemPlotLocations heads: (self stemPlotLocations collect: [ :each | each sin exp ]).
-	^ figure
+	<example>
+	BpFigure instanceStemPlot show: 'stem_plot'.
+	^ BpFigure instanceStemPlotStyled show: 'stem_plot styled'
 ]
 
-{ #category : 'examples' }
-BpStemPlot class >> exampleStemPlotStyled [
-	"Gallery: Stem plot (stem_plot), second figure: grey stems, hollow diamonds and the baseline at 1.1."
-
-	<sampleInstance>
-	| figure |
-	figure := BpFigure new.
-	(figure axes first stemLocations: self stemPlotLocations heads: (self stemPlotLocations collect: [ :each | each sin exp ]))
-		lineFormat: 'grey';
-		markerFormat: 'D';
-		bottom: 1.1;
-		markerFaceColor: 'none'.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpStemPlot class >> exampleStems [
+{ #category : 'instances' }
+BpStemPlot class >> instanceStems [
 	"Answer five stems going up and down from the baseline, in new axes."
 
 	<sampleInstance>
 	^ (BpAxes new
 		   extent: 400 @ 300;
 		   yourself) stem: #( 3 -1 4 -1 5 )
-]
-
-{ #category : 'script' }
-BpStemPlot class >> scriptInteraction [
-	"Interaction handlers on stems: hover a stem or a marker to paint it red, click a marker to see its location and head."
-
-	<example>
-	^ self exampleInteractiveStems show: 'Stem interaction'
-]
-
-{ #category : 'script' }
-BpStemPlot class >> scriptPlotType [
-	"Reproduce the plot type stem(x, y)."
-
-	<example>
-	^ self examplePlotType show: 'stem(x, y)'
-]
-
-{ #category : 'script' }
-BpStemPlot class >> scriptStemPlot [
-	"Reproduce the two figures of the gallery 'Stem plot': default stems, then grey stems with hollow diamonds on a baseline at 1.1."
-
-	<example>
-	self exampleStemPlot show: 'stem_plot'.
-	^ self exampleStemPlotStyled show: 'stem_plot styled'
 ]
 
 { #category : 'private - demo' }

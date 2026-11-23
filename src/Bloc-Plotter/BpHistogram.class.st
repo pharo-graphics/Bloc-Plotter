@@ -4,14 +4,12 @@ I am a histogram, added by `BpAxes>>hist:`. I bin one or several datasets with a
 ## Examples
 
 ```
-BpHistogram scriptHistTypes.
-BpHistogram scriptMultiHist.
-BpHistogram scriptMultiHistStyles.
-BpHistogram scriptHist.
-BpHistogram scriptOptions.
-BpHistogram scriptInteraction.
-BpHistogram exampleStepFilled.
-BpHistogram exampleHistTypes
+BpHistogram exampleHistTypes.
+BpHistogram exampleMultiHist.
+BpHistogram exampleMultiHistStyles.
+BpHistogram exampleHist.
+BpHistogram exampleOptions.
+BpHistogram exampleInteraction
 ```
 
 ## Design Rationale
@@ -76,238 +74,62 @@ BpHistogram class >> dashArrays [
 ]
 
 { #category : 'examples' }
-BpHistogram class >> exampleColorByHeight [
-	"Gallery: Histograms (hist), second figure: bars colored by their height with viridis (normalized between the lowest and the highest bar), and a density with percent tick labels."
+BpHistogram class >> exampleHist [
+	"Reproduce the two first figures of the gallery 'Histograms': two distributions, then bars colored by height and a density with percent labels."
 
-	<sampleInstance>
-	| random dist1 figure histogram lowest highest |
-	random := Random seed: 19680801.
-	dist1 := (1 to: 100000) collect: [ :each | random nextNormal ].
-	figure := BpFigure rows: 1 columns: 2.
-	histogram := ((figure axesAtRow: 1 column: 1) hist: dist1)
-		             bins: 20;
-		             yourself.
-	lowest := histogram counts min.
-	highest := histogram counts max.
-	histogram patches do: [ :each | each background: (BpColors viridis: each amount - lowest / (highest - lowest)) ].
-	((figure axesAtRow: 1 column: 2) hist: dist1)
-		bins: 20;
-		density: true.
-	(figure axesAtRow: 1 column: 2) yTickFormatter: [ :value | (value * 100) rounded printString , '%' ].
-	^ figure
+	<example>
+	BpFigure instanceHistogramTwoDistributions show: 'hist: two distributions'.
+	^ BpFigure instanceHistogramColorByHeight show: 'hist: color by height'
 ]
 
 { #category : 'examples' }
 BpHistogram class >> exampleHistTypes [
-	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes)."
+	"Reproduce the gallery 'Demo of the histogram function''s different histtype settings': stepfilled, step, barstacked and bars on unequal bins."
 
-	<sampleInstance>
-	| random x w figure bottomLeft |
-	random := Random seed: 19680801.
-	x := (1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ].
-	w := (1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 10 ].
-	figure := BpFigure rows: 2 columns: 2.
-	((figure axesAtRow: 1 column: 1) hist: x)
-		bins: 20;
-		density: true;
-		histType: #stepfilled;
-		faceColor: (BpColors named: 'g');
-		alpha: 0.75.
-	(figure axesAtRow: 1 column: 1) title: 'stepfilled'.
-	((figure axesAtRow: 1 column: 2) hist: x)
-		bins: 20;
-		density: true;
-		histType: #step;
-		faceColor: (BpColors named: 'g');
-		alpha: 0.75.
-	(figure axesAtRow: 1 column: 2) title: 'step'.
-	bottomLeft := figure axesAtRow: 2 column: 1.
-	(bottomLeft hist: x)
-		density: true;
-		histType: #barstacked;
-		relativeWidth: 0.8.
-	(bottomLeft hist: w)
-		density: true;
-		histType: #barstacked;
-		relativeWidth: 0.8.
-	bottomLeft title: 'barstacked'.
-	"Create a histogram by providing the bin edges (unequally spaced)."
-	((figure axesAtRow: 2 column: 2) hist: x)
-		bins: #( 100 150 180 195 205 220 250 300 );
-		density: true;
-		histType: #bar;
-		relativeWidth: 0.8.
-	(figure axesAtRow: 2 column: 2) title: 'bar, unequal bins'.
-	^ figure
+	<example>
+	^ BpFigure instanceHistTypes show: 'histogram_histtypes'
 ]
 
 { #category : 'examples' }
-BpHistogram class >> exampleInteractiveHistogram [
-	"A histogram with interaction handlers on its bars: hovering a bar highlights it, clicking it shows its bin and count in the title."
+BpHistogram class >> exampleInteraction [
+	"Interaction handlers on the bars of a histogram: hover a bar to highlight it, click it to see its bin and count."
 
-	<sampleInstance>
-	| random figure axes histogram |
-	random := Random seed: 19680801.
-	figure := BpFigure new.
-	axes := figure axes first.
-	histogram := axes hist: ((1 to: 1000) collect: [ :each | random nextNormal ]).
-	histogram
-		bins: 20;
-		edgeColor: Color white.
-	axes title: 'Click a bar'.
-	histogram
-		whenPatch: BlMouseEnterEvent do: [ :event :bar | bar background: BpColors tab10 second ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :bar | bar background: BpColors tab10 first ];
-		whenPatch: BlClickEvent do: [ :event :bar |
-			axes title: ('[{1}, {2}): {3} values' format: {
-				 ((histogram binEdges at: bar bin) printShowingDecimalPlaces: 2).
-				 ((histogram binEdges at: bar bin + 1) printShowingDecimalPlaces: 2).
-				 bar amount }) ].
-	^ figure
+	<example>
+	^ BpFigure instanceInteractiveHistogram show: 'Histogram interaction'
 ]
 
 { #category : 'examples' }
 BpHistogram class >> exampleMultiHist [
-	"Gallery: Plot multiple data sets as histograms (histogram_multihist), first figure."
+	"Reproduce the gallery 'Plot multiple data sets as histograms': bars with a legend, stacked bars, stacked unfilled steps, and datasets of different sizes."
 
-	<sampleInstance>
-	| random x colors xMulti figure |
-	random := Random seed: 19680801.
-	x := (1 to: 3) collect: [ :dataset | (1 to: 1000) collect: [ :each | random nextNormal ] ].
-	figure := BpFigure rows: 2 columns: 2.
-	colors := #( 'red' 'tan' 'lime' ).
-	((figure axesAtRow: 1 column: 1) hist: x)
-		bins: 10;
-		density: true;
-		histType: #bar;
-		color: (colors collect: [ :each | BpColors named: each ]);
-		label: colors.
-	(figure axesAtRow: 1 column: 1)
-		legend;
-		title: 'bars with legend'.
-	((figure axesAtRow: 1 column: 2) hist: x)
-		bins: 10;
-		density: true;
-		histType: #bar;
-		stacked: true.
-	(figure axesAtRow: 1 column: 2) title: 'stacked bar'.
-	((figure axesAtRow: 2 column: 1) hist: x)
-		bins: 10;
-		histType: #step;
-		stacked: true;
-		fill: false.
-	(figure axesAtRow: 2 column: 1) title: 'stack step (unfilled)'.
-	"Make a multiple-histogram of data-sets with different length."
-	xMulti := #( 10000 5000 2000 ) collect: [ :size | (1 to: size) collect: [ :each | random nextNormal ] ].
-	((figure axesAtRow: 2 column: 2) hist: xMulti)
-		bins: 10;
-		histType: #bar.
-	(figure axesAtRow: 2 column: 2) title: 'different sample sizes'.
-	^ figure
+	<example>
+	^ BpFigure instanceMultiHist show: 'histogram_multihist'
 ]
 
 { #category : 'examples' }
 BpHistogram class >> exampleMultiHistStyles [
-	"Gallery: Plot multiple data sets as histograms (histogram_multihist), one style setting per dataset: edge color, face color, line width and line style."
+	"Reproduce the second part of the gallery 'Plot multiple data sets as histograms': one edge color, face color, line width or line style per dataset."
 
-	<sampleInstance>
-	| random x figure colors |
-	random := Random seed: 19680801.
-	x := (1 to: 3) collect: [ :dataset | (1 to: 1000) collect: [ :each | random nextNormal ] ].
-	colors := #( 'green' 'red' 'blue' ) collect: [ :each | BpColors named: each ].
-	figure := BpFigure rows: 2 columns: 2.
-	((figure axesAtRow: 1 column: 1) hist: x)
-		bins: 10;
-		fill: false;
-		histType: #step;
-		stacked: true;
-		edgeColor: colors;
-		label: #( 'green' 'red' 'blue' ).
-	(figure axesAtRow: 1 column: 1)
-		legend;
-		title: 'Stacked Steps with Edgecolors'.
-	((figure axesAtRow: 1 column: 2) hist: x)
-		bins: 10;
-		histType: #barstacked;
-		faceColor: colors;
-		label: #( 'green' 'red' 'blue' ).
-	(figure axesAtRow: 1 column: 2)
-		legend;
-		title: 'Bars with different Facecolors'.
-	((figure axesAtRow: 2 column: 1) hist: x)
-		bins: 10;
-		fill: false;
-		histType: #bar;
-		lineWidth: #( 1 2 3 );
-		edgeColor: colors;
-		label: #( '1' '2' '3' ).
-	(figure axesAtRow: 2 column: 1)
-		legend;
-		title: 'Bars with Linewidths'.
-	((figure axesAtRow: 2 column: 2) hist: x)
-		bins: 10;
-		fill: false;
-		histType: #bar;
-		lineStyle: #( #solid #dotted #dashed );
-		edgeColor: colors;
-		label: #( '-' ':' '--' ).
-	(figure axesAtRow: 2 column: 2)
-		legend;
-		title: 'Bars with Linestyles'.
-	^ figure
+	<example>
+	^ BpFigure instanceMultiHistStyles show: 'histogram_multihist styles'
 ]
 
 { #category : 'examples' }
 BpHistogram class >> exampleOptions [
-	"The other options of `BpHistogram`: cumulative densities, horizontal bars, log scale, bars aligned on the left edges and starting at a bottom, and a bin strategy."
+	"Show the other options of `BpHistogram`: cumulative, orientation, log, align, bottom, bin strategies, range and weights."
 
-	<sampleInstance>
-	| random x figure |
-	random := Random seed: 19680801.
-	x := (1 to: 1000) collect: [ :each | random nextNormal ].
-	figure := BpFigure rows: 2 columns: 3.
-	figure extent: 900 @ 520.
-	((figure axesAtRow: 1 column: 1) hist: x)
-		bins: 30;
-		density: true;
-		cumulative: true;
-		histType: #step.
-	((figure axesAtRow: 1 column: 1) hist: x)
-		bins: 30;
-		density: true;
-		cumulative: -1;
-		histType: #step.
-	(figure axesAtRow: 1 column: 1) title: 'cumulative: true and -1'.
-	((figure axesAtRow: 1 column: 2) hist: x)
-		bins: 15;
-		orientation: #horizontal;
-		relativeWidth: 0.9.
-	(figure axesAtRow: 1 column: 2) title: 'orientation: #horizontal'.
-	((figure axesAtRow: 1 column: 3) hist: x)
-		bins: 30;
-		log: true.
-	(figure axesAtRow: 1 column: 3) title: 'log: true'.
-	((figure axesAtRow: 2 column: 1) hist: x)
-		bins: #( -3 -2 -1 0 1 2 3 );
-		align: #left;
-		relativeWidth: 0.5;
-		bottom: 50.
-	(figure axesAtRow: 2 column: 1) title: 'align: #left, bottom: 50'.
-	((figure axesAtRow: 2 column: 2) hist: x)
-		bins: #fd;
-		histType: #stepfilled;
-		edgeColor: Color black.
-	(figure axesAtRow: 2 column: 2) title: 'bins: #fd'.
-	((figure axesAtRow: 2 column: 3) hist: x)
-		bins: 20;
-		range: #( 0 3 );
-		weights: (x collect: [ :each | 0.5 ]).
-	(figure axesAtRow: 2 column: 3) title: 'range: #(0 3), weights: 0.5'.
-	^ figure
+	<example>
+	^ BpFigure instanceHistogramOptions show: 'hist options'
 ]
 
-{ #category : 'examples' }
-BpHistogram class >> exampleStepFilled [
+{ #category : 'constants' }
+BpHistogram class >> histTypes [
+
+	^ #( #bar #barstacked #step #stepfilled )
+]
+
+{ #category : 'instances' }
+BpHistogram class >> instanceStepFilled [
 	"Answer a filled step histogram of 100 normal samples, in new axes."
 
 	<sampleInstance>
@@ -319,76 +141,6 @@ BpHistogram class >> exampleStepFilled [
 		  bins: 20;
 		  histType: #stepfilled;
 		  yourself
-]
-
-{ #category : 'examples' }
-BpHistogram class >> exampleTwoDistributions [
-	"Gallery: Histograms (hist), first figure: the number of bins set with bins."
-
-	<sampleInstance>
-	| random dist1 dist2 figure |
-	random := Random seed: 19680801.
-	dist1 := (1 to: 100000) collect: [ :each | random nextNormal ].
-	dist2 := (1 to: 100000) collect: [ :each | random nextNormalMean: 5 deviation: 0.4 ].
-	figure := BpFigure rows: 1 columns: 2.
-	((figure axesAtRow: 1 column: 1) hist: dist1) bins: 20.
-	((figure axesAtRow: 1 column: 2) hist: dist2) bins: 20.
-	^ figure
-]
-
-{ #category : 'constants' }
-BpHistogram class >> histTypes [
-
-	^ #( #bar #barstacked #step #stepfilled )
-]
-
-{ #category : 'script' }
-BpHistogram class >> scriptHist [
-	"Reproduce the two first figures of the gallery 'Histograms': two distributions, then bars colored by height and a density with percent labels."
-
-	<example>
-	self exampleTwoDistributions show: 'hist: two distributions'.
-	^ self exampleColorByHeight show: 'hist: color by height'
-]
-
-{ #category : 'script' }
-BpHistogram class >> scriptHistTypes [
-	"Reproduce the gallery 'Demo of the histogram function''s different histtype settings': stepfilled, step, barstacked and bars on unequal bins."
-
-	<example>
-	^ self exampleHistTypes show: 'histogram_histtypes'
-]
-
-{ #category : 'script' }
-BpHistogram class >> scriptInteraction [
-	"Interaction handlers on the bars of a histogram: hover a bar to highlight it, click it to see its bin and count."
-
-	<example>
-	^ self exampleInteractiveHistogram show: 'Histogram interaction'
-]
-
-{ #category : 'script' }
-BpHistogram class >> scriptMultiHist [
-	"Reproduce the gallery 'Plot multiple data sets as histograms': bars with a legend, stacked bars, stacked unfilled steps, and datasets of different sizes."
-
-	<example>
-	^ self exampleMultiHist show: 'histogram_multihist'
-]
-
-{ #category : 'script' }
-BpHistogram class >> scriptMultiHistStyles [
-	"Reproduce the second part of the gallery 'Plot multiple data sets as histograms': one edge color, face color, line width or line style per dataset."
-
-	<example>
-	^ self exampleMultiHistStyles show: 'histogram_multihist styles'
-]
-
-{ #category : 'script' }
-BpHistogram class >> scriptOptions [
-	"Show the other options of `BpHistogram`: cumulative, orientation, log, align, bottom, bin strategies, range and weights."
-
-	<example>
-	^ self exampleOptions show: 'hist options'
 ]
 
 { #category : 'private - computing' }

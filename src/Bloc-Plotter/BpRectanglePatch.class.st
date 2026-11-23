@@ -4,7 +4,7 @@ I am a bar: the rectangle of one bin of one dataset of a `BpHistogram`, or of on
 ## Examples
 
 ```
-BpRectanglePatch exampleBar
+BpRectanglePatch instanceBar
 ```
 "
 Class {
@@ -20,8 +20,8 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'examples' }
-BpRectanglePatch class >> exampleBar [
+{ #category : 'instances' }
+BpRectanglePatch class >> instanceBar [
 	"Answer the bar of the second bin of a histogram, which holds two values."
 
 	<sampleInstance>

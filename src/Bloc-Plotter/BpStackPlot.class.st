@@ -4,11 +4,10 @@ I am a stack plot, added by `BpAxes>>stackPlotX:ys:`: layers drawn on top of eac
 ## Examples
 
 ```
-BpStackPlot scriptPlotType.
-BpStackPlot scriptStackplotDemo.
-BpStackPlot scriptBaselines.
-BpStackPlot scriptInteraction.
-BpStackPlot exampleLayers
+BpStackPlot examplePlotType.
+BpStackPlot exampleStackPlotDemo.
+BpStackPlot exampleBaselines.
+BpStackPlot exampleInteraction
 ```
 
 ## Design Rationale
@@ -53,113 +52,35 @@ Class {
 
 { #category : 'examples' }
 BpStackPlot class >> exampleBaselines [
-	"The same three layers stacked on each baseline: #zero, #sym, #wiggle and #weightedWiggle."
+	"Show the four baselines of a stack plot on the same layers."
 
-	<sampleInstance>
-	| random x layers figure |
-	random := Random seed: 19680801.
-	x := self linspaceFrom: 0 to: 100 count: 101.
-	layers := (1 to: 3) collect: [ :each | self gaussianMixtureOver: x random: random ].
-	figure := BpFigure rows: 2 columns: 2.
-	#( #zero #sym #wiggle #weightedWiggle ) withIndexDo: [ :each :index |
-		| axes |
-		axes := figure axes at: index.
-		(axes stackPlotX: x ys: layers) baseline: each.
-		axes title: 'baseline: #' , each ].
-	^ figure
+	<example>
+	^ BpFigure instanceStackPlotBaselines show: 'stackplot baselines'
 ]
 
 { #category : 'examples' }
-BpStackPlot class >> exampleInteractiveStack [
-	"The world population by continent: hovering a layer outlines it, clicking it shows its continent and its last value in the title."
+BpStackPlot class >> exampleInteraction [
+	"Interaction handlers on the layers of a stack plot: hover a continent to outline it, click it to see its population."
 
-	<sampleInstance>
-	| figure axes stack |
-	figure := self exampleWorldPopulation.
-	axes := figure axes first.
-	axes title: 'Click a continent'.
-	stack := axes artists first.
-	stack
-		whenPatch: BlMouseEnterEvent do: [ :event :polygon | polygon border: (BlBorder paint: Color black width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :polygon | polygon border: BlBorder empty ];
-		whenPatch: BlClickEvent do: [ :event :polygon |
-			axes title: ('{1}: {2} billion people in 2018' format: {
-				 (stack labelAt: polygon dataset).
-				 ((stack stacks at: polygon dataset) last - (polygon dataset = 1
-					   ifTrue: [ stack baselineValues last ]
-					   ifFalse: [ (stack stacks at: polygon dataset - 1) last ]) printShowingDecimalPlaces: 3) }) ].
-	^ figure
-]
-
-{ #category : 'examples' }
-BpStackPlot class >> exampleLayers [
-	"Answer three labeled layers stacked on zero, in new axes with a legend."
-
-	<sampleInstance>
-	| axes stack |
-	axes := BpAxes new
-		        extent: 400 @ 300;
-		        yourself.
-	stack := (axes stackPlotX: (1 to: 6) ys: #( #( 1 2 3 2 3 4 ) #( 2 2 1 2 3 2 ) #( 1 1 2 2 1 1 ) ))
-		         label: #( 'first' 'second' 'third' );
-		         yourself.
-	axes legend.
-	^ stack
+	<example>
+	^ BpFigure instanceInteractiveStack show: 'Stack interaction'
 ]
 
 { #category : 'examples' }
 BpStackPlot class >> examplePlotType [
-	"Plot types: stackplot(x, y), three layers over x = 0, 2, 4, 6, 8 with fixed limits and ticks."
+	"Reproduce the plot type stackplot(x, y)."
 
-	<sampleInstance>
-	| figure axes |
-	figure := BpFigure new.
-	axes := figure axes first.
-	axes stackPlotX: (self arangeFrom: 0 to: 10 by: 2) ys: #( #( 1 1.25 2 2.75 3 ) #( 1 1 1 1 1 ) #( 2 1 2 1 2 ) ).
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
+	<example>
+	^ BpFigure instanceStackPlotType show: 'stackplot(x, y)'
 ]
 
 { #category : 'examples' }
-BpStackPlot class >> exampleStreamGraph [
-	"Gallery: Stackplots and streamgraphs (stackplot_demo), second figure: three random mixtures of gaussians stacked on the #wiggle baseline."
+BpStackPlot class >> exampleStackPlotDemo [
+	"Reproduce the two figures of the gallery 'Stackplots and streamgraphs': the world population by continent, then a streamgraph."
 
-	<sampleInstance>
-	| random x figure |
-	random := Random seed: 19680801.
-	x := self linspaceFrom: 0 to: 100 count: 101.
-	figure := BpFigure new.
-	(figure axes first stackPlotX: x ys: ((1 to: 3) collect: [ :each | self gaussianMixtureOver: x random: random ])) baseline:
-		#wiggle.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpStackPlot class >> exampleWorldPopulation [
-	"Gallery: Stackplots and streamgraphs (stackplot_demo), first figure: the population of each continent from 1950 to 2018, in billions, one labeled layer per continent."
-
-	<sampleInstance>
-	| population figure axes |
-	population := {
-		              ('Africa' -> #( 0.228 0.284 0.365 0.477 0.631 0.814 1.044 1.275 )).
-		              ('the Americas' -> #( 0.340 0.425 0.519 0.619 0.727 0.840 0.943 1.006 )).
-		              ('Asia' -> #( 1.394 1.686 2.120 2.625 3.202 3.714 4.169 4.560 )).
-		              ('Europe' -> #( 0.220 0.253 0.276 0.295 0.310 0.303 0.294 0.293 )).
-		              ('Oceania' -> #( 0.012 0.015 0.019 0.022 0.026 0.031 0.036 0.039 )) }.
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes stackPlotX: #( 1950 1960 1970 1980 1990 2000 2010 2018 ) ys: (population collect: [ :each | each value ]))
-		label: (population collect: [ :each | each key ]);
-		alpha: 0.8.
-	axes
-		legend;
-		title: 'World population'.
-	^ figure
+	<example>
+	BpFigure instanceStackPlotWorldPopulation show: 'stackplot_demo'.
+	^ BpFigure instanceStackPlotStreamGraph show: 'stackplot_demo streamgraph'
 ]
 
 { #category : 'private - demo' }
@@ -178,37 +99,20 @@ BpStackPlot class >> gaussianMixtureOver: someXs random: aRandom [
 	^ values
 ]
 
-{ #category : 'script' }
-BpStackPlot class >> scriptBaselines [
-	"Show the four baselines of a stack plot on the same layers."
+{ #category : 'instances' }
+BpStackPlot class >> instanceLayers [
+	"Answer three labeled layers stacked on zero, in new axes with a legend."
 
-	<example>
-	^ self exampleBaselines show: 'stackplot baselines'
-]
-
-{ #category : 'script' }
-BpStackPlot class >> scriptInteraction [
-	"Interaction handlers on the layers of a stack plot: hover a continent to outline it, click it to see its population."
-
-	<example>
-	^ self exampleInteractiveStack show: 'Stack interaction'
-]
-
-{ #category : 'script' }
-BpStackPlot class >> scriptPlotType [
-	"Reproduce the plot type stackplot(x, y)."
-
-	<example>
-	^ self examplePlotType show: 'stackplot(x, y)'
-]
-
-{ #category : 'script' }
-BpStackPlot class >> scriptStackplotDemo [
-	"Reproduce the two figures of the gallery 'Stackplots and streamgraphs': the world population by continent, then a streamgraph."
-
-	<example>
-	self exampleWorldPopulation show: 'stackplot_demo'.
-	^ self exampleStreamGraph show: 'stackplot_demo streamgraph'
+	<sampleInstance>
+	| axes stack |
+	axes := BpAxes new
+		        extent: 400 @ 300;
+		        yourself.
+	stack := (axes stackPlotX: (1 to: 6) ys: #( #( 1 2 3 2 3 4 ) #( 2 2 1 2 3 2 ) #( 1 1 2 2 1 1 ) ))
+		         label: #( 'first' 'second' 'third' );
+		         yourself.
+	axes legend.
+	^ stack
 ]
 
 { #category : 'accessing' }

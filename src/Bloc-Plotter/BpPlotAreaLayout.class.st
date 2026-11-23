@@ -4,7 +4,7 @@ I am the layout of a `BpPlotArea`: I place each patch where its data coordinates
 ## Examples
 
 ```
-BpPlotAreaLayout exampleOfHistogram
+BpPlotAreaLayout instanceOfHistogram
 ```
 
 ## Usage
@@ -23,11 +23,11 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'examples' }
-BpPlotAreaLayout class >> exampleOfHistogram [
+{ #category : 'instances' }
+BpPlotAreaLayout class >> instanceOfHistogram [
 
 	<sampleInstance>
-	^ BpAxes exampleHistogram plotArea layout
+	^ BpAxes instanceHistogram plotArea layout
 ]
 
 { #category : 'layout' }

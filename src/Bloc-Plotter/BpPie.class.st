@@ -4,10 +4,9 @@ I am a pie chart: a Bloc element showing values as wedges, labeled with `labels:
 ## Examples
 
 ```
-BpPie scriptPieFeatures.
-BpPie scriptPieLabels.
-BpPie scriptInteraction.
-BpPie exampleExplodeShadowRotate
+BpPie examplePieFeatures.
+BpPie examplePieLabels.
+BpPie exampleInteraction
 ```
 
 ## Design Rationale
@@ -116,191 +115,13 @@ BpPie class >> demoOpen: aCollectionOfAssociations title: aString [
 ]
 
 { #category : 'examples' }
-BpPie class >> exampleAutoPct [
-	"Answer a pie with its labels and the percentage of each wedge with one decimal."
-
-	<sampleInstance>
-	^ self frogsPie
-		  autoPct: '%1.1f%%';
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> exampleColors [
-	"Answer a pie with its labels and chosen wedge colors: olive drab, rosy brown, gray and saddle brown."
-
-	<sampleInstance>
-	^ self frogsPie
-		  colors: (#( '6b8e23' 'bc8f8f' '808080' '8b4513' ) collect: [ :each | Color fromHexString: each ]);
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> exampleExplodeShadowRotate [
-	"Answer a pie whose second wedge is pulled out, with shadows, percentages, and the first wedge starting at the top (start angle 90)."
-
-	<sampleInstance>
-	^ self frogsPie
-		  explode: #( 0 0.1 0 0 );
-		  autoPct: '%1.1f%%';
-		  shadow: true;
-		  startAngle: 90;
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> exampleLabels [
-	"Answer a pie with one label per wedge, given by `labels:`."
-
-	<sampleInstance>
-	^ self frogsPie
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabel [
-	"Answer a pie with one label per wedge, added with `addLabels:`."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: self spamLabels;
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabelAbsoluteValues [
-	"Answer a pie showing the value of each wedge with one decimal."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: '{absval:.1f}';
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabelOutside [
-	"Answer a pie with one label per wedge, outside it at 1.1 times the radius."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: self spamLabels distance: 1.1;
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabelPercents [
-	"Answer a pie showing the percentage of each wedge with one decimal."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: '{frac:.1%}';
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabelRotated [
-	"Answer a pie whose labels are rotated along their wedge."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: self spamLabels
-		  distance: 0.6
-		  rotate: true
-		  textStyle: nil;
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabelSeveralSets [
-	"Answer a pie with three label sets: the names outside, the percentages at 0.7 and the values at 0.4 of the radius."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: self spamLabels distance: 1.1;
-		  addLabels: '{frac:.1%}' distance: 0.7;
-		  addLabels: '{absval:d}' distance: 0.4;
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabelTextStyle [
-	"Answer a pie whose labels are written large and white."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: self spamLabels
-		  distance: 0.6
-		  rotate: false
-		  textStyle: [ :text |
-			  text
-				  fontSize: 18;
-				  foreground: Color white ];
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> examplePieLabelValuesAndPercents [
-	"Answer a pie showing the value and, below it, the percentage of each wedge."
-
-	<sampleInstance>
-	^ self spamPie
-		  addLabels: '{absval:d}\n{frac:.1%}';
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> exampleSmallRadius [
-	"Answer a pie of half the radius, with small percentages without decimals."
-
-	<sampleInstance>
-	^ self frogsPie
-		  autoPct: '%.0f%%';
-		  textStyle: [ :text | text fontSize: 9 ];
-		  radius: 0.5;
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> exampleSwapLabelsAndPercents [
-	"Answer a pie with its percentages outside, at 1.25 times the radius, and its labels inside, at 0.6."
-
-	<sampleInstance>
-	^ self frogsPie
-		  autoPct: '%1.1f%%';
-		  pctDistance: 1.25;
-		  labelDistance: 0.6;
-		  yourself
-]
-
-{ #category : 'examples' }
-BpPie class >> exampleWedgeStyle [
-	"Answer a pie whose wedges are separated by a white border 3 pixels wide."
-
-	<sampleInstance>
-	^ self frogsPie
-		  wedgeStyle: [ :wedge | wedge border: (BlBorder paint: Color white width: 3) ];
-		  yourself
-]
-
-{ #category : 'private - demo' }
-BpPie class >> frogsPie [
-	"Answer the labeled pie that the pie features examples configure."
-
-	^ self new
-		  values: #( 15 30 45 10 );
-		  labels: #( 'Frogs' 'Hogs' 'Dogs' 'Logs' );
-		  yourself
-]
-
-{ #category : 'script' }
-BpPie class >> scriptInteraction [
+BpPie class >> exampleInteraction [
 	"Interaction handlers on wedges: hovering a wedge explodes it, clicking it shows its value under the pie."
 
 	<example>
 	| pie info container space |
 	info := BlTextElement new text: ('Click a wedge' asRopedText fontSize: 16).
-	pie := self frogsPie
-		       autoPct: '%1.1f%%';
-		       yourself.
+	pie := self instanceAutoPct.
 	pie
 		whenWedge: BlMouseEnterEvent do: [ :event :wedge |
 			wedge explode: 0.1.
@@ -334,39 +155,215 @@ BpPie class >> scriptInteraction [
 	^ space
 ]
 
-{ #category : 'script' }
-BpPie class >> scriptPieFeatures [
+{ #category : 'examples' }
+BpPie class >> examplePieFeatures [
 	"Show the features of pies: labels, percentages, colors, swapped labels and percentages, explode with shadow and start angle, small radius, and wedge style."
 
 	<example>
 	^ self
 		  demoOpen: {
-			  ('Label slices' -> self exampleLabels).
-			  ('Auto-label slices' -> self exampleAutoPct).
-			  ('Color slices' -> self exampleColors).
-			  ('Swap labels and percents' -> self exampleSwapLabelsAndPercents).
-			  ('Explode, shadow, rotate' -> self exampleExplodeShadowRotate).
-			  ('Shrink pie' -> self exampleSmallRadius).
-			  ('Wedge style' -> self exampleWedgeStyle) }
+			  ('Label slices' -> self instanceLabels).
+			  ('Auto-label slices' -> self instanceAutoPct).
+			  ('Color slices' -> self instanceColors).
+			  ('Swap labels and percents' -> self instanceSwapLabelsAndPercents).
+			  ('Explode, shadow, rotate' -> self instanceExplodeShadowRotate).
+			  ('Shrink pie' -> self instanceSmallRadius).
+			  ('Wedge style' -> self instanceWedgeStyle) }
 		  title: 'Pie features'
 ]
 
-{ #category : 'script' }
-BpPie class >> scriptPieLabels [
+{ #category : 'examples' }
+BpPie class >> examplePieLabels [
 	"Show the ways to label a pie with `addLabels:`: labels inside, outside or rotated, absolute values, percentages, both, styled text, and several label sets on one pie."
 
 	<example>
 	^ self
 		  demoOpen: {
-			  ('Basic labels' -> self examplePieLabel).
-			  ('Labels outside' -> self examplePieLabelOutside).
-			  ('Rotated labels' -> self examplePieLabelRotated).
-			  ('Absolute values' -> self examplePieLabelAbsoluteValues).
-			  ('Percentages' -> self examplePieLabelPercents).
-			  ('Values and percentages' -> self examplePieLabelValuesAndPercents).
-			  ('Font styling' -> self examplePieLabelTextStyle).
-			  ('Multiple label sets' -> self examplePieLabelSeveralSets) }
+			  ('Basic labels' -> self instancePieLabel).
+			  ('Labels outside' -> self instancePieLabelOutside).
+			  ('Rotated labels' -> self instancePieLabelRotated).
+			  ('Absolute values' -> self instancePieLabelAbsoluteValues).
+			  ('Percentages' -> self instancePieLabelPercents).
+			  ('Values and percentages' -> self instancePieLabelValuesAndPercents).
+			  ('Font styling' -> self instancePieLabelTextStyle).
+			  ('Multiple label sets' -> self instancePieLabelSeveralSets) }
 		  title: 'Pie labels'
+]
+
+{ #category : 'private - demo' }
+BpPie class >> frogsPie [
+	"Answer the labeled pie that the pie features examples configure."
+
+	^ self new
+		  values: #( 15 30 45 10 );
+		  labels: #( 'Frogs' 'Hogs' 'Dogs' 'Logs' );
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instanceAutoPct [
+	"Answer a pie with its labels and the percentage of each wedge with one decimal."
+
+	<sampleInstance>
+	^ self frogsPie
+		  autoPct: '%1.1f%%';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instanceColors [
+	"Answer a pie with its labels and chosen wedge colors: olive drab, rosy brown, gray and saddle brown."
+
+	<sampleInstance>
+	^ self frogsPie
+		  colors: (#( '6b8e23' 'bc8f8f' '808080' '8b4513' ) collect: [ :each | Color fromHexString: each ]);
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instanceExplodeShadowRotate [
+	"Answer a pie whose second wedge is pulled out, with shadows, percentages, and the first wedge starting at the top (start angle 90)."
+
+	<sampleInstance>
+	^ self frogsPie
+		  explode: #( 0 0.1 0 0 );
+		  autoPct: '%1.1f%%';
+		  shadow: true;
+		  startAngle: 90;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instanceLabels [
+	"Answer a pie with one label per wedge, given by `labels:`."
+
+	<sampleInstance>
+	^ self frogsPie
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabel [
+	"Answer a pie with one label per wedge, added with `addLabels:`."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabelAbsoluteValues [
+	"Answer a pie showing the value of each wedge with one decimal."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: '{absval:.1f}';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabelOutside [
+	"Answer a pie with one label per wedge, outside it at 1.1 times the radius."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels distance: 1.1;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabelPercents [
+	"Answer a pie showing the percentage of each wedge with one decimal."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: '{frac:.1%}';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabelRotated [
+	"Answer a pie whose labels are rotated along their wedge."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels
+		  distance: 0.6
+		  rotate: true
+		  textStyle: nil;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabelSeveralSets [
+	"Answer a pie with three label sets: the names outside, the percentages at 0.7 and the values at 0.4 of the radius."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels distance: 1.1;
+		  addLabels: '{frac:.1%}' distance: 0.7;
+		  addLabels: '{absval:d}' distance: 0.4;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabelTextStyle [
+	"Answer a pie whose labels are written large and white."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: self spamLabels
+		  distance: 0.6
+		  rotate: false
+		  textStyle: [ :text |
+			  text
+				  fontSize: 18;
+				  foreground: Color white ];
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instancePieLabelValuesAndPercents [
+	"Answer a pie showing the value and, below it, the percentage of each wedge."
+
+	<sampleInstance>
+	^ self spamPie
+		  addLabels: '{absval:d}\n{frac:.1%}';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instanceSmallRadius [
+	"Answer a pie of half the radius, with small percentages without decimals."
+
+	<sampleInstance>
+	^ self frogsPie
+		  autoPct: '%.0f%%';
+		  textStyle: [ :text | text fontSize: 9 ];
+		  radius: 0.5;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instanceSwapLabelsAndPercents [
+	"Answer a pie with its percentages outside, at 1.25 times the radius, and its labels inside, at 0.6."
+
+	<sampleInstance>
+	^ self frogsPie
+		  autoPct: '%1.1f%%';
+		  pctDistance: 1.25;
+		  labelDistance: 0.6;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpPie class >> instanceWedgeStyle [
+	"Answer a pie whose wedges are separated by a white border 3 pixels wide."
+
+	<sampleInstance>
+	^ self frogsPie
+		  wedgeStyle: [ :wedge | wedge border: (BlBorder paint: Color white width: 3) ];
+		  yourself
 ]
 
 { #category : 'private - demo' }

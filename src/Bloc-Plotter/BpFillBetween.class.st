@@ -4,14 +4,13 @@ I am the area between two curves, added by `BpAxes>>fillBetweenX:y1:y2:` and `Bp
 ## Examples
 
 ```
-BpFillBetween scriptPlotType.
-BpFillBetween scriptFillBetweenDemo.
-BpFillBetween scriptSelectiveFill.
-BpFillBetween scriptConfidenceBand.
-BpFillBetween scriptFillBetweenX.
-BpFillBetween scriptSteps.
-BpFillBetween scriptInteraction.
-BpFillBetween exampleArea
+BpFillBetween examplePlotType.
+BpFillBetween exampleFillBetweenDemo.
+BpFillBetween exampleSelectiveFill.
+BpFillBetween exampleConfidenceBand.
+BpFillBetween exampleFillBetweenX.
+BpFillBetween exampleSteps.
+BpFillBetween exampleInteraction
 ```
 
 ## Design Rationale
@@ -77,7 +76,63 @@ BpFillBetween class >> confidenceBandOf: someXs and: someYs [
 ]
 
 { #category : 'examples' }
-BpFillBetween class >> exampleArea [
+BpFillBetween class >> exampleConfidenceBand [
+	"Reproduce the confidence band figure of the gallery 'Fill the area between two lines'."
+
+	<example>
+	^ BpFigure instanceFillBetweenConfidenceBand show: 'fill_between confidence band'
+]
+
+{ #category : 'examples' }
+BpFillBetween class >> exampleFillBetweenDemo [
+	"Reproduce the basic usage figure of the gallery 'Fill the area between two lines'."
+
+	<example>
+	^ BpFigure instanceFillBetweenDemo show: 'fill_between_demo'
+]
+
+{ #category : 'examples' }
+BpFillBetween class >> exampleFillBetweenX [
+	"Reproduce the gallery 'Fill the area between two vertical lines' (`BpAxes>>fillBetweenY:x1:x2:`)."
+
+	<example>
+	^ BpFigure instanceFillBetweenX show: 'fill_betweenx_demo'
+]
+
+{ #category : 'examples' }
+BpFillBetween class >> exampleInteraction [
+	"Interaction handlers on filled regions: hover a hump to outline it, click it to see its x range."
+
+	<example>
+	^ BpFigure instanceInteractiveFill show: 'Fill interaction'
+]
+
+{ #category : 'examples' }
+BpFillBetween class >> examplePlotType [
+	"Reproduce the plot type fill_between(x, y1, y2)."
+
+	<example>
+	^ BpFigure instanceFillBetweenPlotType show: 'fill_between(x, y1, y2)'
+]
+
+{ #category : 'examples' }
+BpFillBetween class >> exampleSelectiveFill [
+	"Reproduce the selective filling figure of the gallery 'Fill the area between two lines', without and with interpolation."
+
+	<example>
+	^ BpFigure instanceSelectiveFill show: 'fill_between where'
+]
+
+{ #category : 'examples' }
+BpFillBetween class >> exampleSteps [
+	"Show the three step styles of a fill."
+
+	<example>
+	^ BpFigure instanceFillBetweenSteps show: 'fill_between step'
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceArea [
 	"Answer the area under a sine between 0 and pi, in new axes."
 
 	<sampleInstance>
@@ -86,229 +141,6 @@ BpFillBetween class >> exampleArea [
 	^ (BpAxes new
 		   extent: 400 @ 300;
 		   yourself) fillBetweenX: x y1: (x collect: [ :each | each sin ])
-]
-
-{ #category : 'examples' }
-BpFillBetween class >> exampleConfidenceBand [
-	"Gallery: Fill the area between two lines (fill_between_demo), confidence bands: a linear fit of the data and its confidence band, half transparent."
-
-	<sampleInstance>
-	| x y band figure axes |
-	x := self linspaceFrom: 0 to: 10 count: 11.
-	y := #( 3.9 4.4 10.8 10.3 11.2 13.1 14.1 9.9 13.9 15.1 12.5 ).
-	band := self confidenceBandOf: x and: y.
-	figure := BpFigure new.
-	axes := figure axes first.
-	axes plotX: x y: (band first with: band last collect: [ :low :high | low + high / 2 ]) format: '-'.
-	(axes fillBetweenX: x y1: band first y2: band last) alpha: 0.2.
-	(axes plotX: x y: y format: 'o') color: 'tab:brown'.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpFillBetween class >> exampleFillBetweenDemo [
-	"Gallery: Fill the area between two lines (fill_between_demo), basic usage: between y1 and 0, y1 and 1, y1 and y2."
-
-	<sampleInstance>
-	| x y1 y2 figure |
-	x := self arangeFrom: 0.0 to: 2 by: 0.01.
-	y1 := x collect: [ :each | (2 * Float pi * each) sin ].
-	y2 := x collect: [ :each | 0.8 * (4 * Float pi * each) sin ].
-	figure := BpFigure rows: 3 columns: 1.
-	figure extent: 600 @ 600.
-	(figure axesAtRow: 1 column: 1) fillBetweenX: x y1: y1.
-	(figure axesAtRow: 1 column: 1) title: 'fill between y1 and 0'.
-	(figure axesAtRow: 2 column: 1) fillBetweenX: x y1: y1 y2: 1.
-	(figure axesAtRow: 2 column: 1) title: 'fill between y1 and 1'.
-	(figure axesAtRow: 3 column: 1) fillBetweenX: x y1: y1 y2: y2.
-	(figure axesAtRow: 3 column: 1) title: 'fill between y1 and y2'.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpFillBetween class >> exampleFillBetweenX [
-	"Gallery: Fill the area between two vertical lines (fill_betweenx_demo): between (x1, 0), (x1, 1) and (x1, x2) along y."
-
-	<sampleInstance>
-	| y x1 x2 figure |
-	y := self arangeFrom: 0.0 to: 2 by: 0.01.
-	x1 := y collect: [ :each | (2 * Float pi * each) sin ].
-	x2 := y collect: [ :each | 1.2 * (4 * Float pi * each) sin ].
-	figure := BpFigure rows: 1 columns: 3.
-	figure extent: 600 @ 600.
-	(figure axesAtRow: 1 column: 1) fillBetweenY: y x1: 0 x2: x1.
-	(figure axesAtRow: 1 column: 1) title: 'between (x1, 0)'.
-	(figure axesAtRow: 1 column: 2) fillBetweenY: y x1: x1 x2: 1.
-	(figure axesAtRow: 1 column: 2) title: 'between (x1, 1)'.
-	(figure axesAtRow: 1 column: 3) fillBetweenY: y x1: x1 x2: x2.
-	(figure axesAtRow: 1 column: 3) title: 'between (x1, x2)'.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpFillBetween class >> exampleInteractiveFill [
-	"A sine filled in C0 where it is positive and in C1 where it is negative, one polygon per hump: hovering a polygon outlines it, clicking it shows its x range in the title."
-
-	<sampleInstance>
-	| x y figure axes fills |
-	x := self linspaceFrom: 0 to: 4 * Float pi count: 200.
-	y := x collect: [ :each | each sin ].
-	figure := BpFigure new.
-	axes := figure axes first.
-	axes title: 'Click a hump'.
-	fills := {
-		         ((axes fillBetweenX: x y1: y)
-			          where: (y collect: [ :each | each >= 0 ]);
-			          interpolate: true;
-			          color: 'C0';
-			          yourself).
-		         ((axes fillBetweenX: x y1: y)
-			          where: (y collect: [ :each | each <= 0 ]);
-			          interpolate: true;
-			          color: 'C1';
-			          yourself) }.
-	fills do: [ :fill |
-		fill
-			whenPatch: BlMouseEnterEvent do: [ :event :polygon | polygon border: (BlBorder paint: Color black width: 2) ];
-			whenPatch: BlMouseLeaveEvent do: [ :event :polygon | fill paint: polygon ];
-			whenPatch: BlClickEvent do: [ :event :polygon |
-				axes title: ('from x = {1} to x = {2}' format: {
-					 ((polygon dataVertices collect: [ :each | each x ]) min printShowingDecimalPlaces: 2).
-					 ((polygon dataVertices collect: [ :each | each x ]) max printShowingDecimalPlaces: 2) }) ] ].
-	^ figure
-]
-
-{ #category : 'examples' }
-BpFillBetween class >> examplePlotType [
-	"Plot types: fill_between(x, y1, y2), a half transparent band between two noisy lines and the line in its middle."
-
-	<sampleInstance>
-	| random x y1 y2 figure axes |
-	random := Random seed: 1.
-	x := self linspaceFrom: 0 to: 8 count: 16.
-	y1 := x collect: [ :each | 3 + (4 * each / 8) + (random next * 0.5) ].
-	y2 := x collect: [ :each | 1 + (2 * each / 8) + (random next * 0.5) ].
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes fillBetweenX: x y1: y1 y2: y2)
-		alpha: 0.5;
-		lineWidth: 0.
-	(axes plotX: x y: (y1 with: y2 collect: [ :a :b | a + b / 2 ])) lineWidth: 2.
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpFillBetween class >> exampleSelectiveFill [
-	"Gallery: Fill the area between two lines (fill_between_demo), selectively filling horizontal regions: where y1 > y2 in C0, where y1 < y2 in C1, without and with interpolation at the crossing."
-
-	<sampleInstance>
-	| x y1 y2 figure |
-	x := #( 0 1 2 3 ).
-	y1 := #( 0.8 0.8 0.2 0.2 ).
-	y2 := #( 0 0 1 1 ).
-	figure := BpFigure rows: 2 columns: 1.
-	#( false true ) withIndexDo: [ :interpolation :row |
-		| axes |
-		axes := figure axesAtRow: row column: 1.
-		axes title: 'interpolation=' , (interpolation
-			 ifTrue: [ 'True' ]
-			 ifFalse: [ 'False' ]).
-		axes plotX: x y: y1 format: 'o--'.
-		axes plotX: x y: y2 format: 'o--'.
-		(axes fillBetweenX: x y1: y1 y2: y2)
-			where: (y1 with: y2 collect: [ :a :b | a > b ]);
-			color: 'C0';
-			alpha: 0.3;
-			interpolate: interpolation.
-		(axes fillBetweenX: x y1: y1 y2: y2)
-			where: (y1 with: y2 collect: [ :a :b | a < b ]);
-			color: 'C1';
-			alpha: 0.3;
-			interpolate: interpolation ].
-	^ figure
-]
-
-{ #category : 'examples' }
-BpFillBetween class >> exampleSteps [
-	"The three step styles of a fill (step: #pre, #post and #mid), with the data points marked."
-
-	<sampleInstance>
-	| x y figure |
-	x := 1 to: 8.
-	y := #( 2 4 3 6 5 7 4 6 ).
-	figure := BpFigure rows: 1 columns: 3.
-	figure extent: 900 @ 320.
-	#( #pre #post #mid ) withIndexDo: [ :style :column |
-		| axes |
-		axes := figure axesAtRow: 1 column: column.
-		(axes fillBetweenX: x y1: y)
-			step: style;
-			alpha: 0.4.
-		axes plotX: x y: y format: 'o'.
-		axes title: 'step: #' , style ].
-	^ figure
-]
-
-{ #category : 'script' }
-BpFillBetween class >> scriptConfidenceBand [
-	"Reproduce the confidence band figure of the gallery 'Fill the area between two lines'."
-
-	<example>
-	^ self exampleConfidenceBand show: 'fill_between confidence band'
-]
-
-{ #category : 'script' }
-BpFillBetween class >> scriptFillBetweenDemo [
-	"Reproduce the basic usage figure of the gallery 'Fill the area between two lines'."
-
-	<example>
-	^ self exampleFillBetweenDemo show: 'fill_between_demo'
-]
-
-{ #category : 'script' }
-BpFillBetween class >> scriptFillBetweenX [
-	"Reproduce the gallery 'Fill the area between two vertical lines' (`BpAxes>>fillBetweenY:x1:x2:`)."
-
-	<example>
-	^ self exampleFillBetweenX show: 'fill_betweenx_demo'
-]
-
-{ #category : 'script' }
-BpFillBetween class >> scriptInteraction [
-	"Interaction handlers on filled regions: hover a hump to outline it, click it to see its x range."
-
-	<example>
-	^ self exampleInteractiveFill show: 'Fill interaction'
-]
-
-{ #category : 'script' }
-BpFillBetween class >> scriptPlotType [
-	"Reproduce the plot type fill_between(x, y1, y2)."
-
-	<example>
-	^ self examplePlotType show: 'fill_between(x, y1, y2)'
-]
-
-{ #category : 'script' }
-BpFillBetween class >> scriptSelectiveFill [
-	"Reproduce the selective filling figure of the gallery 'Fill the area between two lines', without and with interpolation."
-
-	<example>
-	^ self exampleSelectiveFill show: 'fill_between where'
-]
-
-{ #category : 'script' }
-BpFillBetween class >> scriptSteps [
-	"Show the three step styles of a fill."
-
-	<example>
-	^ self exampleSteps show: 'fill_between step'
 ]
 
 { #category : 'accessing - style' }

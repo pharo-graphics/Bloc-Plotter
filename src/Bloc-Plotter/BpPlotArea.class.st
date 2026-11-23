@@ -4,7 +4,7 @@ I am the inside of a `BpAxes`: the white rectangle framed by the spines, where t
 ## Examples
 
 ```
-BpPlotArea exampleOfHistogram
+BpPlotArea instanceOfHistogram
 ```
 
 ## Usage
@@ -28,11 +28,11 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'examples' }
-BpPlotArea class >> exampleOfHistogram [
+{ #category : 'instances' }
+BpPlotArea class >> instanceOfHistogram [
 
 	<sampleInstance>
-	^ BpAxes exampleHistogram plotArea
+	^ BpAxes instanceHistogram plotArea
 ]
 
 { #category : 'accessing' }

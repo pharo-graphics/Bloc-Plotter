@@ -4,7 +4,7 @@ I am the layout of `BpAxes`: I give their plot area the space left by the tick l
 ## Examples
 
 ```
-BpAxesLayout exampleOfHistogram
+BpAxesLayout instanceOfHistogram
 ```
 
 ## Usage
@@ -24,11 +24,11 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'examples' }
-BpAxesLayout class >> exampleOfHistogram [
+{ #category : 'instances' }
+BpAxesLayout class >> instanceOfHistogram [
 
 	<sampleInstance>
-	^ BpAxes exampleHistogram layout
+	^ BpAxes instanceHistogram layout
 ]
 
 { #category : 'layout' }

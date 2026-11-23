@@ -42,7 +42,7 @@ BpLiveInspectionTest >> showInMorph: aPane resizedTo: anExtent [
 BpLiveInspectionTest >> testASecondLivePaneTakesTheElementFromTheFirstOne [
 
 	| figure first second |
-	figure := BpFigure exampleTwoByTwo.
+	figure := BpFigure instanceTwoByTwo.
 	first := self livePaneOf: figure.
 	second := self livePaneOf: figure.
 	self deny: (first blocElement children includes: figure).
@@ -53,7 +53,7 @@ BpLiveInspectionTest >> testASecondLivePaneTakesTheElementFromTheFirstOne [
 BpLiveInspectionTest >> testAnElementShownInAnotherSpaceIsNotTakenFromIt [
 
 	| figure |
-	figure := BpFigure exampleTwoByTwo.
+	figure := BpFigure instanceTwoByTwo.
 	figure inNewHeadlessSpaceDo: [ :space |
 		| pane |
 		pane := self livePaneOf: figure.
@@ -65,7 +65,7 @@ BpLiveInspectionTest >> testAnElementShownInAnotherSpaceIsNotTakenFromIt [
 BpLiveInspectionTest >> testLiveElementOfAFigureIsTheFigure [
 
 	| figure |
-	figure := BpFigure exampleTwoByTwo.
+	figure := BpFigure instanceTwoByTwo.
 	self assert: figure liveElement identicalTo: figure
 ]
 
@@ -73,7 +73,7 @@ BpLiveInspectionTest >> testLiveElementOfAFigureIsTheFigure [
 BpLiveInspectionTest >> testLiveElementOfAFreeArtistIsANewFigureShowingIt [
 
 	| line figure |
-	line := BpLine exampleSine.
+	line := BpLine instanceSine.
 	figure := line liveElement.
 	self assert: (figure isKindOf: BpFigure).
 	self assert: figure axes first artists asArray equals: { line }
@@ -83,7 +83,7 @@ BpLiveInspectionTest >> testLiveElementOfAFreeArtistIsANewFigureShowingIt [
 BpLiveInspectionTest >> testLiveElementOfAMarkerIsAPatchDrawingIt [
 
 	| marker |
-	marker := BpMarker exampleStar.
+	marker := BpMarker instanceStar.
 	self assert: marker liveElement marker identicalTo: marker
 ]
 
@@ -91,7 +91,7 @@ BpLiveInspectionTest >> testLiveElementOfAMarkerIsAPatchDrawingIt [
 BpLiveInspectionTest >> testLiveElementOfAPatchIsItsFigure [
 
 	| figure |
-	figure := BpLine examplePlotType.
+	figure := BpFigure instanceLinePlotType.
 	self assert: figure axes first artists first patches first liveElement identicalTo: figure
 ]
 
@@ -99,7 +99,7 @@ BpLiveInspectionTest >> testLiveElementOfAPatchIsItsFigure [
 BpLiveInspectionTest >> testLiveElementOfAnArtistIsItsFigure [
 
 	| figure |
-	figure := BpLine examplePlotType.
+	figure := BpFigure instanceLinePlotType.
 	self assert: figure axes first artists first liveElement identicalTo: figure
 ]
 
@@ -140,7 +140,7 @@ BpLiveInspectionTest >> testLiveIsTheFirstPaneOfEveryVisualClass [
 BpLiveInspectionTest >> testLivePaneCentersAnElementOfItsOwnSize [
 
 	| patch |
-	patch := BpMarker exampleStar liveElement.
+	patch := BpMarker instanceStar liveElement.
 	self showInMorph: (self livePaneOf: patch) resizedTo: 300 @ 200.
 	self assert: patch bounds inParent center equals: 150 @ 100
 ]
@@ -150,7 +150,7 @@ BpLiveInspectionTest >> testLivePaneFollowsItsSizeInAMorph [
 	"The first resize of a space hosted in a morph (the Morphic backend) is not announced by Bloc: the Live pane must still lay its figure out at the new size."
 
 	| figure |
-	figure := BpFigure exampleTwoByTwo.
+	figure := BpFigure instanceTwoByTwo.
 	self showInMorph: (self livePaneOf: figure) resizedTo: 300 @ 200.
 	self assert: figure extent equals: 300 @ 200
 ]
@@ -159,7 +159,7 @@ BpLiveInspectionTest >> testLivePaneFollowsItsSizeInAMorph [
 BpLiveInspectionTest >> testLivePaneOfAPatchShowsItsFigure [
 
 	| figure pane |
-	figure := BpLine examplePlotType.
+	figure := BpFigure instanceLinePlotType.
 	pane := self livePaneOf: figure axes first artists first patches first.
 	self assert: (pane blocElement children includes: figure)
 ]
@@ -171,7 +171,7 @@ BpLiveInspectionTest >> testLivePaneOpensInAToploInspector [
 	application := SpApplication new
 		               useBackend: #Toplo;
 		               yourself.
-	window := (StInspectorPresenter newApplication: application model: BpLine exampleSine) open.
+	window := (StInspectorPresenter newApplication: application model: BpLine instanceSine) open.
 	[ self assert: window isOpen ] ensure: [ window close ]
 ]
 
@@ -179,7 +179,7 @@ BpLiveInspectionTest >> testLivePaneOpensInAToploInspector [
 BpLiveInspectionTest >> testLivePaneShowsTheElement [
 
 	| figure pane |
-	figure := BpFigure exampleTwoByTwo.
+	figure := BpFigure instanceTwoByTwo.
 	pane := self livePaneOf: figure.
 	self assert: (pane blocElement children includes: figure)
 ]

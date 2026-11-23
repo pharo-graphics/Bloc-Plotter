@@ -4,7 +4,7 @@ I am the summary of one dataset that a box plot draws: the quartiles (`q1`, `med
 ## Examples
 
 ```
-BpBoxStatistics exampleWithOutlier
+BpBoxStatistics instanceWithOutlier
 ```
 
 ## Design Rationale
@@ -51,8 +51,8 @@ BpBoxStatistics class >> defaultWhiskers [
 	^ 1.5
 ]
 
-{ #category : 'examples' }
-BpBoxStatistics class >> exampleWithOutlier [
+{ #category : 'instances' }
+BpBoxStatistics class >> instanceWithOutlier [
 	"Answer the statistics of 1 to 9 and an outlier, 100, beyond the upper whisker."
 
 	<sampleInstance>

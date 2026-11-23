@@ -4,7 +4,7 @@ I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`B
 ## Examples
 
 ```
-BpArtist scriptArtistsInOneAxes
+BpArtist exampleArtistsInOneAxes
 ```
 
 ## Design Rationale
@@ -58,6 +58,14 @@ BpArtist class >> dashPatterns [
 		  yourself
 ]
 
+{ #category : 'examples' }
+BpArtist class >> exampleArtistsInOneAxes [
+	"Show two kinds of artists in the same axes: a histogram and a scatter plot of its counts (see `BpFigure class>>instanceArtistsInOneAxes`)."
+
+	<example>
+	^ BpFigure instanceArtistsInOneAxes show: 'Artists'
+]
+
 { #category : 'constants' }
 BpArtist class >> lineStyleNames [
 	"Answer the line style of each line style string."
@@ -104,32 +112,6 @@ BpArtist class >> pixelsPerPoint [
 	"Answer how many pixels a typographic point (1/72 inch) takes: figures are drawn at 100 dots per inch."
 
 	^ 100 / 72
-]
-
-{ #category : 'script' }
-BpArtist class >> scriptArtistsInOneAxes [
-	"Show two kinds of artists in the same axes: a histogram of normal samples and, above it, a scatter plot of their counts; each takes the next color of the cycle and the axes scale to cover both."
-
-	<example>
-	| random samples axes figure histogram |
-	random := Random seed: 19680801.
-	samples := (1 to: 500) collect: [ :each | random nextNormal ].
-	figure := BpFigure new.
-	axes := figure axes first.
-	histogram := (axes hist: samples)
-		             bins: 15;
-		             yourself.
-	(axes
-		 scatterX: ((1 to: 15) collect: [ :index | (histogram binEdges at: index) + (histogram binEdges at: index + 1) / 2 ])
-		 y: histogram counts)
-		marker: 'D';
-		s: 50;
-		label: 'counts'.
-	axes
-		title: 'BpHistogram and BpScatterPlot';
-		legend;
-		grid: true.
-	^ figure show: 'Artists'
 ]
 
 { #category : 'interaction' }

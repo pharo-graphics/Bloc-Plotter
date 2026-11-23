@@ -4,7 +4,7 @@ I format numbers the way pies expect: C printf strings for `BpPie>>autoPct:` (`p
 ## Examples
 
 ```
-BpTextFormatter scriptFormats
+BpTextFormatter exampleFormats
 ```
 
 ## Usage
@@ -22,6 +22,19 @@ Class {
 	#package : 'Bloc-Plotter',
 	#tag : 'Support'
 }
+
+{ #category : 'examples' }
+BpTextFormatter class >> exampleFormats [
+	"Show the two format families: printf strings (`BpPie>>autoPct:`) applied to a percentage, and Python replacement fields (`BpPie>>addLabels:`) applied to a value and its fraction. Answers the formatted strings."
+
+	<example>
+	^ {
+		  (self printf: '%1.1f%%' with: 15).
+		  (self printf: '%.0f%%' with: 30.4).
+		  (self format: '{absval:.1f}' absVal: 36 frac: 0.45).
+		  (self format: '{frac:.1%}' absVal: 36 frac: 0.45).
+		  (self format: '{absval:d}\n{frac:.1%}' absVal: 36 frac: 0.45) } inspect
+]
 
 { #category : 'formatting' }
 BpTextFormatter class >> format: aPattern absVal: anAbsoluteValue frac: aFraction [
@@ -100,17 +113,4 @@ BpTextFormatter class >> printf: aPattern with: aNumber [
 			  char = $%
 				  ifTrue: [ self printConversionFrom: in of: aNumber on: out ]
 				  ifFalse: [ out nextPut: char ] ] ]
-]
-
-{ #category : 'script' }
-BpTextFormatter class >> scriptFormats [
-	"Show the two format families: printf strings (`BpPie>>autoPct:`) applied to a percentage, and Python replacement fields (`BpPie>>addLabels:`) applied to a value and its fraction. Answers the formatted strings."
-
-	<example>
-	^ {
-		  (self printf: '%1.1f%%' with: 15).
-		  (self printf: '%.0f%%' with: 30.4).
-		  (self format: '{absval:.1f}' absVal: 36 frac: 0.45).
-		  (self format: '{frac:.1%}' absVal: 36 frac: 0.45).
-		  (self format: '{absval:d}\n{frac:.1%}' absVal: 36 frac: 0.45) } inspect
 ]

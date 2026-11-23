@@ -4,7 +4,7 @@ I compute the bins of a histogram as numpy does: the edges (`numpy.histogram_bin
 ## Examples
 
 ```
-BpHistogramBinning exampleSturges
+BpHistogramBinning instanceSturges
 ```
 
 ## Usage
@@ -80,8 +80,8 @@ BpHistogramBinning class >> density: anArrayOfCounts in: anArrayOfEdges [
 		  each / total / ((anArrayOfEdges at: index + 1) - (anArrayOfEdges at: index)) ]
 ]
 
-{ #category : 'examples' }
-BpHistogramBinning class >> exampleSturges [
+{ #category : 'instances' }
+BpHistogramBinning class >> instanceSturges [
 	"Answer a binning whose number of bins follows the Sturges rule."
 
 	<sampleInstance>

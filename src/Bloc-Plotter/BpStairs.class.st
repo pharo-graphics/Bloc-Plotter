@@ -4,10 +4,9 @@ I am a step curve, added by `BpAxes>>stairs:` and `BpAxes>>stairs:edges:`: one h
 ## Examples
 
 ```
-BpStairs scriptPlotType.
-BpStairs scriptStairsDemo.
-BpStairs scriptInteraction.
-BpStairs exampleSteps
+BpStairs examplePlotType.
+BpStairs exampleStairsDemo.
+BpStairs exampleInteraction
 ```
 
 ## Design Rationale
@@ -54,81 +53,27 @@ Class {
 }
 
 { #category : 'examples' }
-BpStairs class >> exampleInteractiveStairs [
-	"Three step curves: hovering one thickens it, clicking it shows its name in the title."
+BpStairs class >> exampleInteraction [
+	"Interaction handlers on step curves: hover one to thicken it, click it to see its name."
 
-	<sampleInstance>
-	| figure axes edges |
-	figure := BpFigure new.
-	axes := figure axes first.
-	axes title: 'Click a step curve'.
-	edges := 0 to: 12.
-	{
-		('sin' -> [ :each | (each / 2) sin ]).
-		('cos' -> [ :each | (each / 2) cos ]).
-		('half sin' -> [ :each | (each / 2) sin / 2 ]) } do: [ :each |
-			| stairs |
-			stairs := (axes stairs: ((0 to: 11) collect: [ :index | each value value: index + (1 / 2) ]) edges: edges)
-				          baseline: nil;
-				          label: each key;
-				          yourself.
-			stairs
-				whenPatch: BlMouseEnterEvent do: [ :event :polygon | polygon border: (BlBorder paint: polygon border paint width: 4) ];
-				whenPatch: BlMouseLeaveEvent do: [ :event :polygon | stairs paint: polygon ];
-				whenPatch: BlClickEvent do: [ :event :polygon | axes title: ('clicked: {1}' format: { each key }) ] ].
-	axes legend.
-	^ figure
+	<example>
+	^ BpFigure instanceInteractiveStairs show: 'Stairs interaction'
 ]
 
 { #category : 'examples' }
 BpStairs class >> examplePlotType [
-	"Plot types: stairs(values), eight steps 2.5 points wide with fixed limits and ticks."
+	"Reproduce the plot type stairs(values)."
 
-	<sampleInstance>
-	| figure axes |
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes stairs: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 )) lineWidth: 2.5.
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
+	<example>
+	^ BpFigure instanceStairsPlotType show: 'stairs(values)'
 ]
 
 { #category : 'examples' }
 BpStairs class >> exampleStairsDemo [
-	"Gallery: Stairs Demo (stairs_demo), first figure: step histograms with a modified baseline or none, filled and horizontal steps, and stairs added to their axes as an artist."
+	"Reproduce the gallery 'Stairs Demo': step histograms, filled and horizontal steps, and a `BpStairs` added as an artist."
 
-	<sampleInstance>
-	| figure artist |
-	figure := BpFigure rows: 3 columns: 1.
-	figure extent: 600 @ 900.
-	self stepHistogramsIn: (figure axesAtRow: 1 column: 1).
-	self filledStepsIn: (figure axesAtRow: 2 column: 1).
-	artist := figure axesAtRow: 3 column: 1.
-	artist addArtist: (self new
-		 values: #( 1 2 3 2 1 ) edges: (1 to: 6);
-		 label: 'Artist added to the axes';
-		 yourself).
-	artist
-		xLimits: #( 0 7 );
-		yLimits: #( -1 5 );
-		title: 'BpStairs artist'.
-	figure axes do: [ :each | each legend ].
-	^ figure
-]
-
-{ #category : 'examples' }
-BpStairs class >> exampleSteps [
-	"Answer steps of heights 1, 3, 2 and 4 between the edges 0 to 4, in new axes."
-
-	<sampleInstance>
-	^ (BpAxes new
-		   extent: 400 @ 300;
-		   yourself) stairs: #( 1 3 2 4 )
+	<example>
+	^ BpFigure instanceStairsDemo show: 'stairs_demo'
 ]
 
 { #category : 'private - demo' }
@@ -144,28 +89,14 @@ BpStairs class >> filledStepsIn: anAxes [
 	anAxes title: 'Filled histogram'
 ]
 
-{ #category : 'script' }
-BpStairs class >> scriptInteraction [
-	"Interaction handlers on step curves: hover one to thicken it, click it to see its name."
+{ #category : 'instances' }
+BpStairs class >> instanceSteps [
+	"Answer steps of heights 1, 3, 2 and 4 between the edges 0 to 4, in new axes."
 
-	<example>
-	^ self exampleInteractiveStairs show: 'Stairs interaction'
-]
-
-{ #category : 'script' }
-BpStairs class >> scriptPlotType [
-	"Reproduce the plot type stairs(values)."
-
-	<example>
-	^ self examplePlotType show: 'stairs(values)'
-]
-
-{ #category : 'script' }
-BpStairs class >> scriptStairsDemo [
-	"Reproduce the gallery 'Stairs Demo': step histograms, filled and horizontal steps, and a `BpStairs` added as an artist."
-
-	<example>
-	^ self exampleStairsDemo show: 'stairs_demo'
+	<sampleInstance>
+	^ (BpAxes new
+		   extent: 400 @ 300;
+		   yourself) stairs: #( 1 3 2 4 )
 ]
 
 { #category : 'private - demo' }

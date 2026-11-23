@@ -4,7 +4,7 @@ I choose where the ticks of an axis go and how they are labeled: multiples of a 
 ## Examples
 
 ```
-BpTickLocator scriptTicks
+BpTickLocator exampleTicks
 ```
 
 ## Usage
@@ -38,6 +38,17 @@ BpTickLocator class >> decimalsFor: aCollectionOfTicks [
 			  scale := 10 raisedTo: decimals.
 			  aCollectionOfTicks allSatisfy: [ :each | (each * scale - (each * scale) rounded) abs < 1.0e-6 ] ]
 		  ifNone: [ 10 ]
+]
+
+{ #category : 'examples' }
+BpTickLocator class >> exampleTicks [
+	"Answer the ticks and labels chosen for a few ranges: nice steps for linear axes, powers of ten for log axes."
+
+	<example>
+	^ {
+		  (self labelsFor: (self linearTicksFrom: 93.5 to: 306.5 count: 6)).
+		  (self labelsFor: (self linearTicksFrom: 0 to: 0.027 count: 8)).
+		  (self logLabelsFor: (self logTicksFrom: 0.5 to: 2000)) } inspect
 ]
 
 { #category : 'labels' }
@@ -84,17 +95,6 @@ BpTickLocator class >> logTicksFrom: aMinimum to: aMaximum [
 	"Answer the powers of ten between aMinimum and aMaximum, both positive."
 
 	^ (((aMinimum log: 10) - 1.0e-9) ceiling to: ((aMaximum log: 10) + 1.0e-9) floor) collect: [ :each | 10 raisedTo: each ]
-]
-
-{ #category : 'script' }
-BpTickLocator class >> scriptTicks [
-	"Answer the ticks and labels chosen for a few ranges: nice steps for linear axes, powers of ten for log axes."
-
-	<example>
-	^ {
-		  (self labelsFor: (self linearTicksFrom: 93.5 to: 306.5 count: 6)).
-		  (self labelsFor: (self linearTicksFrom: 0 to: 0.027 count: 8)).
-		  (self logLabelsFor: (self logTicksFrom: 0.5 to: 2000)) } inspect
 ]
 
 { #category : 'labels' }

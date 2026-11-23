@@ -72,7 +72,7 @@ BpFigureTest >> testRowsColumnsCreatesAGridOfAxes [
 BpFigureTest >> testSaveAsPDFWritesAPdf [
 
 	self withFileNamed: 'figure.pdf' do: [ :file |
-		BpFigure exampleTwoByTwo saveAsPDF: file.
+		BpFigure instanceTwoByTwo saveAsPDF: file.
 		self assert: (file binaryReadStreamDo: [ :stream | (stream next: 5) asString ]) equals: '%PDF-' ]
 ]
 
@@ -80,7 +80,7 @@ BpFigureTest >> testSaveAsPDFWritesAPdf [
 BpFigureTest >> testSaveAsPNGDpiScalesTheImage [
 
 	self withFileNamed: 'figure.png' do: [ :file |
-		BpFigure exampleTwoByTwo saveAsPNG: file dpi: 200.
+		BpFigure instanceTwoByTwo saveAsPNG: file dpi: 200.
 		self assert: (file binaryReadStreamDo: [ :stream | (PNGReadWriter on: stream) nextImage ]) extent equals: 1280 @ 960 ]
 ]
 
@@ -88,21 +88,21 @@ BpFigureTest >> testSaveAsPNGDpiScalesTheImage [
 BpFigureTest >> testSaveAsPNGHasTheFigureExtent [
 
 	self withFileNamed: 'figure.png' do: [ :file |
-		BpFigure exampleTwoByTwo saveAsPNG: file.
+		BpFigure instanceTwoByTwo saveAsPNG: file.
 		self assert: (file binaryReadStreamDo: [ :stream | (PNGReadWriter on: stream) nextImage ]) extent equals: 640 @ 480 ]
 ]
 
 { #category : 'tests - saving' }
 BpFigureTest >> testSaveAsSVGAnswersTheFile [
 
-	self withFileNamed: 'figure.svg' do: [ :file | self assert: (BpFigure exampleTwoByTwo saveAsSVG: file) equals: file ]
+	self withFileNamed: 'figure.svg' do: [ :file | self assert: (BpFigure instanceTwoByTwo saveAsSVG: file) equals: file ]
 ]
 
 { #category : 'tests - saving' }
 BpFigureTest >> testSaveAsSVGDoesNotDependOnTheExtension [
 
 	self withFileNamed: 'figure.txt' do: [ :file |
-		BpFigure exampleTwoByTwo saveAsSVG: file.
+		BpFigure instanceTwoByTwo saveAsSVG: file.
 		self assert: (file contents includesSubstring: '<svg') ]
 ]
 
@@ -111,7 +111,7 @@ BpFigureTest >> testSaveAsSVGWritesVectorGraphics [
 
 	self withFileNamed: 'figure.svg' do: [ :file |
 		| contents |
-		BpFigure exampleTwoByTwo saveAsSVG: file.
+		BpFigure instanceTwoByTwo saveAsSVG: file.
 		contents := file contents.
 		self assert: (contents includesSubstring: '<svg').
 		self assert: (contents includesSubstring: 'width="640" height="480"').

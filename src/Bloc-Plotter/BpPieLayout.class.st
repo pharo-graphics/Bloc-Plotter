@@ -4,7 +4,7 @@ I am the layout of a `BpPie`. I place its wedges, shadows and texts from the pie
 ## Examples
 
 ```
-BpPieLayout exampleOfLabeledPie
+BpPieLayout instanceOfLabeledPie
 ```
 
 ## Usage
@@ -25,12 +25,12 @@ Class {
 	#tag : 'Pie'
 }
 
-{ #category : 'examples' }
-BpPieLayout class >> exampleOfLabeledPie [
+{ #category : 'instances' }
+BpPieLayout class >> instanceOfLabeledPie [
 	"Answer the layout of a pie with outside labels."
 
 	<sampleInstance>
-	^ BpPie exampleLabels layout
+	^ BpPie instanceLabels layout
 ]
 
 { #category : 'layout' }

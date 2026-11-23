@@ -4,7 +4,7 @@ I convert data coordinates to the pixels of a plot area: x goes right, y goes up
 ## Examples
 
 ```
-BpDataTransform exampleLogScale
+BpDataTransform instanceLogScale
 ```
 
 ## Usage
@@ -34,8 +34,8 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'examples' }
-BpDataTransform class >> exampleLogScale [
+{ #category : 'instances' }
+BpDataTransform class >> instanceLogScale [
 	"Answer a transform of a 400 by 300 plot area showing x from 0 to 10, and y from 1 to 1000 on a log scale."
 
 	<sampleInstance>

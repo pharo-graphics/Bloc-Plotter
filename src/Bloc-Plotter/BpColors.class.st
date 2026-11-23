@@ -4,7 +4,7 @@ I provide the colors of the plots: the default color cycle (`tab10`), some named
 ## Examples
 
 ```
-BpColors scriptPalettes
+BpColors examplePalettes
 ```
 
 ## Usage
@@ -27,32 +27,8 @@ BpColors class >> colorMap: aName [
 	^ self error: 'Unknown colormap: ' , aName printString
 ]
 
-{ #category : 'palettes' }
-BpColors class >> named: aString [
-	"Answer the named color aString ('g', 'red', 'tan', 'lime', 'tab:blue', 'C1' for the second color of the cycle, ...)."
-
-	| tableau |
-	tableau := #( 'tab:blue' 'tab:orange' 'tab:green' 'tab:red' 'tab:purple' 'tab:brown' 'tab:pink' 'tab:gray' 'tab:olive'
-	              'tab:cyan' ) indexOf: aString.
-	tableau > 0 ifTrue: [ ^ self tab10 at: tableau ].
-	(aString size = 2 and: [ aString first = $C and: [ aString last isDigit ] ]) ifTrue: [
-		^ self tab10 at: aString last digitValue + 1 ].
-	^ Color fromHexString: (self namedColors at: aString)
-]
-
-{ #category : 'palettes' }
-BpColors class >> namedColors [
-
-	^ Dictionary newFromPairs:
-		  #( 'b' '0000ff' 'g' '008000' 'r' 'ff0000' 'c' '00bfbf' 'm' 'bf00bf' 'y' 'bfbf00' 'k' '000000' 'w' 'ffffff' 'red' 'ff0000'
-		     'green' '008000' 'blue' '0000ff' 'tan' 'd2b48c' 'lime' '00ff00' 'olivedrab' '6b8e23' 'rosybrown' 'bc8f8f' 'gray' '808080'
-		     'grey' '808080' 'saddlebrown' '8b4513' 'black' '000000' 'white' 'ffffff' 'orange' 'ffa500' 'purple' '800080' 'brown'
-		     'a52a2a' 'pink' 'ffc0cb' 'cyan' '00ffff' 'magenta' 'ff00ff' 'yellow' 'ffff00' 'navy' '000080' 'darkorange' 'ff8c00'
-		     'lightblue' 'add8e6' 'lightgray' 'd3d3d3' 'darkgray' 'a9a9a9' 'silver' 'c0c0c0' 'gold' 'ffd700' 'orchid' 'da70d6' )
-]
-
-{ #category : 'script' }
-BpColors class >> scriptPalettes [
+{ #category : 'examples' }
+BpColors class >> examplePalettes [
 	"Show the color cycle (tab10) on the first row and the viridis colormap on the second one."
 
 	<example>
@@ -80,6 +56,30 @@ BpColors class >> scriptPalettes [
 			(row value: ((0 to: 10) collect: [ :each | self viridis: each / 10 ])) }.
 	space show.
 	^ space
+]
+
+{ #category : 'palettes' }
+BpColors class >> named: aString [
+	"Answer the named color aString ('g', 'red', 'tan', 'lime', 'tab:blue', 'C1' for the second color of the cycle, ...)."
+
+	| tableau |
+	tableau := #( 'tab:blue' 'tab:orange' 'tab:green' 'tab:red' 'tab:purple' 'tab:brown' 'tab:pink' 'tab:gray' 'tab:olive'
+	              'tab:cyan' ) indexOf: aString.
+	tableau > 0 ifTrue: [ ^ self tab10 at: tableau ].
+	(aString size = 2 and: [ aString first = $C and: [ aString last isDigit ] ]) ifTrue: [
+		^ self tab10 at: aString last digitValue + 1 ].
+	^ Color fromHexString: (self namedColors at: aString)
+]
+
+{ #category : 'palettes' }
+BpColors class >> namedColors [
+
+	^ Dictionary newFromPairs:
+		  #( 'b' '0000ff' 'g' '008000' 'r' 'ff0000' 'c' '00bfbf' 'm' 'bf00bf' 'y' 'bfbf00' 'k' '000000' 'w' 'ffffff' 'red' 'ff0000'
+		     'green' '008000' 'blue' '0000ff' 'tan' 'd2b48c' 'lime' '00ff00' 'olivedrab' '6b8e23' 'rosybrown' 'bc8f8f' 'gray' '808080'
+		     'grey' '808080' 'saddlebrown' '8b4513' 'black' '000000' 'white' 'ffffff' 'orange' 'ffa500' 'purple' '800080' 'brown'
+		     'a52a2a' 'pink' 'ffc0cb' 'cyan' '00ffff' 'magenta' 'ff00ff' 'yellow' 'ffff00' 'navy' '000080' 'darkorange' 'ff8c00'
+		     'lightblue' 'add8e6' 'lightgray' 'd3d3d3' 'darkgray' 'a9a9a9' 'silver' 'c0c0c0' 'gold' 'ffd700' 'orchid' 'da70d6' )
 ]
 
 { #category : 'palettes' }

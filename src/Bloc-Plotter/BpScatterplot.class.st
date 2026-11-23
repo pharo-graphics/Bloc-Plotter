@@ -4,11 +4,10 @@ I am a scatter plot, added by `BpAxes>>scatterX:y:`. I show one `BpMarkerPatch` 
 ## Examples
 
 ```
-BpScatterPlot scriptScatter.
-BpScatterPlot scriptScatterWithLegend.
-BpScatterPlot scriptMarkers.
-BpScatterPlot scriptInteraction.
-BpScatterPlot exampleColoredPoints
+BpScatterPlot exampleScatter.
+BpScatterPlot exampleScatterWithLegend.
+BpScatterPlot exampleMarkers.
+BpScatterPlot exampleInteraction
 ```
 
 ## Design Rationale
@@ -63,7 +62,39 @@ BpScatterPlot class >> defaultSize [
 ]
 
 { #category : 'examples' }
-BpScatterPlot class >> exampleColoredPoints [
+BpScatterPlot class >> exampleInteraction [
+	"Interaction handlers on the markers of a scatter: hover a point to outline it, click it to see its coordinates and value."
+
+	<example>
+	^ BpFigure instanceInteractiveScatter show: 'Scatter interaction'
+]
+
+{ #category : 'examples' }
+BpScatterPlot class >> exampleMarkers [
+	"Reproduce the gallery 'Marker examples': six ways to give the marker of a scatter."
+
+	<example>
+	^ BpFigure instanceScatterMarkers show: 'scatter_star_poly'
+]
+
+{ #category : 'examples' }
+BpScatterPlot class >> exampleScatter [
+	"Reproduce the gallery 'Scatter plot': random points with random sizes and colors, half transparent."
+
+	<example>
+	^ BpFigure instanceScatter show: 'scatter'
+]
+
+{ #category : 'examples' }
+BpScatterPlot class >> exampleScatterWithLegend [
+	"Reproduce the gallery 'Scatter plot with a legend': three labeled scatters, a legend and a grid."
+
+	<example>
+	^ BpFigure instanceScatterWithLegend show: 'scatter_with_legend'
+]
+
+{ #category : 'instances' }
+BpScatterPlot class >> instanceColoredPoints [
 	"Answer a scatter of five points colored by a number through viridis, with growing sizes."
 
 	<sampleInstance>
@@ -73,141 +104,6 @@ BpScatterPlot class >> exampleColoredPoints [
 		  c: #( 1 2 3 4 5 );
 		  s: #( 20 40 80 160 320 );
 		  yourself
-]
-
-{ #category : 'examples' }
-BpScatterPlot class >> exampleInteractiveScatter [
-	"A scatter with interaction handlers on its markers: hovering a marker outlines it, clicking it shows its point and value in the title."
-
-	<sampleInstance>
-	| random figure axes scatter |
-	random := Random seed: 19680801.
-	figure := BpFigure new.
-	axes := figure axes first.
-	scatter := axes scatterX: ((1 to: 50) collect: [ :each | random next ]) y: ((1 to: 50) collect: [ :each | random next ]).
-	scatter
-		c: ((1 to: 50) collect: [ :each | random next ]);
-		s: 150;
-		edgeColors: 'none'.
-	axes title: 'Click a point'.
-	scatter
-		whenPatch: BlMouseEnterEvent do: [ :event :point | point border: (BlBorder paint: Color black width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :point | point border: BlBorder empty ];
-		whenPatch: BlClickEvent do: [ :event :point |
-			axes title: ('point {1}: ({2}, {3}), c = {4}' format: {
-				 point index.
-				 (point dataPoint x printShowingDecimalPlaces: 2).
-				 (point dataPoint y printShowingDecimalPlaces: 2).
-				 (point amount printShowingDecimalPlaces: 2) }) ].
-	^ figure
-]
-
-{ #category : 'examples' }
-BpScatterPlot class >> exampleMarkers [
-	"Gallery: Marker examples (scatter_star_poly): a marker symbol, a TeX symbol, a path, a pentagon, a star and an asterisk."
-
-	<sampleInstance>
-	| random x y z figure |
-	random := Random seed: 19680801.
-	x := (1 to: 10) collect: [ :each | random next ].
-	y := (1 to: 10) collect: [ :each | random next ].
-	z := x with: y collect: [ :eachX :eachY | (eachX squared + eachY squared) sqrt ].
-	figure := BpFigure rows: 2 columns: 3.
-	{
-		('>' -> 'marker=''>''').
-		('$\clubsuit$' -> 'marker=''$\clubsuit$''').
-		(#( #( -1 -1 ) #( 1 -1 ) #( 1 1 ) #( -1 -1 ) ) -> 'marker=verts').
-		(#( 5 0 ) -> 'marker=(5, 0)').
-		(#( 5 1 ) -> 'marker=(5, 1)').
-		(#( 5 2 ) -> 'marker=(5, 2)') } withIndexDo: [ :each :index |
-			| axes |
-			axes := figure axes at: index.
-			(axes scatterX: x y: y)
-				s: 80;
-				c: z;
-				marker: each key.
-			axes title: each value ].
-	^ figure
-]
-
-{ #category : 'examples' }
-BpScatterPlot class >> exampleScatter [
-	"Gallery: Scatter plot (shapes_and_collections/scatter): random points with random sizes and colors."
-
-	<sampleInstance>
-	| random n x y colors area figure |
-	random := Random seed: 19680801.
-	n := 50.
-	x := (1 to: n) collect: [ :each | random next ].
-	y := (1 to: n) collect: [ :each | random next ].
-	colors := (1 to: n) collect: [ :each | random next ].
-	"0 to 15 point radii"
-	area := (1 to: n) collect: [ :each | (30 * random next) squared ].
-	figure := BpFigure new.
-	(figure axes first scatterX: x y: y)
-		s: area;
-		c: colors;
-		alpha: 0.5.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpScatterPlot class >> exampleScatterWithLegend [
-	"Gallery: Scatter plot with a legend (scatter_with_legend), first figure: one scatter per color, each with a label."
-
-	<sampleInstance>
-	| random figure axes |
-	random := Random seed: 19680801.
-	figure := BpFigure new.
-	axes := figure axes first.
-	#( 'tab:blue' 'tab:orange' 'tab:green' ) do: [ :color |
-		| n x y scale |
-		n := 750.
-		x := (1 to: n) collect: [ :each | random next ].
-		y := (1 to: n) collect: [ :each | random next ].
-		scale := (1 to: n) collect: [ :each | 200.0 * random next ].
-		(axes scatterX: x y: y)
-			c: color;
-			s: scale;
-			label: color;
-			alpha: 0.3;
-			edgeColors: 'none' ].
-	axes
-		legend;
-		grid: true.
-	^ figure
-]
-
-{ #category : 'script' }
-BpScatterPlot class >> scriptInteraction [
-	"Interaction handlers on the markers of a scatter: hover a point to outline it, click it to see its coordinates and value."
-
-	<example>
-	^ self exampleInteractiveScatter show: 'Scatter interaction'
-]
-
-{ #category : 'script' }
-BpScatterPlot class >> scriptMarkers [
-	"Reproduce the gallery 'Marker examples': six ways to give the marker of a scatter."
-
-	<example>
-	^ self exampleMarkers show: 'scatter_star_poly'
-]
-
-{ #category : 'script' }
-BpScatterPlot class >> scriptScatter [
-	"Reproduce the gallery 'Scatter plot': random points with random sizes and colors, half transparent."
-
-	<example>
-	^ self exampleScatter show: 'scatter'
-]
-
-{ #category : 'script' }
-BpScatterPlot class >> scriptScatterWithLegend [
-	"Reproduce the gallery 'Scatter plot with a legend': three labeled scatters, a legend and a grid."
-
-	<example>
-	^ self exampleScatterWithLegend show: 'scatter_with_legend'
 ]
 
 { #category : 'instance creation' }

@@ -4,7 +4,7 @@ I am one tick of an axis of `BpAxes`: a short mark against the plot area and the
 ## Examples
 
 ```
-BpTick exampleXTick
+BpTick instanceXTick
 ```
 
 ## Usage
@@ -35,8 +35,8 @@ BpTick class >> axis: aSymbol location: aNumber text: aString [
 		  yourself
 ]
 
-{ #category : 'examples' }
-BpTick class >> exampleXTick [
+{ #category : 'instances' }
+BpTick class >> instanceXTick [
 
 	<sampleInstance>
 	^ self axis: #x location: 2.5 text: '2.5'

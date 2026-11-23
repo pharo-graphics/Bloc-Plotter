@@ -4,7 +4,7 @@ I am a set of texts of a `BpPie`, one per wedge, at the same distance from the c
 ## Examples
 
 ```
-BpPieLabelSet examplePercents
+BpPieLabelSet instancePercents
 ```
 
 ## Usage
@@ -28,8 +28,8 @@ Class {
 	#tag : 'Pie'
 }
 
-{ #category : 'examples' }
-BpPieLabelSet class >> examplePercents [
+{ #category : 'instances' }
+BpPieLabelSet class >> instancePercents [
 	"Answer a label set showing the percentage of each wedge with one decimal, at 0.7 times the radius."
 
 	<sampleInstance>

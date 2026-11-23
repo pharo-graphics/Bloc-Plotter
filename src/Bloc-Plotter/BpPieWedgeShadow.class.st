@@ -4,7 +4,7 @@ I am the shadow of a `BpPieWedge`: a darker, half transparent copy of its shape,
 ## Examples
 
 ```
-BpPieWedgeShadow exampleHogsShadow
+BpPieWedgeShadow instanceHogsShadow
 ```
 
 ## Design Rationale
@@ -29,12 +29,12 @@ Class {
 	#tag : 'Pie'
 }
 
-{ #category : 'examples' }
-BpPieWedgeShadow class >> exampleHogsShadow [
-	"Answer the shadow of the exploded 'Hogs' wedge of `BpPie class>>#exampleExplodeShadowRotate`."
+{ #category : 'instances' }
+BpPieWedgeShadow class >> instanceHogsShadow [
+	"Answer the shadow of the exploded 'Hogs' wedge of `BpPie class>>#instanceExplodeShadowRotate`."
 
 	<sampleInstance>
-	^ BpPie exampleExplodeShadowRotate shadows second
+	^ BpPie instanceExplodeShadowRotate shadows second
 ]
 
 { #category : 'instance creation' }

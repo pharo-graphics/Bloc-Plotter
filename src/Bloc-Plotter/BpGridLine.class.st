@@ -4,7 +4,7 @@ I am one line of the grid of a `BpAxes` (`BpAxes>>grid:`): a light gray line acr
 ## Examples
 
 ```
-BpGridLine exampleVertical
+BpGridLine instanceVertical
 ```
 
 ## Design Rationale
@@ -38,8 +38,8 @@ BpGridLine class >> axis: anAxis location: aNumber [
 		  yourself
 ]
 
-{ #category : 'examples' }
-BpGridLine class >> exampleVertical [
+{ #category : 'instances' }
+BpGridLine class >> instanceVertical [
 	"Answer a vertical grid line at 0.5 on the x axis."
 
 	<sampleInstance>

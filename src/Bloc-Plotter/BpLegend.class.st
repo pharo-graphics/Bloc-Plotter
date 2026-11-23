@@ -4,7 +4,7 @@ I am the legend of a `BpAxes`: one row per labeled dataset, a swatch drawn like 
 ## Examples
 
 ```
-BpLegend exampleTwoEntries
+BpLegend instanceTwoEntries
 ```
 
 ## Usage
@@ -30,8 +30,8 @@ BpLegend class >> entries: aCollectionOfAssociations [
 		  yourself
 ]
 
-{ #category : 'examples' }
-BpLegend class >> exampleTwoEntries [
+{ #category : 'instances' }
+BpLegend class >> instanceTwoEntries [
 
 	<sampleInstance>
 	^ self entries: (#( 'red' 'tan' ) collect: [ :each |

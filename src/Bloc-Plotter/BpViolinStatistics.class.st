@@ -4,7 +4,7 @@ I am the summary of one dataset that a `BpViolinPlot` draws: its Gaussian kernel
 ## Examples
 
 ```
-BpViolinStatistics exampleTwoGroups
+BpViolinStatistics instanceTwoGroups
 ```
 
 ## Design Rationale
@@ -46,8 +46,8 @@ Class {
 	#tag : 'Violin'
 }
 
-{ #category : 'examples' }
-BpViolinStatistics class >> exampleTwoGroups [
+{ #category : 'instances' }
+BpViolinStatistics class >> instanceTwoGroups [
 	"Answer the statistics of values gathered in two groups, around 1 and around 5, estimated at 50 points with Scott's rule."
 
 	<sampleInstance>

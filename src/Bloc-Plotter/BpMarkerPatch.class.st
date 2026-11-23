@@ -4,7 +4,7 @@ I am the marker of one point of a `BpScatterPlot` or a `BpLine`, of a flier or a
 ## Examples
 
 ```
-BpMarkerPatch exampleCircle
+BpMarkerPatch instanceCircle
 ```
 
 ## Implementation Notes
@@ -27,8 +27,8 @@ Class {
 	#tag : 'Scatter'
 }
 
-{ #category : 'examples' }
-BpMarkerPatch class >> exampleCircle [
+{ #category : 'instances' }
+BpMarkerPatch class >> instanceCircle [
 	"Answer the marker of the third point of a scatter, a circle of 80 points squared."
 
 	<sampleInstance>

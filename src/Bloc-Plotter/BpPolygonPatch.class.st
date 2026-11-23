@@ -4,7 +4,7 @@ I am a polyline through my `dataVertices` when open, a filled polygon when close
 ## Examples
 
 ```
-BpPolygonPatch exampleStep
+BpPolygonPatch instanceStep
 ```
 
 ## Implementation Notes
@@ -24,8 +24,8 @@ Class {
 	#tag : 'Axes'
 }
 
-{ #category : 'examples' }
-BpPolygonPatch class >> exampleStep [
+{ #category : 'instances' }
+BpPolygonPatch class >> instanceStep [
 	"Answer the outline of a step histogram."
 
 	<sampleInstance>

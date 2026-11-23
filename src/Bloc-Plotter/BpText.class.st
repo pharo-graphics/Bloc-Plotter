@@ -4,7 +4,7 @@ I am a text of a plot on one or several lines: each line break of my text starts
 ## Examples
 
 ```
-BpText exampleTwoLines
+BpText instanceTwoLines
 ```
 
 ## Design Rationale
@@ -30,8 +30,8 @@ Class {
 	#tag : 'Text'
 }
 
-{ #category : 'examples' }
-BpText class >> exampleTwoLines [
+{ #category : 'instances' }
+BpText class >> instanceTwoLines [
 	"Answer a text of two centered lines."
 
 	<sampleInstance>

@@ -4,11 +4,10 @@ I am a violin plot, added by `BpAxes>>violinPlot:` and `BpAxes>>violinPlot:posit
 ## Examples
 
 ```
-BpViolinPlot scriptPlotType.
-BpViolinPlot scriptViolinPlotBasics.
-BpViolinPlot scriptSplitViolins.
-BpViolinPlot scriptInteraction.
-BpViolinPlot exampleViolins
+BpViolinPlot examplePlotType.
+BpViolinPlot exampleViolinPlotBasics.
+BpViolinPlot exampleSplitViolins.
+BpViolinPlot exampleInteraction
 ```
 
 ## Design Rationale
@@ -108,134 +107,39 @@ BpViolinPlot class >> customViolinsIn: anAxes data: someDatasets number: anInteg
 ]
 
 { #category : 'examples' }
-BpViolinPlot class >> exampleInteractiveViolins [
-	"Three violins: hovering one makes it opaque, clicking it shows its median in the title."
+BpViolinPlot class >> exampleInteraction [
+	"Interaction handlers on violins: hover one to make it opaque, click it to see its median."
 
-	<sampleInstance>
-	| random figure axes violins isBody |
-	random := Random seed: 3.
-	figure := BpFigure new.
-	axes := figure axes first.
-	axes title: 'Click a violin'.
-	violins := (axes violinPlot: ((1 to: 3) collect: [ :each |
-		             self
-			             normalSamples: 200
-			             mean: each
-			             deviation: each / 2
-			             random: random ]))
-		           showMedians: true;
-		           yourself.
-	isBody := [ :patch | (violins parts at: #bodies) includes: patch ].
-	violins
-		whenPatch: BlMouseEnterEvent
-		do: [ :event :patch | (isBody value: patch) ifTrue: [ patch background: (patch background paint color alpha: 0.8) ] ];
-		whenPatch: BlMouseLeaveEvent
-		do: [ :event :patch | (isBody value: patch) ifTrue: [ violins paintBody: patch dataset: patch dataset ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			axes title: ('violin {1}: median {2}' format: {
-				 patch dataset.
-				 ((violins statistics at: patch dataset) median printShowingDecimalPlaces: 2) }) ].
-	^ figure
+	<example>
+	^ BpFigure instanceInteractiveViolins show: 'Violin interaction'
 ]
 
 { #category : 'examples' }
 BpViolinPlot class >> examplePlotType [
-	"Plot types: violinplot(D), three violins 2 wide at 2, 4 and 6, without lines, nearly opaque, with fixed limits and ticks."
+	"Reproduce the plot type violinplot(D)."
 
-	<sampleInstance>
-	| random figure axes |
-	random := Random seed: 10.
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes
-		 violinPlot: {
-			 (self
-				  normalSamples: 200
-				  mean: 3
-				  deviation: 0.75
-				  random: random).
-			 (self
-				  normalSamples: 200
-				  mean: 5
-				  deviation: 1
-				  random: random).
-			 (self
-				  normalSamples: 200
-				  mean: 4
-				  deviation: 0.75
-				  random: random) }
-		 positions: #( 2 4 6 ))
-		widths: 2;
-		showExtrema: false;
-		alpha: 0.9.
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7).
-	^ figure
+	<example>
+	^ BpFigure instanceViolinPlotType show: 'violinplot(D)'
 ]
 
 { #category : 'examples' }
 BpViolinPlot class >> exampleSplitViolins [
-	"Two groups compared on each side of the same positions: the low halves on the left, the high halves on the right."
+	"Compare two groups with half violins on each side of the same positions."
 
-	<sampleInstance>
-	| random figure axes |
-	random := Random seed: 7.
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes violinPlot: ((1 to: 4) collect: [ :each |
-		  self
-			  normalSamples: 150
-			  mean: each
-			  deviation: 1
-			  random: random ]))
-		side: #low;
-		showExtrema: false;
-		showMedians: true;
-		label: 'before'.
-	(axes violinPlot: ((1 to: 4) collect: [ :each |
-		  self
-			  normalSamples: 150
-			  mean: each + 1
-			  deviation: 0.6
-			  random: random ]))
-		side: #high;
-		showExtrema: false;
-		showMedians: true;
-		label: 'after'.
-	axes
-		title: 'Split violins';
-		legend.
-	^ figure
+	<example>
+	^ BpFigure instanceSplitViolins show: 'Split violins'
 ]
 
 { #category : 'examples' }
 BpViolinPlot class >> exampleViolinPlotBasics [
-	"Gallery: Violin plot basics (violinplot), custom violins 1, 2 and 4, vertical then horizontal: fewer or more points, widths, means and medians, the Silverman bandwidth, a bandwidth factor and quantiles."
+	"Reproduce the gallery 'Violin plot basics': points, widths, means, medians, bandwidths and quantiles, vertical and horizontal."
 
-	<sampleInstance>
-	| data figure |
-	data := self basicsData.
-	figure := BpFigure rows: 2 columns: 3.
-	figure extent: 1000 @ 600.
-	#( 1 2 4 ) withIndexDo: [ :number :column |
-		self
-			customViolinsIn: (figure axesAtRow: 1 column: column)
-			data: data
-			number: number
-			horizontal: false.
-		self
-			customViolinsIn: (figure axesAtRow: 2 column: column)
-			data: data
-			number: number
-			horizontal: true ].
-	^ figure
+	<example>
+	^ BpFigure instanceViolinPlotBasics show: 'violinplot'
 ]
 
-{ #category : 'examples' }
-BpViolinPlot class >> exampleViolins [
+{ #category : 'instances' }
+BpViolinPlot class >> instanceViolins [
 	"Answer two violins, with their medians, in new axes."
 
 	<sampleInstance>
@@ -263,38 +167,6 @@ BpViolinPlot class >> normalSamples: anInteger mean: aMean deviation: aDeviation
 	"Answer anInteger samples of a normal distribution drawn from aRandom."
 
 	^ (1 to: anInteger) collect: [ :each | aRandom nextNormalMean: aMean deviation: aDeviation ]
-]
-
-{ #category : 'script' }
-BpViolinPlot class >> scriptInteraction [
-	"Interaction handlers on violins: hover one to make it opaque, click it to see its median."
-
-	<example>
-	^ self exampleInteractiveViolins show: 'Violin interaction'
-]
-
-{ #category : 'script' }
-BpViolinPlot class >> scriptPlotType [
-	"Reproduce the plot type violinplot(D)."
-
-	<example>
-	^ self examplePlotType show: 'violinplot(D)'
-]
-
-{ #category : 'script' }
-BpViolinPlot class >> scriptSplitViolins [
-	"Compare two groups with half violins on each side of the same positions."
-
-	<example>
-	^ self exampleSplitViolins show: 'Split violins'
-]
-
-{ #category : 'script' }
-BpViolinPlot class >> scriptViolinPlotBasics [
-	"Reproduce the gallery 'Violin plot basics': points, widths, means, medians, bandwidths and quantiles, vertical and horizontal."
-
-	<example>
-	^ self exampleViolinPlotBasics show: 'violinplot'
 ]
 
 { #category : 'private - computing' }

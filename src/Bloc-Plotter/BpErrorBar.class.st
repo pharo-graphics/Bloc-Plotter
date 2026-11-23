@@ -4,13 +4,12 @@ I am a line plot with error bars, added by `BpAxes>>errorBarX:y:yErr:` and `BpAx
 ## Examples
 
 ```
-BpErrorBar scriptPlotType.
-BpErrorBar scriptErrorbarFunction.
-BpErrorBar scriptErrorbarFeatures.
-BpErrorBar scriptLimits.
-BpErrorBar scriptSubsample.
-BpErrorBar scriptInteraction.
-BpErrorBar exampleMeasures
+BpErrorBar examplePlotType.
+BpErrorBar exampleErrorBarFunction.
+BpErrorBar exampleErrorBarFeatures.
+BpErrorBar exampleLimits.
+BpErrorBar exampleSubsample.
+BpErrorBar exampleInteraction
 ```
 
 ## Design Rationale
@@ -104,96 +103,55 @@ BpErrorBar class >> caret: aSymbol [
 ]
 
 { #category : 'examples' }
-BpErrorBar class >> exampleErrorbarFeatures [
-	"Gallery: Different ways of specifying error bars (errorbar_features): symmetric errors varying with x, then asymmetric x errors on a log scale."
+BpErrorBar class >> exampleErrorBarFeatures [
+	"Reproduce the gallery 'Different ways of specifying error bars': symmetric and asymmetric errors."
 
-	<sampleInstance>
-	| figure x y error symmetric asymmetric |
-	figure := BpFigure rows: 2 columns: 1.
-	figure extent: 640 @ 640.
-	x := self arangeFrom: 0.1 to: 4 by: 0.5.
-	y := x collect: [ :each | each negated exp ].
-	error := x collect: [ :each | 0.2 * each + 0.1 ].
-	symmetric := figure axesAtRow: 1 column: 1.
-	(symmetric errorBarX: x y: y yErr: error) format: '-o'.
-	symmetric title: 'variable, symmetric error'.
-	asymmetric := figure axesAtRow: 2 column: 1.
-	(asymmetric
-		 errorBarX: x
-		 y: y
-		 xErr: {
-			 (error collect: [ :each | each * 0.4 ]).
-			 error }
-		 yErr: nil) format: 'o'.
-	asymmetric
-		title: 'variable, asymmetric error';
-		yScale: #log.
-	^ figure
+	<example>
+	^ BpFigure instanceErrorBarFeatures show: 'errorbar_features'
 ]
 
 { #category : 'examples' }
-BpErrorBar class >> exampleErrorbarFunction [
-	"Gallery: Errorbar function (errorbar), the same error on every point: 0.2 in x and 0.4 in y."
+BpErrorBar class >> exampleErrorBarFunction [
+	"Reproduce the gallery 'Errorbar function': the same errors on every point."
 
-	<sampleInstance>
-	| figure axes x |
-	figure := BpFigure new.
-	axes := figure axes first.
-	x := self arangeFrom: 0.1 to: 4 by: 0.5.
-	axes
-		errorBarX: x
-		y: (x collect: [ :each | each negated exp ])
-		xErr: 0.2
-		yErr: 0.4.
-	axes title: 'Simplest errorbars, 0.2 in x, 0.4 in y'.
-	^ figure
+	<example>
+	^ BpFigure instanceErrorBarFunction show: 'errorbar'
 ]
 
 { #category : 'examples' }
-BpErrorBar class >> exampleInteractiveErrorBars [
-	"Measures with error bars: hovering a bar thickens it, clicking it shows the measure in the title."
+BpErrorBar class >> exampleInteraction [
+	"Interaction handlers on error bars: hover a bar to thicken it, click it to see its measure."
 
-	<sampleInstance>
-	| figure axes measures errors errorBar |
-	figure := BpFigure new.
-	axes := figure axes first.
-	axes title: 'Click an error bar'.
-	measures := #( 2.1 3.4 3.0 4.6 5.2 ).
-	errors := #( 0.3 0.5 0.4 0.6 0.3 ).
-	errorBar := (axes errorBarX: (1 to: 5) y: measures yErr: errors)
-		            format: 'o';
-		            capSize: 5;
-		            yourself.
-	errorBar
-		whenPatch: BlMouseEnterEvent
-		do: [ :event :patch |
-			(errorBar barPatches includes: patch) ifTrue: [ patch border: (BlBorder paint: patch border paint width: 5) ] ];
-		whenPatch: BlMouseLeaveEvent
-		do: [ :event :patch |
-			(errorBar barPatches includes: patch) ifTrue: [ patch border: (BlBorder paint: patch border paint width: 2) ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			(errorBar barPatches includes: patch) ifTrue: [
-				axes title: ('measure {1}: {2} ± {3}' format: {
-					 patch dataset.
-					 (measures at: patch dataset).
-					 (errors at: patch dataset) }) ] ].
-	^ figure
+	<example>
+	^ BpFigure instanceInteractiveErrorBars show: 'Error bar interaction'
 ]
 
 { #category : 'examples' }
 BpErrorBar class >> exampleLimits [
-	"Gallery: Including upper and lower limits in error bars (errorbar_limits_simple), first figure: limits on all points, on both sides, or on some points only."
+	"Reproduce the gallery 'Including upper and lower limits in error bars'."
 
-	<sampleInstance>
-	| figure |
-	figure := BpFigure new.
-	self addLimitSeriesTo: figure axes first.
-	figure axes first legend.
-	^ figure
+	<example>
+	^ BpFigure instanceErrorBarLimits show: 'errorbar_limits_simple'
 ]
 
 { #category : 'examples' }
-BpErrorBar class >> exampleMeasures [
+BpErrorBar class >> examplePlotType [
+	"Reproduce the plot type errorbar(x, y, yerr, xerr)."
+
+	<example>
+	^ BpFigure instanceErrorBarPlotType show: 'errorbar(x, y, yerr, xerr)'
+]
+
+{ #category : 'examples' }
+BpErrorBar class >> exampleSubsample [
+	"Reproduce the gallery 'Errorbar subsampling': draw one error bar in six, shifted between two series."
+
+	<example>
+	^ BpFigure instanceErrorBarSubsample show: 'errorbar_subsample'
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceMeasures [
 	"Answer five measures drawn as circles with error bars and caps, in new axes."
 
 	<sampleInstance>
@@ -203,86 +161,6 @@ BpErrorBar class >> exampleMeasures [
 		  format: 'o';
 		  capSize: 4;
 		  yourself
-]
-
-{ #category : 'examples' }
-BpErrorBar class >> examplePlotType [
-	"Plot types: errorbar(x, y, yerr, xerr), three circles with 2 point wide error bars and caps, with fixed limits and ticks."
-
-	<sampleInstance>
-	| figure axes |
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes errorBarX: #( 2 4 6 ) y: #( 3.6 5 4.2 ) yErr: #( 0.9 1.2 0.5 ))
-		format: 'o';
-		lineWidth: 2;
-		capSize: 6.
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7).
-	^ figure
-]
-
-{ #category : 'examples' }
-BpErrorBar class >> exampleSubsample [
-	"Gallery: Errorbar subsampling (errorbar_subsample): all error bars, one in six, then the second series shifted by three points."
-
-	<sampleInstance>
-	| figure |
-	figure := BpFigure rows: 1 columns: 3.
-	figure extent: 1000 @ 360.
-	1 to: 3 do: [ :column | self subsampleIn: (figure axesAtRow: 1 column: column) column: column ].
-	^ figure
-]
-
-{ #category : 'script' }
-BpErrorBar class >> scriptErrorbarFeatures [
-	"Reproduce the gallery 'Different ways of specifying error bars': symmetric and asymmetric errors."
-
-	<example>
-	^ self exampleErrorbarFeatures show: 'errorbar_features'
-]
-
-{ #category : 'script' }
-BpErrorBar class >> scriptErrorbarFunction [
-	"Reproduce the gallery 'Errorbar function': the same errors on every point."
-
-	<example>
-	^ self exampleErrorbarFunction show: 'errorbar'
-]
-
-{ #category : 'script' }
-BpErrorBar class >> scriptInteraction [
-	"Interaction handlers on error bars: hover a bar to thicken it, click it to see its measure."
-
-	<example>
-	^ self exampleInteractiveErrorBars show: 'Error bar interaction'
-]
-
-{ #category : 'script' }
-BpErrorBar class >> scriptLimits [
-	"Reproduce the gallery 'Including upper and lower limits in error bars'."
-
-	<example>
-	^ self exampleLimits show: 'errorbar_limits_simple'
-]
-
-{ #category : 'script' }
-BpErrorBar class >> scriptPlotType [
-	"Reproduce the plot type errorbar(x, y, yerr, xerr)."
-
-	<example>
-	^ self examplePlotType show: 'errorbar(x, y, yerr, xerr)'
-]
-
-{ #category : 'script' }
-BpErrorBar class >> scriptSubsample [
-	"Reproduce the gallery 'Errorbar subsampling': draw one error bar in six, shifted between two series."
-
-	<example>
-	^ self exampleSubsample show: 'errorbar_subsample'
 ]
 
 { #category : 'private - demo' }

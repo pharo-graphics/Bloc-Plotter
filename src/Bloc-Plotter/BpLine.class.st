@@ -4,9 +4,8 @@ I am a line plot of a `BpAxes` (`BpAxes>>plotX:y:`): a line through points given
 ## Examples
 
 ```
-BpLine exampleSine.
-BpLine scriptPlotType.
-BpLine scriptFormats
+BpLine examplePlotType.
+BpLine exampleFormats
 ```
 
 ## Design Rationale
@@ -68,56 +67,18 @@ BpLine class >> defaultMarkerSize [
 
 { #category : 'examples' }
 BpLine class >> exampleFormats [
-	"Answer the figure of the pyplot tutorial drawing three curves with format strings ('r--', 'bs', 'g^') and a legend."
+	"Show three curves drawn with format strings (see `BpLine>>format:`) and their legend."
 
-	<sampleInstance>
-	| figure axes t |
-	t := (0 to: 24) collect: [ :index | index / 5 ].
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes plotX: t y: t format: 'r--') label: 'linear'.
-	(axes plotX: t y: (t collect: [ :each | each squared ]) format: 'bs') label: 'quadratic'.
-	(axes plotX: t y: (t collect: [ :each | each raisedTo: 3 ]) format: 'g^') label: 'cubic'.
-	axes
-		title: 'Format strings';
-		legend.
-	^ figure
+	<example>
+	^ BpFigure instanceLineFormats show: 'plot format strings'
 ]
 
 { #category : 'examples' }
 BpLine class >> examplePlotType [
-	"Answer the figure of the plot type page (plot_types/basic/plot): markers only, a line, and a line with markers, with fixed limits and ticks."
+	"Show the figure of the plot type page: markers only, a line, and a line with markers."
 
-	<sampleInstance>
-	| figure axes x y x2 y2 |
-	x := (0 to: 99) collect: [ :index | index * 10 / 99.0 ].
-	y := x collect: [ :each | 4 + (2 * each) sin ].
-	x2 := (0 to: 24) collect: [ :index | index * 10 / 24.0 ].
-	y2 := x2 collect: [ :each | 4 + (2 * each) sin ].
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes plotX: x2 y: (y2 collect: [ :each | each + 2.5 ]) format: 'x') markerEdgeWidth: 2.
-	(axes plotX: x y: y) lineWidth: 2.
-	(axes plotX: x2 y: (y2 collect: [ :each | each - 2.5 ]) format: 'o-') lineWidth: 2.
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
-]
-
-{ #category : 'examples' }
-BpLine class >> exampleSine [
-	"Answer a sine line with circle markers."
-
-	<sampleInstance>
-	^ (self
-		   x: ((0 to: 24) collect: [ :index | index * 10 / 24.0 ])
-		   y: ((0 to: 24) collect: [ :index | 4 + (2 * index * 10 / 24.0) sin ]))
-		  format: 'o-';
-		  yourself
+	<example>
+	^ BpFigure instanceLinePlotType show: 'plot'
 ]
 
 { #category : 'format' }
@@ -129,6 +90,18 @@ BpLine class >> formatPartsOf: aString [
 	stream := aString readStream.
 	[ stream atEnd ] whileFalse: [ self readFormatPartFrom: stream into: parts ].
 	^ parts
+]
+
+{ #category : 'instances' }
+BpLine class >> instanceSine [
+	"Answer a sine line with circle markers."
+
+	<sampleInstance>
+	^ (self
+		   x: ((0 to: 24) collect: [ :index | index * 10 / 24.0 ])
+		   y: ((0 to: 24) collect: [ :index | 4 + (2 * index * 10 / 24.0) sin ]))
+		  format: 'o-';
+		  yourself
 ]
 
 { #category : 'format' }
@@ -145,22 +118,6 @@ BpLine class >> readFormatPartFrom: aStream into: aDictionary [
 	('bgrcmykw' includes: char) ifTrue: [ ^ aDictionary at: #color put: (String with: char) ].
 	(BpMarker namedMarkers includesKey: (String with: char)) ifTrue: [ ^ aDictionary at: #marker put: (String with: char) ].
 	^ self error: 'Unknown format character: ' , char printString
-]
-
-{ #category : 'script' }
-BpLine class >> scriptFormats [
-	"Show three curves drawn with format strings (see `BpLine>>format:`) and their legend."
-
-	<example>
-	^ self exampleFormats show: 'plot format strings'
-]
-
-{ #category : 'script' }
-BpLine class >> scriptPlotType [
-	"Show the figure of the plot type page: markers only, a line, and a line with markers."
-
-	<example>
-	^ self examplePlotType show: 'plot'
 ]
 
 { #category : 'constants' }

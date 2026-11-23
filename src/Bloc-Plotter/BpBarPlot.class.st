@@ -4,13 +4,12 @@ I am a bar plot, added by `BpAxes>>barX:height:` and `BpAxes>>barhY:width:`. I d
 ## Examples
 
 ```
-BpBarPlot scriptPlotType.
-BpBarPlot scriptBarColors.
-BpBarPlot scriptStacked.
-BpBarPlot scriptGrouped.
-BpBarPlot scriptHorizontal.
-BpBarPlot scriptInteraction.
-BpBarPlot exampleThreeBars
+BpBarPlot examplePlotType.
+BpBarPlot exampleBarColors.
+BpBarPlot exampleStacked.
+BpBarPlot exampleGrouped.
+BpBarPlot exampleHorizontal.
+BpBarPlot exampleInteraction
 ```
 
 ## Design Rationale
@@ -66,185 +65,60 @@ Class {
 
 { #category : 'examples' }
 BpBarPlot class >> exampleBarColors [
-	"Gallery: Bar color demo (bar_colors): categories, one color and one label per bar; the underscore hides the second red label from the legend."
+	"Reproduce the gallery 'Bar color demo': one color and one legend label per bar."
 
-	<sampleInstance>
-	| figure axes |
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes barX: #( 'apple' 'blueberry' 'cherry' 'orange' ) height: #( 40 100 30 55 ))
-		label: #( 'red' 'blue' '_red' 'orange' );
-		color: #( 'tab:red' 'tab:blue' 'tab:red' 'tab:orange' ).
-	axes
-		title: 'Fruit supply by kind and color';
-		legend.
-	^ figure
+	<example>
+	^ BpFigure instanceBarColors show: 'bar_colors'
 ]
 
 { #category : 'examples' }
 BpBarPlot class >> exampleGrouped [
-	"Gallery: Grouped bar chart with labels (barchart), without the bar labels: three bar plots shifted by their width; the middle one labels the ticks with the species."
+	"Reproduce the gallery 'Grouped bar chart with labels', without the bar labels: three groups of three bars."
 
-	<sampleInstance>
-	| species means figure axes width |
-	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
-	means := {
-		         ('Bill Depth' -> #( 18.35 18.43 14.98 )).
-		         ('Bill Length' -> #( 38.79 48.83 47.50 )).
-		         ('Flipper Length' -> #( 189.95 195.82 217.19 )) }.
-	figure := BpFigure new.
-	axes := figure axes first.
-	width := 0.25.
-	means withIndexDo: [ :each :index |
-		| offset |
-		offset := width * (index - 1).
-		(axes barX: ((0 to: 2) collect: [ :position | position + offset ]) height: each value)
-			width: width;
-			label: each key ].
-	axes artists second tickLabel: species.
-	axes
-		title: 'Penguin attributes by species';
-		yLimits: #( 0 250 );
-		legend.
-	^ figure
+	<example>
+	^ BpFigure instanceBarPlotGrouped show: 'barchart'
 ]
 
 { #category : 'examples' }
 BpBarPlot class >> exampleHorizontal [
-	"Gallery: Horizontal bar chart (barh), without the error bars: the names label the ticks of the y axis, from top to bottom."
+	"Reproduce the gallery 'Horizontal bar chart', without the error bars."
 
-	<sampleInstance>
-	| random people figure axes |
-	random := Random seed: 19680801.
-	people := #( 'Tom' 'Dick' 'Harry' 'Slim' 'Jim' ).
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes barhY: #( 4 3 2 1 0 ) width: (people collect: [ :each | 3 + (10 * random next) ])) tickLabel: people.
-	axes title: 'How fast do you want to go today?'.
-	^ figure
+	<example>
+	^ BpFigure instanceBarPlotHorizontal show: 'barh'
 ]
 
 { #category : 'examples' }
-BpBarPlot class >> exampleInteractiveBars [
-	"Bars with interaction handlers: hovering a bar highlights it, clicking it shows its category and height in the title."
+BpBarPlot class >> exampleInteraction [
+	"Interaction handlers on bars: hover a bar to highlight it, click it to see its category and height."
 
-	<sampleInstance>
-	| figure axes bars |
-	figure := BpFigure new.
-	axes := figure axes first.
-	bars := axes barX: #( 'apple' 'blueberry' 'cherry' 'orange' ) height: #( 40 100 30 55 ).
-	axes title: 'Click a bar'.
-	bars
-		whenPatch: BlMouseEnterEvent do: [ :event :bar | bar background: BpColors tab10 second ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :bar | bar background: BpColors tab10 first ];
-		whenPatch: BlClickEvent do: [ :event :bar |
-			axes title: ('{1}: {2}' format: {
-				 (bars x at: bar bin).
-				 bar amount }) ].
-	^ figure
+	<example>
+	^ BpFigure instanceInteractiveBars show: 'Bar interaction'
 ]
 
 { #category : 'examples' }
 BpBarPlot class >> examplePlotType [
-	"Plot types: bar(x, height), eight bars one unit wide outlined in white."
+	"Reproduce the plot type bar(x, height)."
 
-	<sampleInstance>
-	| figure axes |
-	figure := BpFigure new.
-	axes := figure axes first.
-	(axes barX: ((0 to: 7) collect: [ :each | each + 0.5 ]) height: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ))
-		width: 1;
-		edgeColor: 'white';
-		lineWidth: 0.7.
-	axes
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7).
-	^ figure
+	<example>
+	^ BpFigure instanceBarPlotType show: 'bar(x, height)'
 ]
 
 { #category : 'examples' }
 BpBarPlot class >> exampleStacked [
-	"Gallery: Stacked bar chart (bar_stacked): each bar plot starts on the tops of the previous one (bottom:)."
+	"Reproduce the gallery 'Stacked bar chart': bars on top of each other with bottom:."
 
-	<sampleInstance>
-	| species weightCounts figure axes bottom |
-	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
-	weightCounts := {
-		                ('Below' -> #( 70 31 58 )).
-		                ('Above' -> #( 82 37 66 )) }.
-	figure := BpFigure new.
-	axes := figure axes first.
-	bottom := #( 0 0 0 ).
-	weightCounts do: [ :each |
-		(axes barX: species height: each value)
-			width: 0.5;
-			label: each key;
-			bottom: bottom.
-		bottom := bottom with: each value collect: [ :base :count | base + count ] ].
-	axes
-		title: 'Number of penguins with above average body mass';
-		legend.
-	^ figure
+	<example>
+	^ BpFigure instanceBarPlotStacked show: 'bar_stacked'
 ]
 
-{ #category : 'examples' }
-BpBarPlot class >> exampleThreeBars [
+{ #category : 'instances' }
+BpBarPlot class >> instanceThreeBars [
 	"Answer three bars of fruits, in new axes."
 
 	<sampleInstance>
 	^ (BpAxes new
 		   extent: 400 @ 300;
 		   yourself) barX: #( 'apple' 'blueberry' 'cherry' ) height: #( 40 100 30 )
-]
-
-{ #category : 'script' }
-BpBarPlot class >> scriptBarColors [
-	"Reproduce the gallery 'Bar color demo': one color and one legend label per bar."
-
-	<example>
-	^ self exampleBarColors show: 'bar_colors'
-]
-
-{ #category : 'script' }
-BpBarPlot class >> scriptGrouped [
-	"Reproduce the gallery 'Grouped bar chart with labels', without the bar labels: three groups of three bars."
-
-	<example>
-	^ self exampleGrouped show: 'barchart'
-]
-
-{ #category : 'script' }
-BpBarPlot class >> scriptHorizontal [
-	"Reproduce the gallery 'Horizontal bar chart', without the error bars."
-
-	<example>
-	^ self exampleHorizontal show: 'barh'
-]
-
-{ #category : 'script' }
-BpBarPlot class >> scriptInteraction [
-	"Interaction handlers on bars: hover a bar to highlight it, click it to see its category and height."
-
-	<example>
-	^ self exampleInteractiveBars show: 'Bar interaction'
-]
-
-{ #category : 'script' }
-BpBarPlot class >> scriptPlotType [
-	"Reproduce the plot type bar(x, height)."
-
-	<example>
-	^ self examplePlotType show: 'bar(x, height)'
-]
-
-{ #category : 'script' }
-BpBarPlot class >> scriptStacked [
-	"Reproduce the gallery 'Stacked bar chart': bars on top of each other with bottom:."
-
-	<example>
-	^ self exampleStacked show: 'bar_stacked'
 ]
 
 { #category : 'accessing - options' }
