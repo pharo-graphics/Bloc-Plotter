@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, or a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, or a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -18,7 +18,7 @@ BpAxes exampleHistogram
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:` and `violinPlot:positions:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the tab10 cycle of `BpColors`).
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:` and `errorBarX:y:xErr:yErr:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the tab10 cycle of `BpColors`).
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
@@ -187,6 +187,27 @@ BpAxes >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 	^ (self scaleOf: anAxis) = #log
 		  ifTrue: [ BpTickLocator logLabelsFor: aCollectionOfLocations ]
 		  ifFalse: [ BpTickLocator labelsFor: aCollectionOfLocations ]
+]
+
+{ #category : 'plotting' }
+BpAxes >> errorBarX: xValues y: yValues xErr: anXErrorOrNil yErr: aYErrorOrNil [
+	"Draw the points of xValues and yValues joined by a line, with error bars on x and y (a number for every point, one number per point, or the lower then the upper errors; nil for none), and answer them, to be configured with format:, capSize:, errorColor:, upperLimits:, ... (see `BpErrorBar`)."
+
+	^ self addArtist: ((BpErrorBar x: xValues y: yValues)
+		   xErr: anXErrorOrNil;
+		   yErr: aYErrorOrNil;
+		   yourself)
+]
+
+{ #category : 'plotting' }
+BpAxes >> errorBarX: xValues y: yValues yErr: anErrorOrNil [
+	"Draw the points of xValues and yValues joined by a line, with error bars of anErrorOrNil on y, and answer them (see `errorBarX:y:xErr:yErr:`)."
+
+	^ self
+		  errorBarX: xValues
+		  y: yValues
+		  xErr: nil
+		  yErr: anErrorOrNil
 ]
 
 { #category : 'plotting' }

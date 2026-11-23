@@ -18,7 +18,7 @@ BpLine scriptFormats
 
 ## Usage
 
-1. `BpAxes>>plotX:y:` and `BpAxes>>plotX:y:format:` create me and add me to the axes; see `BpArtist` for the rest of the life cycle.
+1. `BpAxes>>plotX:y:` and `BpAxes>>plotX:y:format:` create me and add me to the axes; see `BpArtist` for the rest of the life cycle. `BpErrorBar` adds error bars to my points.
 2. My legend entry (`legendEntries`) is a short piece of my line with one marker in its middle.
 
 ## Invariants and Assumptions
@@ -161,6 +161,13 @@ BpLine class >> scriptPlotType [
 
 	<example>
 	^ self examplePlotType show: 'plot'
+]
+
+{ #category : 'constants' }
+BpLine class >> swatchExtent [
+	"Answer the extent of my legend swatch, in pixels."
+
+	^ 28 @ 14
 ]
 
 { #category : 'instance creation' }
@@ -368,8 +375,8 @@ BpLine >> newPatches [
 BpLine >> newSwatch [
 
 	| width height swatch |
-	width := 28.
-	height := 14.
+	width := self class swatchExtent x.
+	height := self class swatchExtent y.
 	swatch := BlElement new
 		          extent: width @ height;
 		          yourself.

@@ -18,10 +18,11 @@ BpFigure scriptFillBetween.
 BpFigure scriptStackPlot.
 BpFigure scriptStairs.
 BpFigure scriptViolinPlot.
+BpFigure scriptErrorBar.
 BpFigure scriptSave
 ```
 
-More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs` and `BpViolinPlot`.
+More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs`, `BpViolinPlot` and `BpErrorBar`.
 
 ## Design Rationale
 
@@ -91,6 +92,14 @@ BpFigure class >> scriptBoxPlot [
 
 	<example>
 	^ BpBoxPlot exampleBoxPlotDemo show: 'boxplot_demo'
+]
+
+{ #category : 'script' }
+BpFigure class >> scriptErrorBar [
+	"Show the figure of the gallery error bar limits: upper and lower limits on all or some points (see `BpErrorBar`)."
+
+	<example>
+	^ BpErrorBar exampleLimits show: 'errorbar'
 ]
 
 { #category : 'script' }

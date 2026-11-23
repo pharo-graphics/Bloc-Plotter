@@ -1,5 +1,5 @@
 "
-I am the marker of one point of a `BpScatterPlot` or a `BpLine`, of a flier or a mean of a `BpBoxPlot`, or of a head of a `BpStemPlot`. I know the `index` of my point, its `dataPoint`, my `area` (in points squared, see `BpScatterPlot>>s:`) and my `amount` (the number of `BpScatterPlot>>c:` mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
+I am the marker of one point of a `BpScatterPlot` or a `BpLine`, of a flier or a mean of a `BpBoxPlot`, of a head of a `BpStemPlot`, or of a cap or limit arrow of a `BpErrorBar`. I know the `index` of my point, its `dataPoint`, my `area` (in points squared, see `BpScatterPlot>>s:`) and my `amount` (the number of `BpScatterPlot>>c:` mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
 
 ## Examples
 
