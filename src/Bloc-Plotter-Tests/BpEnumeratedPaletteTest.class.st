@@ -50,6 +50,15 @@ BpEnumeratedPaletteTest >> testEverySchemeHasItsSizes [
 ]
 
 { #category : 'tests' }
+BpEnumeratedPaletteTest >> testMdl200GoesFromRedToBlueGrey [
+
+	self assert: BpMDLChartingPalette mdl200 name equals: 'mdl200'.
+	self assert: (BpMDLChartingPalette mdl200 colorAt: 1) equals: (BpPalette colorFromTriplet: #( 16rEF 16r9A 16r9A )).
+	self assert: (BpMDLChartingPalette mdl200 colorAt: 18) equals: (BpPalette colorFromTriplet: #( 16rEE 16rEE 16rEE )).
+	self assert: (BpMDLChartingPalette mdl200 colorAt: 19) equals: (BpPalette colorFromTriplet: #( 16rB0 16rBE 16rC5 ))
+]
+
+{ #category : 'tests' }
 BpEnumeratedPaletteTest >> testMdlMixedSchemesAreNamedAfterTheirRow [
 
 	self assert: BpMDLChartingPalette mdl300Mixed name equals: 'mdl300Mixed'.
@@ -119,7 +128,7 @@ BpEnumeratedPaletteTest >> testMdlSchemesHaveNineteenDistinctColors [
 
 	| palettes |
 	palettes := BpMDLChartingPalette schemes collect: [ :each | BpMDLChartingPalette perform: each ].
-	self assert: palettes size equals: 6.
+	self assert: palettes size equals: 7.
 	self assert: (palettes allSatisfy: [ :each | each size = 19 and: [ each colors asSet size = 19 ] ])
 ]
 

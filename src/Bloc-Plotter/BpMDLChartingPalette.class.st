@@ -1,5 +1,5 @@
 "
-I am a palette of the Material Design colors, to tell things apart without ordering them. My schemes come from three rows of the Material Design color table, from the lightest to the darkest: `mdl300`, `mdl400` and `mdl500` keep the order of the table, `mdl300Mixed`, `mdl400Mixed` and `mdl500Mixed` hold the same colors in an order that separates close hues.
+I am a palette of the Material Design colors, to tell things apart without ordering them. My schemes come from four rows of the Material Design color table, from the lightest to the darkest: `mdl200`, `mdl300`, `mdl400` and `mdl500` keep the order of the table, `mdl300Mixed`, `mdl400Mixed` and `mdl500Mixed` hold the colors of the last three in an order that separates close hues.
 
 ## Examples
 
@@ -10,12 +10,12 @@ BpMDLChartingPalette exampleMDLCharting
 ## Design Rationale
 
 - A row holds 19 colors in the order of the table: red, pink, purple, deep purple, indigo, blue, light blue, cyan, teal, green, light green, lime, yellow, amber, orange, deep orange, brown, grey, blue grey. Colors next to each other have close hues, so the first artists of a chart are hard to tell apart. The mixed schemes are for charts with a few artists.
-- The three mixed schemes share one order, and so do the three rows: the same index is the same hue in the three, so a chart can move from one to another and keep its hues.
+- The three mixed schemes share one order, and so do the four rows: the same index is the same hue in all of them, so a chart can move from one to another and keep its hues.
 
 ## Implementation Notes
 
 - The colors come from https://materialui.co/colors.
-- The order of the mixed schemes (`mixedOrder`) was computed once on OKLab distances, taking the worst of the three rows, in normal vision and in simulated protanopia and deuteranopia. Its first five colors are all distinct from each other. Further on, only the colors next to each other are.
+- The order of the mixed schemes (`mixedOrder`) was computed once on OKLab distances, taking the worst of the rows 300, 400 and 500, in normal vision and in simulated protanopia and deuteranopia. Its first five colors are all distinct from each other. Further on, only the colors next to each other are.
 
 ## Invariants and Assumptions
 
@@ -31,11 +31,12 @@ Class {
 
 { #category : 'examples' }
 BpMDLChartingPalette class >> exampleMDLCharting [
-	"Show the three rows of Material Design colors, from the lightest to the darkest, then their mixed versions."
+	"Show the four rows of Material Design colors, from the lightest to the darkest, then the mixed versions of the last three."
 
 	<example>
 	^ self
 		  demoOpen: {
+			  self instanceMdl200.
 			  self instanceMdl300.
 			  self instanceMdl400.
 			  self instanceMdl500.
@@ -43,6 +44,13 @@ BpMDLChartingPalette class >> exampleMDLCharting [
 			  self instanceMdl400Mixed.
 			  self instanceMdl500Mixed }
 		  title: 'MDL charting palettes'
+]
+
+{ #category : 'instances' }
+BpMDLChartingPalette class >> instanceMdl200 [
+
+	<sampleInstance>
+	^ self mdl200
 ]
 
 { #category : 'instances' }
@@ -85,6 +93,17 @@ BpMDLChartingPalette class >> instanceMdl500Mixed [
 
 	<sampleInstance>
 	^ self mdl500Mixed
+]
+
+{ #category : 'instance creation - schemes' }
+BpMDLChartingPalette class >> mdl200 [
+
+	^ self
+		  name: 'mdl200'
+		  triplets:
+			  #( #( 239 154 154 ) #( 244 143 177 ) #( 206 147 216 ) #( 179 157 219 ) #( 159 168 218 ) #( 144 202 249 ) #( 129 212 250 )
+			     #( 128 222 234 ) #( 128 203 196 ) #( 165 214 167 ) #( 197 225 165 ) #( 230 238 156 ) #( 255 245 157 ) #( 255 224 130 )
+			     #( 255 204 128 ) #( 255 171 145 ) #( 188 170 164 ) #( 238 238 238 ) #( 176 190 197 ) )
 ]
 
 { #category : 'instance creation - schemes' }
@@ -156,5 +175,5 @@ BpMDLChartingPalette class >> mixedOrder [
 BpMDLChartingPalette class >> schemes [
 	"Answer the selectors of my schemes."
 
-	^ #( #mdl300 #mdl400 #mdl500 #mdl300Mixed #mdl400Mixed #mdl500Mixed )
+	^ #( #mdl200 #mdl300 #mdl400 #mdl500 #mdl300Mixed #mdl400Mixed #mdl500Mixed )
 ]
