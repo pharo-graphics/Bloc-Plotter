@@ -17,7 +17,7 @@ BpFillBetween exampleArea
 ## Design Rationale
 
 - I compute my polygons as follows: for each run of true values of `where`, the polygon starts at the first x on `y2`, goes along `y1`, comes back along `y2`; with `interpolate:` its two ends are the points where `y1 - y2` changes sign, found by linear interpolation; `step:` turns each run into steps (#pre, #post, #mid) before.
-- I keep the vocabulary of `BpAxes>>fillBetweenX:y1:y2:` whatever my orientation: `x` is the independent axis, `y1` and `y2` the dependent one. `BpAxes>>fillBetweenY:x1:x2:` maps the arguments of `fill_betweenx` on them.
+- I keep the vocabulary of `BpAxes>>fillBetweenX:y1:y2:` whatever my orientation: `x` is the independent axis, `y1` and `y2` the dependent one. `BpAxes>>fillBetweenY:x1:x2:` maps its arguments on them.
 - Without color, the fill takes the next color of the cycle and has no outline; `color:` sets both the fill and the outline, `faceColor:` only the fill, `edgeColor:` only the outline; `alpha:` makes both transparent.
 - Like bars, my polygons are drawn below the grid.
 
@@ -417,13 +417,6 @@ BpFillBetween >> interpolate: aBoolean [
 BpFillBetween >> isHorizontal [
 
 	^ orientation = #horizontal
-]
-
-{ #category : 'private - computing' }
-BpFillBetween >> isMany: aValue [
-	"Answer whether aValue gives one value per x rather than one for all."
-
-	^ aValue isCollection and: [ aValue isString not ]
 ]
 
 { #category : 'axes' }

@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:` a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, or a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:` a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, or a `BpStackPlot` added by `stackPlotX:ys:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -18,7 +18,7 @@ BpAxes exampleHistogram
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:` and `fillBetweenY:x1:x2:` (and their variants filling down to 0) create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the tab10 cycle of `BpColors`).
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0) and `stackPlotX:ys:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the tab10 cycle of `BpColors`).
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
@@ -455,6 +455,15 @@ BpAxes >> scatterX: xValues y: yValues [
 	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured with s:, c:, marker:, alpha:, ... (see `BpScatterPlot`)."
 
 	^ self addArtist: (BpScatterPlot x: xValues y: yValues)
+]
+
+{ #category : 'plotting' }
+BpAxes >> stackPlotX: aCollection ys: aCollectionOfCollections [
+	"Stack the layers aCollectionOfCollections (one value per x each) over aCollection and answer the stack, to be configured with baseline:, colors:, label:, alpha:, ... (see `BpStackPlot`)."
+
+	^ self addArtist: (BpStackPlot new
+		   x: aCollection ys: aCollectionOfCollections;
+		   yourself)
 ]
 
 { #category : 'plotting' }

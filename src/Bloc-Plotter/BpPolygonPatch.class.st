@@ -1,5 +1,5 @@
 "
-I am a polyline through my `dataVertices` when open, a filled polygon when closed: the outline of a step histogram (`BpHistogram>>histType:` #step or #stepfilled) the line of a `BpLine`, a box, whisker, cap, median or mean line of a `BpBoxPlot`, a stem or the baseline of a `BpStemPlot`, or a region of a `BpFillBetween`. See `BpPatch` for the life cycle.
+I am a polyline through my `dataVertices` when open, a filled polygon when closed: the outline of a step histogram (`BpHistogram>>histType:` #step or #stepfilled) the line of a `BpLine`, a box, whisker, cap, median or mean line of a `BpBoxPlot`, a stem or the baseline of a `BpStemPlot`, a region of a `BpFillBetween`, or a layer of a `BpStackPlot`. See `BpPatch` for the life cycle.
 
 ## Examples
 

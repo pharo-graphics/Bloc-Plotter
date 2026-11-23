@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`) or the area between two curves (`BpFillBetween`). I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`) the area between two curves (`BpFillBetween`) or a stack plot (`BpStackPlot`). I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -16,7 +16,7 @@ BpArtist scriptArtistsInOneAxes
 
 ## Usage
 
-1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
+1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the axes (`BpAxes>>artistChanged:`); they rebuild their limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
@@ -227,6 +227,13 @@ BpArtist >> isColorName: aString [
 		  do: [ false ]
 ]
 
+{ #category : 'private - style' }
+BpArtist >> isMany: aValue [
+	"Answer whether aValue gives one value per dataset, point or item rather than one for all: a collection other than a string."
+
+	^ aValue isCollection and: [ aValue isString not ]
+]
+
 { #category : 'accessing - style' }
 BpArtist >> label: aStringOrCollection [
 	"Set the label shown in the legend: one string, or one per dataset for a histogram of several datasets."
@@ -309,7 +316,7 @@ BpArtist >> requiredValuesOn: anAxis [
 BpArtist >> setting: aValueOrCollection at: anIndex [
 	"Answer a style setting for one dataset or point: the setting itself, or its element at anIndex when it is a collection (one per dataset or point)."
 
-	^ (aValueOrCollection isCollection and: [ aValueOrCollection isString not ])
+	^ (self isMany: aValueOrCollection)
 		  ifTrue: [ aValueOrCollection at: anIndex ]
 		  ifFalse: [ aValueOrCollection ]
 ]

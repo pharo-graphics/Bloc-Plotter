@@ -15,10 +15,11 @@ BpFigure scriptPlot.
 BpFigure scriptBar.
 BpFigure scriptStem.
 BpFigure scriptFillBetween.
+BpFigure scriptStackPlot.
 BpFigure scriptSave
 ```
 
-More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot` and `BpFillBetween`.
+More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween` and `BpStackPlot`.
 
 ## Design Rationale
 
@@ -158,6 +159,14 @@ BpFigure class >> scriptScatter [
 
 	<example>
 	^ BpScatterPlot exampleScatter show: 'scatter'
+]
+
+{ #category : 'script' }
+BpFigure class >> scriptStackPlot [
+	"Show the figure of the gallery stackplot demo: the world population stacked by continent (see `BpStackPlot`)."
+
+	<example>
+	^ BpStackPlot exampleWorldPopulation show: 'stackplot'
 ]
 
 { #category : 'script' }

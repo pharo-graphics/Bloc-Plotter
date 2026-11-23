@@ -394,13 +394,6 @@ BpBarPlot >> isHorizontal [
 	^ orientation = #horizontal
 ]
 
-{ #category : 'private - computing' }
-BpBarPlot >> isMany: aValue [
-	"Answer whether aValue gives one value per bar rather than one for all."
-
-	^ aValue isCollection and: [ aValue isString not ]
-]
-
 { #category : 'private - style' }
 BpBarPlot >> isShownLabel: aStringOrNil [
 	"Answer whether aStringOrNil gives a legend entry: labels starting with an underscore are hidden."
