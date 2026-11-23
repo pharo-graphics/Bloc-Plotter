@@ -4,9 +4,23 @@
     <img alt="Pharo" src="https://img.shields.io/static/v1?style=for-the-badge&message=Pharo&color=3297d4&logo=Harbor&logoColor=FFFFFF&label=" />
 </a>
 
+Pay attention this is a proof of concept. We are not sure to keep it. 
+
 A matplotlib-like plotting library for [Bloc](https://github.com/pharo-graphics/Bloc): figures, axes and artists
 for pie charts, histograms, scatter plots, line plots and box plots, with interactive patches and SVG, PDF and
-PNG export.
+PNG export.  Main design is based on matplotlib but we will revise. .
+
+Plan:
+- get the important plots
+- refactor, refactor, refactor by confronting with Roassal.
+- separate DSL from core entities.
+- Avoid dsl inside strings.
+- Minimize isNil, exception, asArray
+- More pharoism
+- Get uniform options such as beHorizontal, beVertical
+- Legend as a first class object
+- More metadescription
+
 
 Bloc-Plotter depends on Bloc v3.0.0.
 
