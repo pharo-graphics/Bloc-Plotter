@@ -1,5 +1,5 @@
 "
-I am the legend of a `BpAxes`: one row per labeled dataset, a swatch drawn like its patches followed by its label, as matplotlib `Axes.legend`.
+I am the legend of a `BpAxes`: one row per labeled dataset, a swatch drawn like its patches followed by its label (`BpAxes>>legend`).
 
 ## Examples
 

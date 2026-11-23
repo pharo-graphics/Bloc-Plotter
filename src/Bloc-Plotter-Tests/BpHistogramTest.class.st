@@ -1,5 +1,5 @@
 "
-I test `BpHistogram` against the algorithm of matplotlib Axes.hist: the values of the bins (density, stacking, cumulative sums), the geometry of bars and steps, and the style of the patches.
+I test `BpHistogram`: the values of the bins (density, stacking, cumulative sums), the geometry of bars and steps, and the style of the patches.
 "
 Class {
 	#name : 'BpHistogramTest',
@@ -399,7 +399,7 @@ BpHistogramTest >> testStepFilledIsClosed [
 
 { #category : 'tests - styles' }
 BpHistogramTest >> testStepIsDrawnWithColorNotFaceColor [
-	"As in matplotlib, an unfilled step ignores facecolor and draws its outline with the dataset color."
+	"An unfilled step ignores faceColor: and draws its outline with the dataset color."
 
 	| step |
 	step := (BpHistogram new

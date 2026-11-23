@@ -1,5 +1,5 @@
 "
-I am one line of the grid of a `BpAxes` (matplotlib `grid`): a light gray line across the plot area at the location of a tick, vertical for the x axis and horizontal for the y axis.
+I am one line of the grid of a `BpAxes` (`BpAxes>>grid:`): a light gray line across the plot area at the location of a tick, vertical for the x axis and horizontal for the y axis.
 
 ## Examples
 
@@ -9,7 +9,7 @@ BpGridLine exampleVertical
 
 ## Design Rationale
 
-- I am drawn above the patches and below the legend, as the default matplotlib grid, and I do not receive mouse events, so I never hide a patch from interaction handlers.
+- I am drawn above the patches and below the legend, and I do not receive mouse events, so I never hide a patch from interaction handlers.
 
 ## Usage
 
@@ -55,7 +55,7 @@ BpGridLine >> axis [
 
 { #category : 'accessing' }
 BpGridLine >> boundsWith: aTransform in: anExtent [
-	"Answer my bounds in a plot area of anExtent: a line of the matplotlib grid width (0.8 point) across the plot area at my location."
+	"Answer my bounds in a plot area of anExtent: a line 0.8 point wide across the plot area at my location."
 
 	| width position |
 	width := 0.8 * BpArtist pixelsPerPoint.

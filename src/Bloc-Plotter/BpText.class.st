@@ -1,5 +1,5 @@
 "
-I am a text of a plot on one or several lines: each line break of my text starts a new line, centered under the previous one. A `BpAxes` shows its title with me, so a title can be written on two lines as in matplotlib.
+I am a text of a plot on one or several lines: each line break of my text starts a new line, centered under the previous one. A `BpAxes` shows its title with me, so a title can be written on two lines.
 
 ## Examples
 

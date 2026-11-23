@@ -1,5 +1,5 @@
 "
-I am a scatter plot: the artist of matplotlib `Axes.scatter`. I show one `BpMarkerPatch` per point, whose `BpMarker`, size and color may vary from point to point: the numbers of `c:` are mapped to colors through a colormap.
+I am a scatter plot, added by `BpAxes>>scatterX:y:`. I show one `BpMarkerPatch` per point, whose `BpMarker`, size and color may vary from point to point: the numbers of `c:` are mapped to colors through a colormap.
 
 ## Examples
 
@@ -13,8 +13,8 @@ BpScatterPlot exampleColoredPoints
 
 ## Design Rationale
 
-- My setters are the arguments of matplotlib `Axes.scatter`, in camel case: `s:` (size in points squared, 36 by default), `c:` (a color, one per point, or numbers), `marker:`, `colorMap:` (cmap), `vMin:`, `vMax:`, `alpha:`, `lineWidths:`, `edgeColors:` ('face' by default, 'none', or colors) and `label:`. My results are `offsets` and `patches`.
-- As in matplotlib, alpha applies to the faces and to the edges, and an unfilled marker ('+', 'x', an asterisk) is drawn with the face color.
+- My setters are `s:` (size in points squared, 36 by default), `c:` (a color, one per point, or numbers), `marker:`, `colorMap:`, `vMin:`, `vMax:`, `alpha:`, `lineWidths:`, `edgeColors:` ('face' by default, 'none', or colors) and `label:`. My results are `offsets` and `patches`.
+- Alpha applies to the faces and to the edges, and an unfilled marker ('+', 'x', an asterisk) is drawn with the face color.
 - Numbers of `c:` are normalized between `vMin` and `vMax` (their smallest and largest by default), clipped, then mapped by the colormap: a name known by `BpColors class>>colorMap:` or a block.
 
 ## Usage
@@ -24,8 +24,8 @@ BpScatterPlot exampleColoredPoints
 
 ## Implementation Notes
 
-- My patches cover only their point in data coordinates, so autoscaling ignores the size of the markers, as matplotlib does.
-- Not supported yet: `norm`, `plotnonfinite`, masked values and matplotlib `legend_elements`.
+- My patches cover only their point in data coordinates, so autoscaling ignores the size of the markers.
+- Not supported yet: normalizations other than linear, non-finite and masked values, and legend entries built from the sizes or colors.
 
 ## Invariants and Assumptions
 
@@ -57,7 +57,7 @@ Class {
 
 { #category : 'accessing' }
 BpScatterPlot class >> defaultSize [
-	"Answer the marker size in points squared when none is given: the square of the matplotlib default marker size, 6 points."
+	"Answer the marker size in points squared when none is given: the square of the default marker size, 6 points."
 
 	^ 36
 ]
@@ -104,7 +104,7 @@ BpScatterPlot class >> exampleInteractiveScatter [
 
 { #category : 'examples' }
 BpScatterPlot class >> exampleMarkers [
-	"matplotlib gallery: Marker examples (scatter_star_poly): a marker symbol, a TeX symbol, a path, a pentagon, a star and an asterisk."
+	"Gallery: Marker examples (scatter_star_poly): a marker symbol, a TeX symbol, a path, a pentagon, a star and an asterisk."
 
 	<sampleInstance>
 	| random x y z figure |
@@ -132,7 +132,7 @@ BpScatterPlot class >> exampleMarkers [
 
 { #category : 'examples' }
 BpScatterPlot class >> exampleScatter [
-	"matplotlib gallery: Scatter plot (shapes_and_collections/scatter): random points with random sizes and colors."
+	"Gallery: Scatter plot (shapes_and_collections/scatter): random points with random sizes and colors."
 
 	<sampleInstance>
 	| random n x y colors area figure |
@@ -153,7 +153,7 @@ BpScatterPlot class >> exampleScatter [
 
 { #category : 'examples' }
 BpScatterPlot class >> exampleScatterWithLegend [
-	"matplotlib gallery: Scatter plot with a legend (scatter_with_legend), first figure: one scatter per color, each with a label."
+	"Gallery: Scatter plot with a legend (scatter_with_legend), first figure: one scatter per color, each with a label."
 
 	<sampleInstance>
 	| random figure axes |
@@ -188,7 +188,7 @@ BpScatterPlot class >> scriptInteraction [
 
 { #category : 'script' }
 BpScatterPlot class >> scriptMarkers [
-	"Reproduce the matplotlib gallery 'Marker examples': six ways to give the marker of a scatter."
+	"Reproduce the gallery 'Marker examples': six ways to give the marker of a scatter."
 
 	<example>
 	^ self exampleMarkers show: 'scatter_star_poly'
@@ -196,7 +196,7 @@ BpScatterPlot class >> scriptMarkers [
 
 { #category : 'script' }
 BpScatterPlot class >> scriptScatter [
-	"Reproduce the matplotlib gallery 'Scatter plot': random points with random sizes and colors, half transparent."
+	"Reproduce the gallery 'Scatter plot': random points with random sizes and colors, half transparent."
 
 	<example>
 	^ self exampleScatter show: 'scatter'
@@ -204,7 +204,7 @@ BpScatterPlot class >> scriptScatter [
 
 { #category : 'script' }
 BpScatterPlot class >> scriptScatterWithLegend [
-	"Reproduce the matplotlib gallery 'Scatter plot with a legend': three labeled scatters, a legend and a grid."
+	"Reproduce the gallery 'Scatter plot with a legend': three labeled scatters, a legend and a grid."
 
 	<example>
 	^ self exampleScatterWithLegend show: 'scatter_with_legend'
@@ -221,7 +221,7 @@ BpScatterPlot class >> x: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 
 { #category : 'accessing - options' }
 BpScatterPlot >> c: aColorOrCollection [
-	"Set the color of the markers (matplotlib c): one color or color name, one per point, or one number per point mapped through my colormap."
+	"Set the color of the markers: one color or color name, one per point, or one number per point mapped through my colormap."
 
 	c := aColorOrCollection.
 	self refresh
@@ -256,7 +256,7 @@ BpScatterPlot >> compute [
 
 { #category : 'private - computing' }
 BpScatterPlot >> edgeColorAt: anIndex [
-	"Answer the edge color of a point, or nil without edge. An unfilled marker is drawn with its face color, as matplotlib."
+	"Answer the edge color of a point, or nil without edge. An unfilled marker is drawn with its face color."
 
 	| edge |
 	marker isFilled ifFalse: [ ^ faceColors at: anIndex ].
@@ -323,7 +323,7 @@ BpScatterPlot >> lineWidths: aNumberOrCollection [
 
 { #category : 'accessing - options' }
 BpScatterPlot >> marker: aSpecification [
-	"Set the marker of all points from a matplotlib specification (see BpMarker class>>on:)."
+	"Set the marker of all points from a marker specification (see BpMarker class>>on:)."
 
 	marker := BpMarker on: aSpecification.
 	self refresh
@@ -376,14 +376,14 @@ BpScatterPlot >> normalized: aNumber [
 
 { #category : 'accessing - results' }
 BpScatterPlot >> offsets [
-	"Answer the points shown, in data coordinates (matplotlib PathCollection get_offsets)."
+	"Answer the points shown, in data coordinates."
 
 	^ offsets
 ]
 
 { #category : 'accessing - options' }
 BpScatterPlot >> s: aNumberOrCollection [
-	"Set the marker size in points squared, for all points or one per point (matplotlib s)."
+	"Set the marker size in points squared, for all points or one per point."
 
 	s := aNumberOrCollection.
 	self refresh

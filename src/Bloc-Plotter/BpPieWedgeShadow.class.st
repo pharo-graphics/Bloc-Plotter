@@ -1,5 +1,5 @@
 "
-I am the shadow of a `BpPieWedge`: a darker, half transparent copy of its shape, slightly moved to the bottom left, as the shadow of matplotlib pies.
+I am the shadow of a `BpPieWedge`: a darker, half transparent copy of its shape, slightly moved to the bottom left.
 
 ## Examples
 
@@ -31,7 +31,7 @@ Class {
 
 { #category : 'examples' }
 BpPieWedgeShadow class >> exampleHogsShadow [
-	"Answer the shadow of the exploded 'Hogs' wedge of the matplotlib pie features gallery."
+	"Answer the shadow of the exploded 'Hogs' wedge of `BpPie class>>#exampleExplodeShadowRotate`."
 
 	<sampleInstance>
 	^ BpPie exampleExplodeShadowRotate shadows second
@@ -73,7 +73,7 @@ BpPieWedgeShadow >> wedge [
 
 { #category : 'accessing' }
 BpPieWedgeShadow >> wedge: aWedge [
-	"Take the shape of aWedge and a darker, half transparent version of its color, like matplotlib shadows (shade 0.7)."
+	"Take the shape of aWedge and a darker (shade 0.7), half transparent version of its color."
 
 	| color |
 	wedge := aWedge.

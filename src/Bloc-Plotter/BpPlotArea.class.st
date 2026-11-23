@@ -1,5 +1,5 @@
 "
-I am the inside of a `BpAxes`: the white rectangle framed by the spines, where the patches of the artists, the grid lines and the legend are shown, clipped to my bounds (`showChildren`). From bottom to top: the patches of bars and scatter points, the grid lines, the patches of lines (`BpArtist>>isAboveGrid`), then the legend, as matplotlib z-orders. My `BpPlotAreaLayout` places the patches where their data are.
+I am the inside of a `BpAxes`: the white rectangle framed by the spines, where the patches of the artists, the grid lines and the legend are shown, clipped to my bounds (`showChildren`). From bottom to top: the patches of bars and scatter points, the grid lines, the patches of lines (`BpArtist>>isAboveGrid`), then the legend. My `BpPlotAreaLayout` places the patches where their data are.
 
 ## Examples
 
@@ -55,7 +55,7 @@ BpPlotArea >> gridLines [
 
 { #category : 'accessing' }
 BpPlotArea >> gridLines: aCollectionOfGridLines [
-	"Show aCollectionOfGridLines instead of my current ones, above the patches as in matplotlib."
+	"Show aCollectionOfGridLines instead of my current ones, above the patches."
 
 	gridLines := aCollectionOfGridLines asArray.
 	self showChildren

@@ -9,7 +9,7 @@ BpPieText exampleValueAndPercent
 
 ## Design Rationale
 
-- My `alignment` is `#center` inside the pie; outside it, as in matplotlib, `#left` on the right half and `#right` on the left half, so that I go away from the pie.
+- My `alignment` is `#center` inside the pie; outside it, `#left` on the right half and `#right` on the left half, so that I go away from the pie.
 - When I rotate, my `rotationAngle` follows the bisector of my wedge but stays between -90 and 90 degrees, so that I am never upside down.
 
 ## Usage
@@ -45,7 +45,7 @@ BpPieText class >> exampleValueAndPercent [
 
 { #category : 'geometry' }
 BpPieText >> alignment [
-	"Answer how I am placed relative to my anchor point: #center inside the pie, and outside it (as matplotlib does) #left on the right half so that I go away from the pie, #right on the left half."
+	"Answer how I am placed relative to my anchor point: #center inside the pie, and outside it #left on the right half so that I go away from the pie, #right on the left half."
 
 	distance > 1 ifFalse: [ ^ #center ].
 	^ wedge midAngle degreesToRadians cos > 0
@@ -123,7 +123,7 @@ BpPieText >> rotate [
 
 { #category : 'geometry' }
 BpPieText >> rotationAngle [
-	"Answer my rotation in degrees, counterclockwise as in matplotlib: along the bisector of my wedge when I rotate, kept between -90 and 90 so that I am never upside down."
+	"Answer my rotation in degrees, counterclockwise: along the bisector of my wedge when I rotate, kept between -90 and 90 so that I am never upside down."
 
 	| angle |
 	rotate ifFalse: [ ^ 0 ].

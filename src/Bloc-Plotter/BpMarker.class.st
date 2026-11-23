@@ -1,5 +1,5 @@
 "
-I am the shape of a scatter marker, as matplotlib `MarkerStyle`: a circle, a polygon, lines (unfilled markers such as '+'), a path or a text. `BpMarker class>>on:` reads the matplotlib specifications: symbols ('o', '^', '*', ...), tuples (number of sides, 0 polygon, 1 star or 2 asterisk, angle), the vertices of a path, or a text between dollars.
+I am the shape of a scatter marker: a circle, a polygon, lines (unfilled markers such as '+'), a path or a text. `BpMarker class>>on:` reads the marker specifications: symbols ('o', '^', '*', ...), tuples (number of sides, 0 polygon, 1 star or 2 asterisk, angle), the vertices of a path, or a text between dollars.
 
 ## Examples
 
@@ -10,7 +10,7 @@ BpMarker scriptAllMarkers
 
 ## Design Rationale
 
-- My vertices are in the unit cell of matplotlib markers: y goes up, a circle has a diameter of 1. A `BpMarkerPatch` scales them to its size and flips y with `pixelVerticesWithSide:`, so one marker serves all sizes.
+- My vertices are in the unit cell of markers: y goes up, a circle has a diameter of 1. A `BpMarkerPatch` scales them to its size and flips y with `pixelVerticesWithSide:`, so one marker serves all sizes.
 - The TeX card suits ('$\clubsuit$', ...) are drawn as paths (`BlSvgPath`) because the fonts of the image do not have their glyphs; other texts between dollars are shown with the default font.
 
 ## Usage
@@ -42,7 +42,7 @@ Class {
 
 { #category : 'private - shapes' }
 BpMarker class >> asterisk: aNumberOfBranches angle: aDegreeAngle [
-	"A path going from the center to each vertex of a regular polygon and back (matplotlib unit_regular_asterisk)."
+	"A path going from the center to each vertex of a regular polygon and back."
 
 	^ (self regular: aNumberOfBranches angle: aDegreeAngle) flatCollect: [ :each |
 		  {
@@ -95,7 +95,7 @@ BpMarker class >> commands: aCollectionOfCommands [
 
 { #category : 'examples' }
 BpMarker class >> exampleStar [
-	"Answer the star marker of matplotlib ('*')."
+	"Answer the star marker ('*')."
 
 	<sampleInstance>
 	^ self on: '*'
@@ -153,7 +153,7 @@ BpMarker class >> named: aString [
 
 { #category : 'private - shapes' }
 BpMarker class >> namedMarkers [
-	"The matplotlib marker symbols and how to build them, with y going up and the unit cell from -0.5 to 0.5."
+	"The marker symbols and how to build them, with y going up and the unit cell from -0.5 to 0.5."
 
 	| triangle square plus cross |
 	triangle := {
@@ -219,7 +219,7 @@ BpMarker class >> namedMarkers [
 
 { #category : 'instance creation' }
 BpMarker class >> on: aSpecification [
-	"Answer the marker of a matplotlib marker specification: a symbol string such as 'o' or '^', a text between dollars such as '$f$', a tuple (number of sides, 0 for a polygon, 1 for a star or 2 for an asterisk, angle in degrees), or the vertices of a path."
+	"Answer the marker of a marker specification: a symbol string such as 'o' or '^', a text between dollars such as '$f$', a tuple (number of sides, 0 for a polygon, 1 for a star or 2 for an asterisk, angle in degrees), or the vertices of a path."
 
 	aSpecification isString ifTrue: [
 		^ (aSpecification size > 2 and: [ aSpecification first = $$ and: [ aSpecification last = $$ ] ])
@@ -242,7 +242,7 @@ BpMarker class >> polar: aRadius angle: aDegreeAngle [
 
 { #category : 'private - shapes' }
 BpMarker class >> regular: aNumberOfSides angle: aDegreeAngle [
-	"The vertices of a regular polygon of radius 0.5, the first one at the top before rotation (matplotlib unit_regular_polygon scaled by 0.5)."
+	"The vertices of a regular polygon of radius 0.5, the first one at the top before rotation."
 
 	^ (0 to: aNumberOfSides - 1) collect: [ :index | self polar: 0.5 angle: 360 * index / aNumberOfSides + 90 + aDegreeAngle ]
 ]
@@ -280,7 +280,7 @@ BpMarker class >> scriptAllMarkers [
 
 { #category : 'private - shapes' }
 BpMarker class >> star: aNumberOfPoints inner: anInnerRatio angle: aDegreeAngle [
-	"The vertices of a star of radius 0.5 whose inner vertices are at anInnerRatio of it (matplotlib unit_regular_star scaled by 0.5)."
+	"The vertices of a star of radius 0.5 whose inner vertices are at anInnerRatio of it."
 
 	^ (0 to: 2 * aNumberOfPoints - 1) collect: [ :index |
 		  self
@@ -309,7 +309,7 @@ BpMarker class >> stem [
 
 { #category : 'private - shapes' }
 BpMarker class >> texMarkers [
-	"The TeX symbols drawn as shapes, such as matplotlib '$\clubsuit$'."
+	"The TeX symbols drawn as shapes, such as '$\clubsuit$'."
 
 	^ Dictionary new
 		  at: '\clubsuit' put: [
@@ -357,7 +357,7 @@ BpMarker class >> tuple: anArray [
 
 { #category : 'instance creation' }
 BpMarker class >> vertices: aCollectionOfPoints [
-	"A custom path, scaled so that its farthest coordinate is at 0.5 from the center, as matplotlib."
+	"A custom path, scaled so that its farthest coordinate is at 0.5 from the center."
 
 	| rescale |
 	rescale := (aCollectionOfPoints collect: [ :each | each x abs max: each y abs ]) max.

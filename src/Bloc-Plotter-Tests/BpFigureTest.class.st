@@ -17,7 +17,7 @@ BpFigureTest >> testAxesAreCountedRowByRow [
 ]
 
 { #category : 'tests' }
-BpFigureTest >> testDefaultExtentIsTheOneOfMatplotlib [
+BpFigureTest >> testDefaultExtentIs640By480 [
 
 	| figure |
 	figure := BpFigure new.

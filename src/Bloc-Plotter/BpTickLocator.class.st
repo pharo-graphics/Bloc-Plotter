@@ -1,5 +1,5 @@
 "
-I choose where the ticks of an axis go and how they are labeled: multiples of a nice step (1, 2, 2.5 or 5 times a power of ten) as matplotlib MaxNLocator on linear axes, powers of ten on log axes, and labels printed with just the decimals the ticks need, as matplotlib ScalarFormatter.
+I choose where the ticks of an axis go and how they are labeled: multiples of a nice step (1, 2, 2.5 or 5 times a power of ten) on linear axes, powers of ten on log axes, and labels printed with just the decimals the ticks need.
 
 ## Examples
 
@@ -42,7 +42,7 @@ BpTickLocator class >> decimalsFor: aCollectionOfTicks [
 
 { #category : 'labels' }
 BpTickLocator class >> labelsFor: aCollectionOfTicks [
-	"Answer the labels of linear ticks, all printed with the number of decimals their step needs, as matplotlib ScalarFormatter."
+	"Answer the labels of linear ticks, all printed with the number of decimals their step needs."
 
 	| decimals |
 	decimals := self decimalsFor: aCollectionOfTicks.
@@ -54,7 +54,7 @@ BpTickLocator class >> labelsFor: aCollectionOfTicks [
 
 { #category : 'ticks' }
 BpTickLocator class >> linearTicksFrom: aMinimum to: aMaximum count: anInteger [
-	"Answer at most anInteger + 1 ticks between aMinimum and aMaximum, multiples of a nice step (1, 2, 2.5 or 5 times a power of ten), as matplotlib MaxNLocator."
+	"Answer at most anInteger + 1 ticks between aMinimum and aMaximum, multiples of a nice step (1, 2, 2.5 or 5 times a power of ten)."
 
 	| raw scale step first last |
 	aMaximum > aMinimum ifFalse: [ ^ { aMinimum } ].

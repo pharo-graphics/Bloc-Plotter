@@ -1,5 +1,5 @@
 "
-I am the summary of one dataset that a box plot draws, matplotlib `cbook.boxplot_stats`: the quartiles (`q1`, `median`, `q3`), the `mean`, the whisker ends (`whiskerLow`, `whiskerHigh`), the `fliers` beyond them, and the confidence interval of the median used by notches (`confidenceLow`, `confidenceHigh`).
+I am the summary of one dataset that a box plot draws: the quartiles (`q1`, `median`, `q3`), the `mean`, the whisker ends (`whiskerLow`, `whiskerHigh`), the `fliers` beyond them, and the confidence interval of the median used by notches (`confidenceLow`, `confidenceHigh`).
 
 ## Examples
 
@@ -9,7 +9,7 @@ BpBoxStatistics exampleWithOutlier
 
 ## Design Rationale
 
-- Percentiles use linear interpolation between the closest ranks (`percentile:of:`), the numpy default used by matplotlib, so the boxes match those of matplotlib.
+- Percentiles use linear interpolation between the closest ranks (`percentile:of:`), the numpy default.
 - Whiskers are given as a factor of the interquartile range (1.5 by default) or a pair of percentiles. A whisker ends on the most extreme datum within its limit, not on the limit; with no datum there, it stays on the quartile.
 - The notch is the median plus or minus 1.57 interquartile ranges divided by the square root of the size.
 
@@ -61,14 +61,14 @@ BpBoxStatistics class >> exampleWithOutlier [
 
 { #category : 'instance creation' }
 BpBoxStatistics class >> of: aCollectionOfNumbers [
-	"Answer the statistics of a box plot of aCollectionOfNumbers, with whiskers reaching 1.5 times the interquartile range (Tukey, the matplotlib default)."
+	"Answer the statistics of a box plot of aCollectionOfNumbers, with whiskers reaching 1.5 times the interquartile range (Tukey)."
 
 	^ self of: aCollectionOfNumbers whiskers: self defaultWhiskers
 ]
 
 { #category : 'instance creation' }
 BpBoxStatistics class >> of: aCollectionOfNumbers whiskers: aNumberOrPair [
-	"Answer the statistics of a box plot of aCollectionOfNumbers (matplotlib cbook.boxplot_stats). aNumberOrPair is matplotlib whis: a number of interquartile ranges, or the two percentiles where the whiskers end."
+	"Answer the statistics of a box plot of aCollectionOfNumbers. aNumberOrPair is a number of interquartile ranges, or the two percentiles where the whiskers end (see `BpBoxPlot>>whiskers:`)."
 
 	aCollectionOfNumbers isEmpty ifTrue: [ ^ self error: 'A box plot needs at least one value' ].
 	^ self new

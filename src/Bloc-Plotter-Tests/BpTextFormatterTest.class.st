@@ -1,5 +1,5 @@
 "
-I test `BpTextFormatter`: the printf strings of matplotlib `autopct` and the Python replacement fields of matplotlib `pie_label`.
+I test `BpTextFormatter`: the printf strings of `BpPie>>autoPct:` and the Python replacement fields of `BpPie>>addLabels:`.
 "
 Class {
 	#name : 'BpTextFormatterTest',

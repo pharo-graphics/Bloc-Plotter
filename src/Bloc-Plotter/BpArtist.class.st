@@ -1,5 +1,5 @@
 "
-I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`) or a stem plot (`BpStemPlot`), as matplotlib artists. I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
+I am an artist of a `BpAxes`: something drawn from data, such as a histogram (`BpHistogram`), a scatter plot (`BpScatterPlot`), a line plot (`BpLine`), a box plot (`BpBoxPlot`), a bar plot (`BpBarPlot`), a stem plot (`BpStemPlot`) or the area between two curves (`BpFillBetween`). I compute what my data show and build patches (`BpPatch`) that my axes place in their plot area; `whenPatch:do:` adds an interaction handler to all my patches.
 
 ## Examples
 
@@ -9,14 +9,14 @@ BpArtist scriptArtistsInOneAxes
 
 ## Design Rationale
 
-- I only know what my axes need: my patches (`allPatches`), my legend entries, the values autoscaling must cover besides my patches (`requiredValuesOn:`) and must not go past (`stickyValuesOn:`), the ticks I place myself (`managedTicksOn:`, matplotlib `manage_ticks`), the axes I put on a log scale (`logAxes`), how many colors of the color cycle I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The axes ignore the kind of plot.
+- I only know what my axes need: my patches (`allPatches`), my legend entries, the values autoscaling must cover besides my patches (`requiredValuesOn:`) and must not go past (`stickyValuesOn:`), the ticks I place myself (`managedTicksOn:`), the axes I put on a log scale (`logAxes`), how many colors of the color cycle I take (`colorCount`), and whether my patches are drawn above the grid (`isAboveGrid`). The axes ignore the kind of plot.
 - Each change recomputes everything (`refresh`): subclasses define `compute` and `newPatches`, and new patches replace the previous ones. Handlers given to `whenPatch:do:` are kept and given to each new patch.
-- Style settings take one value or one per dataset or point (`setting:at:`), as matplotlib arguments.
+- Style settings take one value or one per dataset or point (`setting:at:`).
 - My Live inspector pane (`TBpLiveInspection`) shows the figure of my axes, or a new figure holding me when I have no axes yet.
 
 ## Usage
 
-1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
+1. A plotting method of `BpAxes` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`) creates the artist, and `BpAxes>>addArtist:` gives it its axes and its colors of the color cycle (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the axes (`BpAxes>>artistChanged:`); they rebuild their limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.
@@ -39,9 +39,16 @@ Class {
 	#tag : 'Axes'
 }
 
+{ #category : 'private - demo' }
+BpArtist class >> arangeFrom: aNumber to: anotherNumber by: aStep [
+	"Answer the numbers from aNumber by aStep, below anotherNumber (excluded), as numpy arange, to write gallery examples."
+
+	^ (0 to: (anotherNumber - aNumber / aStep) ceiling - 1) collect: [ :index | aNumber + (index * aStep) ]
+]
+
 { #category : 'constants' }
 BpArtist class >> dashPatterns [
-	"Answer the dash pattern of each line style in points for a line one point wide, as the matplotlib rcParams lines.dashed_pattern, lines.dashdot_pattern and lines.dotted_pattern."
+	"Answer the dash pattern of each line style in points for a line one point wide."
 
 	^ Dictionary new
 		  at: #solid put: #(  );
@@ -53,7 +60,7 @@ BpArtist class >> dashPatterns [
 
 { #category : 'constants' }
 BpArtist class >> lineStyleNames [
-	"Answer the line style of each matplotlib line style string."
+	"Answer the line style of each line style string."
 
 	^ Dictionary new
 		  at: '-' put: #solid;
@@ -73,7 +80,7 @@ BpArtist class >> lineStyleNames [
 
 { #category : 'constants' }
 BpArtist class >> lineStyleOf: aSymbolOrString [
-	"Answer the line style #solid, #dashed, #dashdot, #dotted or #none named by aSymbolOrString, a symbol or a matplotlib string ('-', '--', '-.', ':', 'None', ...)."
+	"Answer the line style #solid, #dashed, #dashdot, #dotted or #none named by aSymbolOrString, a symbol or a string ('-', '--', '-.', ':', 'None', ...)."
 
 	^ self dashPatterns
 		  at: aSymbolOrString asSymbol
@@ -84,9 +91,17 @@ BpArtist class >> lineStyleOf: aSymbolOrString [
 			  ifAbsent: [ self error: 'Unknown line style: ' , aSymbolOrString printString ] ]
 ]
 
+{ #category : 'private - demo' }
+BpArtist class >> linspaceFrom: aNumber to: anotherNumber count: anInteger [
+	"Answer anInteger numbers evenly spaced from aNumber to anotherNumber included, as numpy linspace, to write gallery examples."
+
+	anInteger = 1 ifTrue: [ ^ { aNumber } ].
+	^ (0 to: anInteger - 1) collect: [ :index | aNumber + (index * (anotherNumber - aNumber) / (anInteger - 1)) ]
+]
+
 { #category : 'accessing' }
 BpArtist class >> pixelsPerPoint [
-	"Answer how many pixels a typographic point (1/72 inch) takes: matplotlib draws its default figures at 100 dots per inch."
+	"Answer how many pixels a typographic point (1/72 inch) takes: figures are drawn at 100 dots per inch."
 
 	^ 100 / 72
 ]
@@ -161,7 +176,7 @@ BpArtist >> colorCount [
 
 { #category : 'private - style' }
 BpArtist >> colorOf: aColorOrName [
-	"Answer the color aColorOrName names (a `Color` or a matplotlib name), made transparent by my alpha."
+	"Answer the color aColorOrName names (a `Color` or a name known by `BpColors`), made transparent by my alpha."
 
 	| color |
 	color := aColorOrName isColor
@@ -196,7 +211,7 @@ BpArtist >> initialize [
 
 { #category : 'axes' }
 BpArtist >> isAboveGrid [
-	"Answer whether my patches are drawn above the grid. matplotlib draws the grid above patches and collections (bars, scatter points) and below lines."
+	"Answer whether my patches are drawn above the grid: the patches of bars and scatter points are drawn below it, lines above it."
 
 	^ false
 ]
@@ -247,7 +262,7 @@ BpArtist >> logAxes [
 
 { #category : 'axes' }
 BpArtist >> managedTicksOn: anAxis [
-	"Answer the ticks I place on anAxis, as location -> label associations, or nil to let my axes choose them (matplotlib manage_ticks)."
+	"Answer the ticks I place on anAxis, as location -> label associations, or nil to let my axes choose them."
 
 	^ nil
 ]
@@ -301,14 +316,14 @@ BpArtist >> setting: aValueOrCollection at: anIndex [
 
 { #category : 'axes' }
 BpArtist >> stickyValuesOn: anAxis [
-	"Answer the values autoscaling margins must not go past on anAxis (#x or #y), as matplotlib sticky edges."
+	"Answer the values autoscaling margins must not go past on anAxis (#x or #y)."
 
 	^ #(  )
 ]
 
 { #category : 'private - style' }
 BpArtist >> strokeColor: aColor width: aNumberOfPoints style: aLineStyle [
-	"Answer the stroke of a line of aColor, aNumberOfPoints wide, in aLineStyle (#solid, #dashed, #dashdot or #dotted): matplotlib scales the dashes with the width and draws solid lines with projecting caps and dashed ones with butt caps."
+	"Answer the stroke of a line of aColor, aNumberOfPoints wide, in aLineStyle (#solid, #dashed, #dashdot or #dotted): the dashes scale with the width, solid lines have projecting caps and dashed ones butt caps."
 
 	| width builder |
 	width := aNumberOfPoints * self class pixelsPerPoint.

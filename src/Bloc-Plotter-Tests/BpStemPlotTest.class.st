@@ -1,5 +1,5 @@
 "
-I check `BpStemPlot` against matplotlib `Axes.stem`: the stems from the bottom to the heads, the markers on the heads, the baseline across the locations, the default colors and widths, the three format strings, horizontal stems, the legend entry and the color cycle left untouched.
+I check `BpStemPlot`: the stems from the bottom to the heads, the markers on the heads, the baseline across the locations, the default colors and widths, the three format strings, horizontal stems, the legend entry and the color cycle left untouched.
 
 ## Implementation Notes
 
@@ -91,7 +91,7 @@ BpStemPlotTest >> testDefaultBaselineIsC3 [
 ]
 
 { #category : 'tests' }
-BpStemPlotTest >> testDefaultSizesAreTheMatplotlibOnes [
+BpStemPlotTest >> testDefaultSizes [
 
 	| stems |
 	stems := self stems.

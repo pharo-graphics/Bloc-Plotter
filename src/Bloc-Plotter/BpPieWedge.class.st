@@ -1,5 +1,5 @@
 "
-I am one wedge of a `BpPie`: the sector showing one of its values. I know my value (`amount`), my `fraction` of the pie, the angles I span (`theta1`, `theta2`, in degrees counterclockwise from the right, as matplotlib `Wedge`) and how far I am exploded.
+I am one wedge of a `BpPie`: the sector showing one of its values. I know my value (`amount`), my `fraction` of the pie, the angles I span (`theta1`, `theta2`, in degrees counterclockwise from the right) and how far I am exploded.
 
 ## Examples
 
@@ -40,7 +40,7 @@ Class {
 
 { #category : 'examples' }
 BpPieWedge class >> exampleHogs [
-	"Answer the exploded 'Hogs' wedge of the matplotlib pie features gallery."
+	"Answer the exploded 'Hogs' wedge of `BpPie class>>#exampleExplodeShadowRotate`."
 
 	<sampleInstance>
 	^ BpPie exampleExplodeShadowRotate wedgeAt: 2
@@ -153,14 +153,14 @@ BpPieWedge >> printOn: aStream [
 
 { #category : 'accessing' }
 BpPieWedge >> theta1 [
-	"Answer the angle where I start, in degrees, counterclockwise from the right as in matplotlib."
+	"Answer the angle where I start, in degrees, counterclockwise from the right."
 
 	^ theta1
 ]
 
 { #category : 'accessing' }
 BpPieWedge >> theta1: aStartAngle theta2: anEndAngle [
-	"Set the angles I span, in degrees, counterclockwise from the right as in matplotlib. My geometry is a Bloc annulus sector, whose angles go clockwise."
+	"Set the angles I span, in degrees, counterclockwise from the right. My geometry is a Bloc annulus sector, whose angles go clockwise."
 
 	theta1 := aStartAngle.
 	theta2 := anEndAngle.
@@ -173,7 +173,7 @@ BpPieWedge >> theta1: aStartAngle theta2: anEndAngle [
 
 { #category : 'accessing' }
 BpPieWedge >> theta2 [
-	"Answer the angle where I end, in degrees, counterclockwise from the right as in matplotlib."
+	"Answer the angle where I end, in degrees, counterclockwise from the right."
 
 	^ theta2
 ]

@@ -89,7 +89,7 @@ BpPieTest >> testColorsAreGivenToWedges [
 ]
 
 { #category : 'tests - wedges' }
-BpPieTest >> testDefaultColorsFollowMatplotlibCycle [
+BpPieTest >> testDefaultColorsFollowTheTab10Cycle [
 
 	self assert: (pie wedges collect: [ :each | each background paint color ] as: Array) equals: (BpPie defaultColors first: 4)
 ]
@@ -378,7 +378,7 @@ BpPieTest >> testWedgeFractionsAreNotNormalizedWhenAsked [
 
 { #category : 'tests - wedges' }
 BpPieTest >> testWedgeGeometryUsesBlocAngles [
-	"Bloc measures angles clockwise, matplotlib counterclockwise: the wedge from 90 to 144 degrees is the sector from -144 to -90."
+	"Bloc measures angles clockwise, `BpPieWedge` counterclockwise: the wedge from 90 to 144 degrees is the sector from -144 to -90."
 
 	| geometry |
 	pie startAngle: 90.

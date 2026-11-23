@@ -1,5 +1,5 @@
 "
-I convert data coordinates to the pixels of a plot area, as the matplotlib transData transform: x goes right, y goes up, each axis on a linear or log scale. Patches and ticks ask me `pointFor:` or `rectangleFor:`.
+I convert data coordinates to the pixels of a plot area: x goes right, y goes up, each axis on a linear or log scale. Patches and ticks ask me `pointFor:` or `rectangleFor:`.
 
 ## Examples
 
@@ -17,7 +17,7 @@ BpDataTransform exampleLogScale
 
 ## Implementation Notes
 
-- On a log scale, non-positive values are clipped one axis length below the axis, as matplotlib does with nonpositive='clip': bars starting at 0 then go down out of the clipped plot area.
+- On a log scale, non-positive values are clipped one axis length below the axis: bars starting at 0 then go down out of the clipped plot area.
 "
 Class {
 	#name : 'BpDataTransform',
@@ -62,7 +62,7 @@ BpDataTransform >> extent: aPoint [
 
 { #category : 'transforming' }
 BpDataTransform >> fractionOf: aValue limits: aCollection scale: aSymbol [
-	"Answer where aValue is between the limits, 0 at the first and 1 at the last. On a log scale, non-positive values are clipped well below the axis, as matplotlib does with nonpositive='clip'."
+	"Answer where aValue is between the limits, 0 at the first and 1 at the last. On a log scale, non-positive values are clipped well below the axis."
 
 	| low high value |
 	aSymbol = #log

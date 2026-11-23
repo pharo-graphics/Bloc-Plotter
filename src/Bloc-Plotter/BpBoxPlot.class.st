@@ -1,5 +1,5 @@
 "
-I am a box plot of one or several datasets, the artist of matplotlib `Axes.boxplot`: for each dataset, a box from the first to the third quartile crossed by the median, whiskers to the most extreme data within 1.5 interquartile ranges, caps at their ends, and the fliers beyond them as markers. I get the numbers from `BpBoxStatistics` and draw them with `BpPolygonPatch` lines and boxes and `BpMarkerPatch` fliers and means.
+I am a box plot of one or several datasets, added by `BpAxes>>boxPlot:`: for each dataset, a box from the first to the third quartile crossed by the median, whiskers to the most extreme data within 1.5 interquartile ranges, caps at their ends, and the fliers beyond them as markers. I get the numbers from `BpBoxStatistics` and draw them with `BpPolygonPatch` lines and boxes and `BpMarkerPatch` fliers and means.
 
 ## Examples
 
@@ -13,11 +13,11 @@ BpBoxPlot scriptBoxPlotDemo
 
 ## Design Rationale
 
-- My settings are the matplotlib keyword arguments in camelCase: `notch:`, `whiskers:` (a factor of the interquartile range or a pair of percentiles), `positions:`, `widths:`, `capWidths:`, `orientation:` (`#vertical` or `#horizontal`, matplotlib `vert`), `flierSymbol:` (matplotlib `sym`, a format such as `'gD'`, `''` hides the fliers), `patchArtist:`, `showMeans:`, `meanLine:`, `showFliers:`, `showCaps:`, `showBox:`, `tickLabels:`.
-- Styles are dictionaries over defaults, as the matplotlib `boxprops`, `medianprops`, `whiskerprops`, `capprops`, `flierprops` and `meanprops`: keys such as `#color`, `#faceColor`, `#edgeColor`, `#lineWidth`, `#lineStyle`, `#marker`, `#markerSize`. The defaults are the matplotlib ones (black box and whiskers, median in `'C1'`, mean as a `'C2'` triangle). The color `'none'` is transparent.
-- I keep the patches of each part apart (`parts` at `#boxes`, `#medians`, `#whiskers`, `#caps`, `#fliers`, `#means`), the dictionary matplotlib `boxplot` answers, and draw them in that layered order: whiskers and caps under the boxes, medians and means over them.
+- My settings are `notch:`, `whiskers:` (a factor of the interquartile range or a pair of percentiles), `positions:`, `widths:`, `capWidths:`, `orientation:` (`#vertical` or `#horizontal`), `flierSymbol:` (a format such as `'gD'`, `''` hides the fliers), `patchArtist:`, `showMeans:`, `meanLine:`, `showFliers:`, `showCaps:`, `showBox:`, `tickLabels:`.
+- Styles are dictionaries over defaults (`boxProperties:`, `medianProperties:`, `whiskerProperties:`, `capProperties:`, `flierProperties:` and `meanProperties:`): keys such as `#color`, `#faceColor`, `#edgeColor`, `#lineWidth`, `#lineStyle`, `#marker`, `#markerSize`. The defaults are a black box and whiskers, median in `'C1'`, mean as a `'C2'` triangle. The color `'none'` is transparent.
+- I keep the patches of each part apart (`parts` at `#boxes`, `#medians`, `#whiskers`, `#caps`, `#fliers`, `#means`) and draw them in that layered order: whiskers and caps under the boxes, medians and means over them.
 - I work in (position @ value) and swap the coordinates once, in `oriented:`, so horizontal boxes need no other code.
-- As matplotlib `manage_ticks`, I put a tick at each position (`managedTicksOn:`) and require half a unit around the extreme positions (`requiredValuesOn:`), which autoscaling does not go past. Ticks fixed with `xTicks:` win.
+- I put a tick at each position (`managedTicksOn:`) and require half a unit around the extreme positions (`requiredValuesOn:`), which autoscaling does not go past. Ticks fixed with `xTicks:` win.
 - I do not use the color cycle (`colorCount` is 0) and I am drawn above the grid.
 
 ## Usage
@@ -29,7 +29,7 @@ BpBoxPlot scriptBoxPlotDemo
 ## Implementation Notes
 
 - The notched box is a ten-vertex polygon narrowed to half its width at the median, between `confidenceLow` and `confidenceHigh`.
-- Default widths follow matplotlib: 0.15 times the span of the positions, clipped between 0.15 and 0.5.
+- Default widths are 0.15 times the span of the positions, clipped between 0.15 and 0.5.
 
 ## Invariants and Assumptions
 
@@ -54,14 +54,14 @@ Class {
 		'showFliers',
 		'showCaps',
 		'showBox',
-		'boxProps',
-		'medianProps',
-		'whiskerProps',
-		'capProps',
-		'flierProps',
-		'meanProps',
 		'tickLabels',
-		'parts'
+		'parts',
+		'meanProperties',
+		'medianProperties',
+		'flierProperties',
+		'capProperties',
+		'boxProperties',
+		'whiskerProperties'
 	],
 	#category : 'Bloc-Plotter-Box',
 	#package : 'Bloc-Plotter',
@@ -69,8 +69,8 @@ Class {
 }
 
 { #category : 'constants' }
-BpBoxPlot class >> defaultBoxProps [
-	"Answer the style of the boxes, as the matplotlib rcParams boxplot.boxprops (the face is the patch color, used when the boxes are filled)."
+BpBoxPlot class >> defaultBoxProperties [
+	"Answer the style of the boxes (the face is the patch color, used when the boxes are filled)."
 
 	^ {
 		  (#color -> 'black').
@@ -80,7 +80,7 @@ BpBoxPlot class >> defaultBoxProps [
 ]
 
 { #category : 'constants' }
-BpBoxPlot class >> defaultCapProps [
+BpBoxPlot class >> defaultCapProperties [
 
 	^ {
 		  (#color -> 'black').
@@ -89,8 +89,8 @@ BpBoxPlot class >> defaultCapProps [
 ]
 
 { #category : 'constants' }
-BpBoxPlot class >> defaultFlierProps [
-	"Answer the style of the fliers, as the matplotlib rcParams boxplot.flierprops: unfilled black circles."
+BpBoxPlot class >> defaultFlierProperties [
+	"Answer the style of the fliers: unfilled black circles."
 
 	^ {
 		  (#marker -> 'o').
@@ -101,8 +101,8 @@ BpBoxPlot class >> defaultFlierProps [
 ]
 
 { #category : 'constants' }
-BpBoxPlot class >> defaultMeanProps [
-	"Answer the style of the means, as the matplotlib rcParams boxplot.meanprops: green triangles, or a dashed green line."
+BpBoxPlot class >> defaultMeanProperties [
+	"Answer the style of the means: green triangles, or a dashed green line."
 
 	^ {
 		  (#marker -> '^').
@@ -116,7 +116,7 @@ BpBoxPlot class >> defaultMeanProps [
 ]
 
 { #category : 'constants' }
-BpBoxPlot class >> defaultMedianProps [
+BpBoxPlot class >> defaultMedianProperties [
 
 	^ {
 		  (#color -> 'C1').
@@ -125,7 +125,7 @@ BpBoxPlot class >> defaultMedianProps [
 ]
 
 { #category : 'constants' }
-BpBoxPlot class >> defaultWhiskerProps [
+BpBoxPlot class >> defaultWhiskerProperties [
 
 	^ {
 		  (#color -> 'black').
@@ -135,7 +135,7 @@ BpBoxPlot class >> defaultWhiskerProps [
 
 { #category : 'examples' }
 BpBoxPlot class >> exampleBoxPlotDemo [
-	"Answer the first figure of the matplotlib gallery Boxplots (statistics/boxplot_demo): the same data drawn as a basic, a notched, a horizontal box plot, with other flier symbols, without fliers and with shorter whiskers."
+	"Answer the first figure of the gallery Boxplots (statistics/boxplot_demo): the same data drawn as a basic, a notched, a horizontal box plot, with other flier symbols, without fliers and with shorter whiskers."
 
 	<sampleInstance>
 	| random data figure settings |
@@ -199,7 +199,7 @@ BpBoxPlot class >> exampleInteractiveBoxPlot [
 
 { #category : 'examples' }
 BpBoxPlot class >> examplePlotType [
-	"Answer the figure of the plot type page of matplotlib (plot_types/stats/boxplot_plot): three filled boxes at 2, 4 and 6 without fliers, with white medians and edges."
+	"Answer the figure of the box plot type page (plot_types/stats/boxplot_plot): three filled boxes at 2, 4 and 6 without fliers, with white medians and edges."
 
 	<sampleInstance>
 	| random columns figure axes |
@@ -213,17 +213,17 @@ BpBoxPlot class >> examplePlotType [
 		widths: 1.5;
 		patchArtist: true;
 		showFliers: false;
-		medianProps: {
+		medianProperties: {
 			(#color -> 'white').
 			(#lineWidth -> 0.5) } asDictionary;
-		boxProps: {
+		boxProperties: {
 			(#faceColor -> 'C0').
 			(#edgeColor -> 'white').
 			(#lineWidth -> 0.5) } asDictionary;
-		whiskerProps: {
+		whiskerProperties: {
 			(#color -> 'C0').
 			(#lineWidth -> 1.5) } asDictionary;
-		capProps: {
+		capProperties: {
 			(#color -> 'C0').
 			(#lineWidth -> 1.5) } asDictionary.
 	axes
@@ -249,7 +249,7 @@ BpBoxPlot class >> exampleThreeBoxes [
 
 { #category : 'script' }
 BpBoxPlot class >> scriptBoxPlotDemo [
-	"Show the six variants of the matplotlib gallery Boxplots: basic, notched, other flier symbols, no fliers, horizontal, shorter whiskers."
+	"Show the six variants of the gallery Boxplots: basic, notched, other flier symbols, no fliers, horizontal, shorter whiskers."
 
 	<example>
 	^ self exampleBoxPlotDemo show: 'boxplot_demo'
@@ -265,7 +265,7 @@ BpBoxPlot class >> scriptInteraction [
 
 { #category : 'script' }
 BpBoxPlot class >> scriptPlotType [
-	"Show the figure of the box plot type page of matplotlib."
+	"Show the figure of the box plot type page."
 
 	<example>
 	^ self examplePlotType show: 'boxplot'
@@ -285,13 +285,13 @@ BpBoxPlot >> addPartsOf: aStatistics at: aPosition width: aWidth dataset: anInde
 			 newLine: {
 				 (aPosition @ aStatistics q1).
 				 (aPosition @ aStatistics whiskerLow) }
-			 props: (self props: whiskerProps defaults: self class defaultWhiskerProps)
+			 properties: (self properties: whiskerProperties defaults: self class defaultWhiskerProperties)
 			 dataset: anIndex);
 		add: (self
 			 newLine: {
 				 (aPosition @ aStatistics q3).
 				 (aPosition @ aStatistics whiskerHigh) }
-			 props: (self props: whiskerProps defaults: self class defaultWhiskerProps)
+			 properties: (self properties: whiskerProperties defaults: self class defaultWhiskerProperties)
 			 dataset: anIndex).
 	showCaps ifTrue: [
 		(parts at: #caps)
@@ -299,13 +299,13 @@ BpBoxPlot >> addPartsOf: aStatistics at: aPosition width: aWidth dataset: anInde
 				 newLine: {
 					 (aPosition - capHalf @ aStatistics whiskerLow).
 					 (aPosition + capHalf @ aStatistics whiskerLow) }
-				 props: (self props: capProps defaults: self class defaultCapProps)
+				 properties: (self properties: capProperties defaults: self class defaultCapProperties)
 				 dataset: anIndex);
 			add: (self
 				 newLine: {
 					 (aPosition - capHalf @ aStatistics whiskerHigh).
 					 (aPosition + capHalf @ aStatistics whiskerHigh) }
-				 props: (self props: capProps defaults: self class defaultCapProps)
+				 properties: (self properties: capProperties defaults: self class defaultCapProperties)
 				 dataset: anIndex) ].
 	showBox ifTrue: [
 		(parts at: #boxes) add: (self
@@ -317,7 +317,7 @@ BpBoxPlot >> addPartsOf: aStatistics at: aPosition width: aWidth dataset: anInde
 		 newLine: {
 			 (aPosition - medianHalf @ aStatistics median).
 			 (aPosition + medianHalf @ aStatistics median) }
-		 props: (self props: medianProps defaults: self class defaultMedianProps)
+		 properties: (self properties: medianProperties defaults: self class defaultMedianProperties)
 		 dataset: anIndex).
 	showMeans ifTrue: [
 		(parts at: #means) add: (self
@@ -327,22 +327,22 @@ BpBoxPlot >> addPartsOf: aStatistics at: aPosition width: aWidth dataset: anInde
 			 dataset: anIndex) ].
 	self hasFliers ifTrue: [
 		(parts at: #fliers) addAll:
-			(aStatistics fliers collect: [ :each | self newMarkerAt: aPosition @ each props: self flierStyle dataset: anIndex ]) ]
+			(aStatistics fliers collect: [ :each | self newMarkerAt: aPosition @ each properties: self flierStyle dataset: anIndex ]) ]
 ]
 
 { #category : 'accessing' }
-BpBoxPlot >> boxProps: aDictionary [
+BpBoxPlot >> boxProperties: aDictionary [
 	"Set the style of the boxes: #color or #edgeColor, #faceColor, #lineWidth (points), #lineStyle."
 
-	boxProps := aDictionary.
+	boxProperties := aDictionary.
 	self refresh
 ]
 
 { #category : 'accessing' }
-BpBoxPlot >> capProps: aDictionary [
+BpBoxPlot >> capProperties: aDictionary [
 	"Set the style of the caps: #color, #lineWidth (points), #lineStyle."
 
-	capProps := aDictionary.
+	capProperties := aDictionary.
 	self refresh
 ]
 
@@ -356,7 +356,7 @@ BpBoxPlot >> capWidths: aNumberOrCollection [
 
 { #category : 'axes' }
 BpBoxPlot >> colorCount [
-	"Answer 0: box plots are drawn in the colors of their props, not with the color cycle."
+	"Answer 0: box plots are drawn in the colors of their properties, not with the color cycle."
 
 	^ 0
 ]
@@ -368,19 +368,19 @@ BpBoxPlot >> compute [
 ]
 
 { #category : 'accessing' }
-BpBoxPlot >> flierProps: aDictionary [
+BpBoxPlot >> flierProperties: aDictionary [
 	"Set the style of the fliers: #marker, #markerFaceColor, #markerEdgeColor, #markerSize and #markerEdgeWidth (points)."
 
-	flierProps := aDictionary.
+	flierProperties := aDictionary.
 	self refresh
 ]
 
 { #category : 'private - computing' }
 BpBoxPlot >> flierStyle [
-	"Answer the style of the fliers: my flier props, then the marker and color of my flier symbol, which colors both the face and the edge as in matplotlib."
+	"Answer the style of the fliers: my flier properties, then the marker and color of my flier symbol, which colors both the face and the edge."
 
 	| style symbol |
-	style := self props: flierProps defaults: self class defaultFlierProps.
+	style := self properties: flierProperties defaults: self class defaultFlierProperties.
 	flierSymbol ifNil: [ ^ style ].
 	symbol := BpLine formatPartsOf: flierSymbol.
 	symbol at: #marker ifPresent: [ :each | style at: #marker put: each ].
@@ -393,7 +393,7 @@ BpBoxPlot >> flierStyle [
 
 { #category : 'accessing' }
 BpBoxPlot >> flierSymbol: aString [
-	"Set the marker and color of the fliers with a matplotlib format string such as 'gD' or 'rs' (matplotlib sym); '' hides the fliers."
+	"Set the marker and color of the fliers with a format string such as 'gD' or 'rs' (see `BpLine>>format:`); '' hides the fliers."
 
 	flierSymbol := aString.
 	self refresh
@@ -420,12 +420,12 @@ BpBoxPlot >> initialize [
 	showFliers := true.
 	showCaps := true.
 	showBox := true.
-	boxProps := Dictionary new.
-	medianProps := Dictionary new.
-	whiskerProps := Dictionary new.
-	capProps := Dictionary new.
-	flierProps := Dictionary new.
-	meanProps := Dictionary new.
+	boxProperties := Dictionary new.
+	medianProperties := Dictionary new.
+	whiskerProperties := Dictionary new.
+	capProperties := Dictionary new.
+	flierProperties := Dictionary new.
+	meanProperties := Dictionary new.
 	parts := Dictionary new
 ]
 
@@ -443,7 +443,7 @@ BpBoxPlot >> isHorizontal [
 
 { #category : 'axes' }
 BpBoxPlot >> legendEntries [
-	"Answer my label with a filled box when my boxes are filled, otherwise with my median line, as matplotlib."
+	"Answer my label with a filled box when my boxes are filled, otherwise with my median line."
 
 	(label isNil or: [ statistics isEmpty ]) ifTrue: [ ^ #(  ) ].
 	^ { (label asString -> self newSwatch) }
@@ -451,7 +451,7 @@ BpBoxPlot >> legendEntries [
 
 { #category : 'axes' }
 BpBoxPlot >> managedTicksOn: anAxis [
-	"Answer a tick at each of my positions on my position axis, labeled by my tick labels or the position, as matplotlib manage_ticks."
+	"Answer a tick at each of my positions on my position axis, labeled by my tick labels or the position."
 
 	| labels |
 	(anAxis ~= self positionAxis or: [ datasets isEmpty ]) ifTrue: [ ^ nil ].
@@ -468,18 +468,18 @@ BpBoxPlot >> meanLine: aBoolean [
 ]
 
 { #category : 'accessing' }
-BpBoxPlot >> meanProps: aDictionary [
-	"Set the style of the means: the marker keys of flierProps:, or #color, #lineWidth and #lineStyle for mean lines."
+BpBoxPlot >> meanProperties: aDictionary [
+	"Set the style of the means: the marker keys of flierProperties:, or #color, #lineWidth and #lineStyle for mean lines."
 
-	meanProps := aDictionary.
+	meanProperties := aDictionary.
 	self refresh
 ]
 
 { #category : 'accessing' }
-BpBoxPlot >> medianProps: aDictionary [
+BpBoxPlot >> medianProperties: aDictionary [
 	"Set the style of the medians: #color, #lineWidth (points), #lineStyle."
 
-	medianProps := aDictionary.
+	medianProperties := aDictionary.
 	self refresh
 ]
 
@@ -509,7 +509,7 @@ BpBoxPlot >> newBoxOf: aStatistics at: aPosition half: aHalfWidth dataset: anInd
 				          (right @ aStatistics q1).
 				          (right @ aStatistics q3).
 				          (left @ aStatistics q3) } ].
-	style := self props: boxProps defaults: self class defaultBoxProps.
+	style := self properties: boxProperties defaults: self class defaultBoxProperties.
 	box := self newPolygon: points closed: true dataset: anIndex.
 	box
 		background: (patchArtist
@@ -523,7 +523,7 @@ BpBoxPlot >> newBoxOf: aStatistics at: aPosition half: aHalfWidth dataset: anInd
 ]
 
 { #category : 'private - computing' }
-BpBoxPlot >> newLine: somePoints props: aStyle dataset: anIndex [
+BpBoxPlot >> newLine: somePoints properties: aStyle dataset: anIndex [
 
 	| line |
 	line := self newPolygon: somePoints closed: false dataset: anIndex.
@@ -537,7 +537,7 @@ BpBoxPlot >> newLine: somePoints props: aStyle dataset: anIndex [
 ]
 
 { #category : 'private - computing' }
-BpBoxPlot >> newMarkerAt: aPoint props: aStyle dataset: anIndex [
+BpBoxPlot >> newMarkerAt: aPoint properties: aStyle dataset: anIndex [
 
 	| marker patch |
 	marker := BpMarker on: (aStyle at: #marker).
@@ -564,16 +564,16 @@ BpBoxPlot >> newMarkerAt: aPoint props: aStyle dataset: anIndex [
 BpBoxPlot >> newMeanOf: aStatistics at: aPosition half: aHalfWidth dataset: anIndex [
 
 	| style |
-	style := self props: meanProps defaults: self class defaultMeanProps.
+	style := self properties: meanProperties defaults: self class defaultMeanProperties.
 	^ meanLine
 		  ifTrue: [
 			  self
 				  newLine: {
 					  (aPosition - aHalfWidth @ aStatistics mean).
 					  (aPosition + aHalfWidth @ aStatistics mean) }
-				  props: style
+				  properties: style
 				  dataset: anIndex ]
-		  ifFalse: [ self newMarkerAt: aPosition @ aStatistics mean props: style dataset: anIndex ]
+		  ifFalse: [ self newMarkerAt: aPosition @ aStatistics mean properties: style dataset: anIndex ]
 ]
 
 { #category : 'private - computing' }
@@ -616,7 +616,7 @@ BpBoxPlot >> newSwatch [
 
 	| style |
 	patchArtist ifTrue: [
-		style := self props: boxProps defaults: self class defaultBoxProps.
+		style := self properties: boxProperties defaults: self class defaultBoxProperties.
 		^ BlElement new
 			  extent: 20 @ 10;
 			  background: (self paintOf: (style at: #faceColor));
@@ -624,7 +624,7 @@ BpBoxPlot >> newSwatch [
 				   paint: (self paintOf: (style at: #edgeColor ifAbsent: [ style at: #color ]))
 				   width: (style at: #lineWidth) * self class pixelsPerPoint);
 			  yourself ].
-	style := self props: medianProps defaults: self class defaultMedianProps.
+	style := self properties: medianProperties defaults: self class defaultMedianProperties.
 	^ BlElement new
 		  geometry: (BlLineGeometry from: 0 @ 5 to: 20 @ 5);
 		  border: (self
@@ -663,14 +663,14 @@ BpBoxPlot >> oriented: aPoint [
 
 { #category : 'accessing' }
 BpBoxPlot >> parts [
-	"Answer my patches by role, as the dictionary answered by matplotlib boxplot: #boxes, #medians, #whiskers, #caps, #fliers and #means."
+	"Answer my patches by role: #boxes, #medians, #whiskers, #caps, #fliers and #means."
 
 	^ parts
 ]
 
 { #category : 'accessing' }
 BpBoxPlot >> patchArtist: aBoolean [
-	"Fill the boxes (with the face color of the box props, the first color of the cycle by default) instead of drawing only their outline."
+	"Fill the boxes (with the face color of the box properties, the first color of the cycle by default) instead of drawing only their outline."
 
 	patchArtist := aBoolean.
 	self refresh
@@ -700,7 +700,7 @@ BpBoxPlot >> positions: aCollectionOfNumbers [
 ]
 
 { #category : 'private - computing' }
-BpBoxPlot >> props: aDictionary defaults: someDefaults [
+BpBoxPlot >> properties: aDictionary defaults: someDefaults [
 	"Answer someDefaults overridden by aDictionary."
 
 	^ someDefaults copy
@@ -710,7 +710,7 @@ BpBoxPlot >> props: aDictionary defaults: someDefaults [
 
 { #category : 'axes' }
 BpBoxPlot >> requiredValuesOn: anAxis [
-	"Answer half a unit around my extreme positions on my position axis, so that even a single box looks right, as matplotlib."
+	"Answer half a unit around my extreme positions on my position axis, so that even a single box looks right."
 
 	(anAxis ~= self positionAxis or: [ datasets isEmpty ]) ifTrue: [ ^ #(  ) ].
 	^ {
@@ -769,16 +769,16 @@ BpBoxPlot >> tickLabels: aCollectionOfStrings [
 ]
 
 { #category : 'accessing' }
-BpBoxPlot >> whiskerProps: aDictionary [
+BpBoxPlot >> whiskerProperties: aDictionary [
 	"Set the style of the whiskers: #color, #lineWidth (points), #lineStyle."
 
-	whiskerProps := aDictionary.
+	whiskerProperties := aDictionary.
 	self refresh
 ]
 
 { #category : 'accessing' }
 BpBoxPlot >> whiskers: aNumberOrPair [
-	"Set how far the whiskers reach (matplotlib whis): a number of interquartile ranges from the box (1.5 by default), or the two percentiles where they end."
+	"Set how far the whiskers reach: a number of interquartile ranges from the box (1.5 by default), or the two percentiles where they end."
 
 	whiskers := aNumberOrPair.
 	self refresh
@@ -786,7 +786,7 @@ BpBoxPlot >> whiskers: aNumberOrPair [
 
 { #category : 'accessing' }
 BpBoxPlot >> widths [
-	"Answer the width of each box: the given ones, or 0.15 times the distance between the extreme positions, kept between 0.15 and 0.5, as matplotlib."
+	"Answer the width of each box: the given ones, or 0.15 times the distance between the extreme positions, kept between 0.15 and 0.5."
 
 	| default |
 	widths ifNotNil: [ ^ (1 to: datasets size) collect: [ :index | self setting: widths at: index ] ].

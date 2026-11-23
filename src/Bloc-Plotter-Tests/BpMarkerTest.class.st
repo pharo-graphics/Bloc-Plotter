@@ -1,5 +1,5 @@
 "
-I test `BpMarker`: the shapes of the matplotlib marker symbols, tuples, paths and texts in the unit cell, and their drawing.
+I test `BpMarker`: the shapes of the marker symbols, tuples, paths and texts in the unit cell, and their drawing.
 "
 Class {
 	#name : 'BpMarkerTest',
@@ -106,7 +106,7 @@ BpMarkerTest >> testSquareFitsTheUnitCell [
 ]
 
 { #category : 'tests' }
-BpMarkerTest >> testStarSymbolHasTheInnerCircleOfMatplotlib [
+BpMarkerTest >> testStarSymbolInnerVerticesMakeARegularPentagram [
 
 	self assert: ((BpMarker on: '*') vertices second r closeTo: 0.381966 / 2 precision: 1e-6)
 ]

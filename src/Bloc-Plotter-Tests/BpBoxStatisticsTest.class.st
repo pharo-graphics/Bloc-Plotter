@@ -1,5 +1,5 @@
 "
-I check `BpBoxStatistics` against the values matplotlib `cbook.boxplot_stats` computes: numpy linear percentiles, whisker ends on data, fliers, mean, notch interval, and whiskers given as percentiles.
+I check the values `BpBoxStatistics` computes: numpy linear percentiles, whisker ends on data, fliers, mean, notch interval, and whiskers given as percentiles.
 "
 Class {
 	#name : 'BpBoxStatisticsTest',

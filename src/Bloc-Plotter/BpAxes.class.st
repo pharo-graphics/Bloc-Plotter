@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend: the Bloc counterpart of matplotlib `Axes`. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:` a `BpBarPlot` added by `barX:height:` or `barhY:width:`, or a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:` a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, or a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -9,25 +9,25 @@ BpAxes exampleHistogram
 
 ## Design Rationale
 
-- As in matplotlib, autoscaling adds a margin of 5% on each side, stopped by the sticky values of the artists: the bars of a histogram start exactly at 0. Artists can also require values to be covered (`BpArtist>>requiredValuesOn:`): a box plot keeps half a unit around its positions.
+- Autoscaling adds a margin of 5% on each side, stopped by the sticky values of the artists: the bars of a histogram start exactly at 0. Artists can also require values to be covered (`BpArtist>>requiredValuesOn:`): a box plot keeps half a unit around its positions.
 - My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale.
-- Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`, matplotlib `set_xticks`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box, a bar plot one at each category), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length as in matplotlib: computing it from my size would change my children during the layout pass and trigger another layout.
-- My title is a `BpText`, so a line break gives a title on several lines, as in matplotlib.
-- I have one slot per matplotlib setting, hence many slots.
+- Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box, a bar plot one at each category), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length: computing it from my size would change my children during the layout pass and trigger another layout.
+- My title is a `BpText`, so a line break gives a title on several lines.
+- I have one slot per setting, hence many slots.
 
 ## Usage
 
 1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:` and `stemLocations:heads:` create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the matplotlib tab10 cycle).
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:` and `fillBetweenY:x1:x2:` (and their variants filling down to 0) create an artist, and `addArtist:` gives it the next colors of my color cycle (`nextColors:`, the tab10 cycle of `BpColors`).
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpAxesLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
 
-- My settings are named after the matplotlib ones (`set_xlim` is `xLimits:`, `set_yscale` is `yScale:`); nil limits mean autoscaling, and a tick formatter is a block answering the label of a value.
+- Nil limits mean autoscaling, and a tick formatter is a block answering the label of a value.
 - I am mutable and keep my artists, but each rebuild replaces the ticks, legend and patches I show.
 
 ## Implementation Notes
 
-- Not supported yet: axis labels, shared axes, `tight_layout`, colorbars, the `_mpl-gallery` style of the matplotlib plot types (small figure, grid below the data).
+- Not supported yet: axis labels, shared axes, a layout fitting the axes to their labels, colorbars, the style of the plot types page (small figure, grid below the data).
 "
 Class {
 	#name : 'BpAxes',
@@ -99,7 +99,7 @@ BpAxes >> artists [
 
 { #category : 'private - building' }
 BpAxes >> autoScale: anAxis [
-	"Answer the limits of anAxis (#x or #y) covering all patches, with margins as matplotlib autoscaling."
+	"Answer the limits of anAxis (#x or #y) covering all patches, with a margin on each side."
 
 	| values |
 	values := self dataValuesOn: anAxis.
@@ -114,7 +114,7 @@ BpAxes >> autoScale: anAxis [
 
 { #category : 'plotting' }
 BpAxes >> barX: aCollectionOrValue height: aCollectionOrNumber [
-	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured like matplotlib Axes.bar: width:, bottom:, align:, color:, tickLabel:, ..."
+	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured with width:, bottom:, align:, color:, tickLabel:, ... (see `BpBarPlot`)."
 
 	^ self addArtist: (BpBarPlot new
 		   x: aCollectionOrValue height: aCollectionOrNumber;
@@ -123,7 +123,7 @@ BpAxes >> barX: aCollectionOrValue height: aCollectionOrNumber [
 
 { #category : 'plotting' }
 BpAxes >> barhY: aCollectionOrValue width: aCollectionOrNumber [
-	"Add horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, and answer them, as matplotlib Axes.barh. They keep the vocabulary of bar: the thickness of the bars (barh height) is width:, their start (barh left) is bottom:."
+	"Add horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, and answer them, the horizontal counterpart of `barX:height:`. They keep the vocabulary of `barX:height:`: their thickness is width:, their start is bottom:."
 
 	^ self addArtist: (BpBarPlot new
 		   orientation: #horizontal;
@@ -133,7 +133,7 @@ BpAxes >> barhY: aCollectionOrValue width: aCollectionOrNumber [
 
 { #category : 'plotting' }
 BpAxes >> boxPlot: aCollection [
-	"Add a box plot of aCollection (numbers for one box, or one collection of numbers per box) and answer it, to be configured like matplotlib Axes.boxplot: notch:, whiskers:, positions:, widths:, patchArtist:, ..."
+	"Add a box plot of aCollection (numbers for one box, or one collection of numbers per box) and answer it, to be configured with notch:, whiskers:, positions:, widths:, patchArtist:, ... (see `BpBoxPlot`)."
 
 	^ self addArtist: (BpBoxPlot new
 		   x: aCollection;
@@ -190,8 +190,41 @@ BpAxes >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 ]
 
 { #category : 'plotting' }
+BpAxes >> fillBetweenX: aCollection y1: aCollectionOrNumber [
+	"Fill the area between the curve aCollectionOrNumber over aCollection and 0, and answer it (see `fillBetweenX:y1:y2:`)."
+
+	^ self fillBetweenX: aCollection y1: aCollectionOrNumber y2: 0
+]
+
+{ #category : 'plotting' }
+BpAxes >> fillBetweenX: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber [
+	"Fill the area between two curves over aCollection (one value per x, or one for all) and answer it, to be configured with where:, interpolate:, step:, color:, alpha:, ... (see `BpFillBetween`)."
+
+	^ self addArtist: (BpFillBetween new
+		   x: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber;
+		   yourself)
+]
+
+{ #category : 'plotting' }
+BpAxes >> fillBetweenY: aCollection x1: aCollectionOrNumber [
+	"Fill the area between the curve aCollectionOrNumber over the y values aCollection and 0, and answer it (see `fillBetweenY:x1:x2:`)."
+
+	^ self fillBetweenY: aCollection x1: aCollectionOrNumber x2: 0
+]
+
+{ #category : 'plotting' }
+BpAxes >> fillBetweenY: aCollection x1: aCollectionOrNumber x2: anotherCollectionOrNumber [
+	"Fill the area between two curves over the y values aCollection and answer it, the horizontal counterpart of `fillBetweenX:y1:y2:`. The fill keeps the vocabulary of `fillBetweenX:y1:y2:`: y is its x, x1 and x2 its y1 and y2."
+
+	^ self addArtist: (BpFillBetween new
+		   orientation: #horizontal;
+		   x: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber;
+		   yourself)
+]
+
+{ #category : 'plotting' }
 BpAxes >> grid: aBoolean [
-	"Show or hide lines across the plot area at each tick (matplotlib grid)."
+	"Show or hide lines across the plot area at each tick."
 
 	showGrid := aBoolean.
 	self rebuild
@@ -199,7 +232,7 @@ BpAxes >> grid: aBoolean [
 
 { #category : 'plotting' }
 BpAxes >> hist: aCollection [
-	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured like matplotlib Axes.hist: bins:, density:, histType:, ..."
+	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured with bins:, density:, histType:, ... (see `BpHistogram`)."
 
 	^ self addArtist: (BpHistogram new
 		   x: aCollection;
@@ -239,7 +272,7 @@ BpAxes >> initialize [
 
 { #category : 'plotting' }
 BpAxes >> legend [
-	"Show a legend with the label of each dataset that has one (matplotlib legend)."
+	"Show a legend with the label of each dataset that has one."
 
 	showLegend := true.
 	self rebuild
@@ -331,7 +364,7 @@ BpAxes >> newTicksOn: anAxis [
 
 { #category : 'plotting' }
 BpAxes >> nextColors: anInteger [
-	"Answer the next anInteger colors of my color cycle, the matplotlib default one."
+	"Answer the next anInteger colors of my color cycle, the tab10 colors of `BpColors`."
 
 	| cycle colors |
 	cycle := BpColors tab10.
@@ -368,14 +401,14 @@ BpAxes >> plotBounds: aRectangle [
 
 { #category : 'plotting' }
 BpAxes >> plotX: xValues y: yValues [
-	"Draw a line through the points of xValues and yValues (matplotlib plot). Answer the `BpLine`, to set its style."
+	"Draw a line through the points of xValues and yValues. Answer the `BpLine`, to set its style."
 
 	^ self addArtist: (BpLine x: xValues y: yValues)
 ]
 
 { #category : 'plotting' }
 BpAxes >> plotX: xValues y: yValues format: aString [
-	"Draw the points of xValues and yValues with the matplotlib format aString ('o-', 'r--', 'x', ...). Answer the `BpLine`."
+	"Draw the points of xValues and yValues with the format aString ('o-', 'r--', 'x', ...; see `BpLine>>format:`). Answer the `BpLine`."
 
 	^ (self plotX: xValues y: yValues)
 		  format: aString;
@@ -419,14 +452,14 @@ BpAxes >> scaleOf: anAxis [
 
 { #category : 'plotting' }
 BpAxes >> scatterX: xValues y: yValues [
-	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured like matplotlib Axes.scatter: s:, c:, marker:, alpha:, ..."
+	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured with s:, c:, marker:, alpha:, ... (see `BpScatterPlot`)."
 
 	^ self addArtist: (BpScatterPlot x: xValues y: yValues)
 ]
 
 { #category : 'plotting' }
 BpAxes >> stem: aCollection [
-	"Add a stem plot of the heads aCollection, located at 0, 1, 2, ..., and answer it, to be configured like matplotlib Axes.stem: lineFormat:, markerFormat:, baseFormat:, bottom:, orientation:, ..."
+	"Add a stem plot of the heads aCollection, located at 0, 1, 2, ..., and answer it, to be configured with lineFormat:, markerFormat:, baseFormat:, bottom:, orientation:, ... (see `BpStemPlot`)."
 
 	^ self addArtist: (BpStemPlot new
 		   heads: aCollection;
@@ -435,7 +468,7 @@ BpAxes >> stem: aCollection [
 
 { #category : 'plotting' }
 BpAxes >> stemLocations: aCollection heads: anotherCollection [
-	"Add a stem plot of the heads anotherCollection at the locations aCollection and answer it, as matplotlib Axes.stem(locs, heads), whose locs are my locations."
+	"Add a stem plot of the heads anotherCollection at the locations aCollection and answer it (see `stem:`)."
 
 	^ self addArtist: (BpStemPlot new
 		   locations: aCollection heads: anotherCollection;
@@ -478,7 +511,7 @@ BpAxes >> title [
 
 { #category : 'accessing' }
 BpAxes >> title: aString [
-	"Set the title shown above my plot area (matplotlib set_title); a line break gives a title on several lines."
+	"Set the title shown above my plot area; a line break gives a title on several lines."
 
 	titleElement text: (aString asRopedText fontSize: 14)
 ]
@@ -491,7 +524,7 @@ BpAxes >> titleElement [
 
 { #category : 'private - building' }
 BpAxes >> updateScales [
-	"Put on a log scale the axes my artists ask for, as a matplotlib histogram with log true."
+	"Put on a log scale the axes my artists ask for, such as the value axis of a histogram with log: true."
 
 	artists do: [ :each |
 		each logAxes do: [ :axis |
@@ -509,7 +542,7 @@ BpAxes >> xLimits [
 
 { #category : 'accessing' }
 BpAxes >> xLimits: aCollectionOrNil [
-	"Set the left and right data values (matplotlib set_xlim); nil computes them from the data."
+	"Set the left and right data values; nil computes them from the data."
 
 	xLimits := aCollectionOrNil.
 	self rebuild
@@ -523,7 +556,7 @@ BpAxes >> xScale [
 
 { #category : 'accessing' }
 BpAxes >> xScale: aSymbol [
-	"Set #linear or #log (matplotlib set_xscale)."
+	"Set #linear or #log."
 
 	xScale := aSymbol.
 	self rebuild
@@ -545,7 +578,7 @@ BpAxes >> xTickCount: anInteger [
 
 { #category : 'accessing' }
 BpAxes >> xTickFormatter: aBlockOrNil [
-	"Set a block answering the label of an x tick from its value (matplotlib xaxis.set_major_formatter); nil prints the values."
+	"Set a block answering the label of an x tick from its value; nil prints the values."
 
 	xTickFormatter := aBlockOrNil.
 	self rebuild
@@ -553,7 +586,7 @@ BpAxes >> xTickFormatter: aBlockOrNil [
 
 { #category : 'accessing' }
 BpAxes >> xTicks: aCollectionOfNumbers [
-	"Put the ticks of the x axis at aCollectionOfNumbers instead of choosing them (matplotlib set_xticks); nil chooses them again."
+	"Put the ticks of the x axis at aCollectionOfNumbers instead of choosing them; nil chooses them again."
 
 	xTicks := aCollectionOfNumbers ifNotNil: [ aCollectionOfNumbers asArray ].
 	self rebuild
@@ -567,7 +600,7 @@ BpAxes >> yLimits [
 
 { #category : 'accessing' }
 BpAxes >> yLimits: aCollectionOrNil [
-	"Set the bottom and top data values (matplotlib set_ylim); nil computes them from the data."
+	"Set the bottom and top data values; nil computes them from the data."
 
 	yLimits := aCollectionOrNil.
 	self rebuild
@@ -581,7 +614,7 @@ BpAxes >> yScale [
 
 { #category : 'accessing' }
 BpAxes >> yScale: aSymbol [
-	"Set #linear or #log (matplotlib set_yscale)."
+	"Set #linear or #log."
 
 	yScale := aSymbol.
 	self rebuild
@@ -603,7 +636,7 @@ BpAxes >> yTickCount: anInteger [
 
 { #category : 'accessing' }
 BpAxes >> yTickFormatter: aBlockOrNil [
-	"Set a block answering the label of a y tick from its value (matplotlib yaxis.set_major_formatter); nil prints the values."
+	"Set a block answering the label of a y tick from its value; nil prints the values."
 
 	yTickFormatter := aBlockOrNil.
 	self rebuild
@@ -611,7 +644,7 @@ BpAxes >> yTickFormatter: aBlockOrNil [
 
 { #category : 'accessing' }
 BpAxes >> yTicks: aCollectionOfNumbers [
-	"Put the ticks of the y axis at aCollectionOfNumbers instead of choosing them (matplotlib set_yticks); nil chooses them again."
+	"Put the ticks of the y axis at aCollectionOfNumbers instead of choosing them; nil chooses them again."
 
 	yTicks := aCollectionOfNumbers ifNotNil: [ aCollectionOfNumbers asArray ].
 	self rebuild

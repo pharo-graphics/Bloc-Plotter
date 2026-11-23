@@ -1,5 +1,5 @@
 "
-I am a stem plot: the `BpArtist` of matplotlib `Axes.stem`. For each location I draw a vertical line (a stem) from a baseline to its head, and a marker on the head; a horizontal baseline joins the first and the last location. Three matplotlib format strings style these parts: `lineFormat:` the stems, `markerFormat:` the markers and `baseFormat:` the baseline.
+I am a stem plot, added by `BpAxes>>stem:` and `BpAxes>>stemLocations:heads:`. For each location I draw a vertical line (a stem) from a baseline to its head, and a marker on the head; a horizontal baseline joins the first and the last location. Three format strings style these parts: `lineFormat:` the stems, `markerFormat:` the markers and `baseFormat:` the baseline.
 
 ## Examples
 
@@ -12,10 +12,10 @@ BpStemPlot exampleStems
 
 ## Design Rationale
 
-- My parts are the three results of matplotlib (`StemContainer`): `stemLines` (one open `BpPolygonPatch` of two vertices per stem), `markerLine` (one `BpMarkerPatch` per head) and `baseLine` (one `BpPolygonPatch`, nil when hidden). They are drawn in that order, above the grid, as matplotlib lines.
-- As matplotlib, I take no color of the color cycle (`colorCount` is 0): stems and markers are 'C0' and the baseline 'C3' unless a format string gives another color, and markers take the color of the stems by default.
-- The formats are read by `BpLine class>>formatPartsOf:`, so they accept what `BpLine>>format:` accepts, plus a whole color name ('grey') for any of them; a blank base format (' ') hides the baseline, as matplotlib users write basefmt=' '.
-- `markerFaceColor:` stands for matplotlib `markerline.set_markerfacecolor`, the only part style the gallery changes after the call; 'none' gives hollow markers.
+- My parts are `stemLines` (one open `BpPolygonPatch` of two vertices per stem), `markerLine` (one `BpMarkerPatch` per head) and `baseLine` (one `BpPolygonPatch`, nil when hidden). They are drawn in that order, above the grid, as lines.
+- I take no color of the color cycle (`colorCount` is 0): stems and markers are 'C0' and the baseline 'C3' unless a format string gives another color, and markers take the color of the stems by default.
+- The formats are read by `BpLine class>>formatPartsOf:`, so they accept what `BpLine>>format:` accepts, plus a whole color name ('grey') for any of them; a blank base format (' ') hides the baseline.
+- `markerFaceColor:` sets the fill of the markers, the only part style the gallery changes; 'none' gives hollow markers.
 
 ## Usage
 
@@ -24,9 +24,9 @@ BpStemPlot exampleStems
 
 ## Implementation Notes
 
-- The line style of the marker format is ignored: matplotlib joins the markers with a line when markerfmt has one ('o-'), I never do.
-- A marker in the line or base format is ignored, as matplotlib does for the stems.
-- I have one slot and setter per matplotlib argument, hence many slots.
+- The line style of the marker format is ignored: I never join the markers with a line, even with a format such as 'o-'.
+- A marker in the line or base format is ignored.
+- I have one slot and setter per option, hence many slots.
 
 ## Invariants and Assumptions
 
@@ -78,7 +78,7 @@ BpStemPlot class >> exampleInteractiveStems [
 
 { #category : 'examples' }
 BpStemPlot class >> examplePlotType [
-	"matplotlib plot types: stem(x, y), eight stems with fixed limits and ticks."
+	"Plot types: stem(x, y), eight stems with fixed limits and ticks."
 
 	<sampleInstance>
 	| figure axes |
@@ -96,7 +96,7 @@ BpStemPlot class >> examplePlotType [
 
 { #category : 'examples' }
 BpStemPlot class >> exampleStemPlot [
-	"matplotlib gallery: Stem plot (stem_plot), first figure: exp(sin(x)) at 41 locations between 0.1 and 2 pi."
+	"Gallery: Stem plot (stem_plot), first figure: exp(sin(x)) at 41 locations between 0.1 and 2 pi."
 
 	<sampleInstance>
 	| figure |
@@ -107,7 +107,7 @@ BpStemPlot class >> exampleStemPlot [
 
 { #category : 'examples' }
 BpStemPlot class >> exampleStemPlotStyled [
-	"matplotlib gallery: Stem plot (stem_plot), second figure: grey stems, hollow diamonds and the baseline at 1.1."
+	"Gallery: Stem plot (stem_plot), second figure: grey stems, hollow diamonds and the baseline at 1.1."
 
 	<sampleInstance>
 	| figure |
@@ -140,7 +140,7 @@ BpStemPlot class >> scriptInteraction [
 
 { #category : 'script' }
 BpStemPlot class >> scriptPlotType [
-	"Reproduce the matplotlib plot type stem(x, y)."
+	"Reproduce the plot type stem(x, y)."
 
 	<example>
 	^ self examplePlotType show: 'stem(x, y)'
@@ -148,7 +148,7 @@ BpStemPlot class >> scriptPlotType [
 
 { #category : 'script' }
 BpStemPlot class >> scriptStemPlot [
-	"Reproduce the two figures of the matplotlib gallery 'Stem plot': default stems, then grey stems with hollow diamonds on a baseline at 1.1."
+	"Reproduce the two figures of the gallery 'Stem plot': default stems, then grey stems with hollow diamonds on a baseline at 1.1."
 
 	<example>
 	self exampleStemPlot show: 'stem_plot'.
@@ -157,9 +157,9 @@ BpStemPlot class >> scriptStemPlot [
 
 { #category : 'private - demo' }
 BpStemPlot class >> stemPlotLocations [
-	"Answer the 41 locations of the matplotlib gallery stem plot, numpy linspace(0.1, 2 * pi, 41)."
+	"Answer the 41 locations of the gallery stem plot, from 0.1 to 2 pi."
 
-	^ (0 to: 40) collect: [ :index | 0.1 + (index * (2 * Float pi - 0.1) / 40) ]
+	^ self linspaceFrom: 0.1 to: 2 * Float pi count: 41
 ]
 
 { #category : 'accessing - options' }
@@ -170,7 +170,7 @@ BpStemPlot >> baseFormat [
 
 { #category : 'accessing - options' }
 BpStemPlot >> baseFormat: aString [
-	"Set the color and line style of the baseline with a matplotlib format string (basefmt, 'C3-' by default); a blank string hides it."
+	"Set the color and line style of the baseline with a format string ('C3-' by default, see `BpLine>>format:`); a blank string hides it."
 
 	baseFormat := aString.
 	self refresh
@@ -178,7 +178,7 @@ BpStemPlot >> baseFormat: aString [
 
 { #category : 'accessing - results' }
 BpStemPlot >> baseLine [
-	"Answer my baseline patch (matplotlib baseline), nil when hidden."
+	"Answer my baseline patch, nil when hidden."
 
 	^ baseLine
 ]
@@ -199,7 +199,7 @@ BpStemPlot >> bottom: aNumber [
 
 { #category : 'axes' }
 BpStemPlot >> colorCount [
-	"Answer 0: as matplotlib, my default colors are fixed ('C0' and 'C3'), not taken from the color cycle."
+	"Answer 0: my default colors are fixed ('C0' and 'C3'), not taken from the color cycle."
 
 	^ 0
 ]
@@ -259,7 +259,7 @@ BpStemPlot >> isHorizontal [
 
 { #category : 'axes' }
 BpStemPlot >> legendEntries [
-	"Answer my label with a stem and its marker on a piece of baseline, as matplotlib."
+	"Answer my label with a stem and its marker on a piece of baseline."
 
 	(label isNil or: [ markerLine isEmpty ]) ifTrue: [ ^ #(  ) ].
 	^ { (label asString -> self newSwatch) }
@@ -273,7 +273,7 @@ BpStemPlot >> lineFormat [
 
 { #category : 'accessing - options' }
 BpStemPlot >> lineFormat: aString [
-	"Set the color and line style of the stems with a matplotlib format string (linefmt, 'C0-' by default) or a color name. The markers take this color unless the marker format gives one."
+	"Set the color and line style of the stems with a format string ('C0-' by default, see `BpLine>>format:`) or a color name. The markers take this color unless the marker format gives one."
 
 	lineFormat := aString.
 	self refresh
@@ -289,7 +289,7 @@ BpStemPlot >> locations [
 
 { #category : 'accessing - data' }
 BpStemPlot >> locations: aCollectionOrNil heads: anotherCollection [
-	"Set the locations of the stems and their heads at once. Without locations (nil), the stems are located at 0, 1, 2, ... as matplotlib."
+	"Set the locations of the stems and their heads at once. Without locations (nil), the stems are located at 0, 1, 2, ..."
 
 	(aCollectionOrNil isNotNil and: [ aCollectionOrNil size ~= anotherCollection size ]) ifTrue: [
 		^ self error: ('locations and heads have different sizes: {1} and {2}' format: {
@@ -302,7 +302,7 @@ BpStemPlot >> locations: aCollectionOrNil heads: anotherCollection [
 
 { #category : 'private - style' }
 BpStemPlot >> markerColor [
-	"Answer the color of the marker format, else the color of the stems, as matplotlib."
+	"Answer the color of the marker format, else the color of the stems."
 
 	^ (self partsOf: markerFormat) at: #color ifPresent: [ :each | self paintOf: each ] ifAbsent: [ self stemColor ]
 ]
@@ -315,7 +315,7 @@ BpStemPlot >> markerFaceColor [
 
 { #category : 'accessing - style' }
 BpStemPlot >> markerFaceColor: aColorOrName [
-	"Set the fill color of the markers (matplotlib markerline.set_markerfacecolor); 'none' gives hollow markers."
+	"Set the fill color of the markers; 'none' gives hollow markers."
 
 	markerFaceColor := aColorOrName.
 	self refresh
@@ -329,7 +329,7 @@ BpStemPlot >> markerFormat [
 
 { #category : 'accessing - options' }
 BpStemPlot >> markerFormat: aString [
-	"Set the marker and its color with a matplotlib format string (markerfmt, 'o' by default)."
+	"Set the marker and its color with a format string ('o' by default, see `BpLine>>format:`)."
 
 	markerFormat := aString.
 	self refresh
@@ -337,7 +337,7 @@ BpStemPlot >> markerFormat: aString [
 
 { #category : 'accessing - results' }
 BpStemPlot >> markerLine [
-	"Answer my markers, one patch per head (matplotlib markerline)."
+	"Answer my markers, one patch per head."
 
 	^ markerLine
 ]
@@ -401,7 +401,7 @@ BpStemPlot >> newMarkerAt: aPoint index: anIndex marker: aMarker color: aColor [
 
 { #category : 'private - computing' }
 BpStemPlot >> newPatches [
-	"Answer my stems, then my markers, then my baseline, in the order matplotlib draws them."
+	"Answer my stems, then my markers, then my baseline, in drawing order."
 
 	| allLocations color style marker headColor |
 	allLocations := self locations.
@@ -488,7 +488,7 @@ BpStemPlot >> oriented: aPoint [
 
 { #category : 'private - style' }
 BpStemPlot >> partsOf: aString [
-	"Answer the parts (#color, #lineStyle, #marker) of a matplotlib format string, a whole color name giving only the color."
+	"Answer the parts (#color, #lineStyle, #marker) of a format string, a whole color name giving only the color."
 
 	(self isColorName: aString) ifTrue: [
 		^ Dictionary new
@@ -505,7 +505,7 @@ BpStemPlot >> stemColor [
 
 { #category : 'accessing - results' }
 BpStemPlot >> stemLines [
-	"Answer my stems, one line patch per head (matplotlib stemlines)."
+	"Answer my stems, one line patch per head."
 
 	^ stemLines
 ]

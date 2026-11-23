@@ -1,5 +1,5 @@
 "
-I am a bar plot: the `BpArtist` of matplotlib `Axes.bar` and `Axes.barh`. I draw one rectangle (`BpRectanglePatch`) per bar, standing on its `bottom` at its position on the position axis and as long as its height on the value axis. Positions are numbers or category names (strings), which then become the ticks of my position axis.
+I am a bar plot, added by `BpAxes>>barX:height:` and `BpAxes>>barhY:width:`. I draw one rectangle (`BpRectanglePatch`) per bar, standing on its `bottom` at its position on the position axis and as long as its height on the value axis. Positions are numbers or category names (strings), which then become the ticks of my position axis.
 
 ## Examples
 
@@ -15,24 +15,24 @@ BpBarPlot exampleThreeBars
 
 ## Design Rationale
 
-- My setters are the arguments of matplotlib `Axes.bar` in camel case (`edgeColor:`, `lineWidth:`, `tickLabel:` for tick_label), with symbols for its strings (`align: #edge`, `orientation: #horizontal`), so that the matplotlib gallery can be written almost word for word. Each setting takes one value for all bars or one per bar, broadcast as numpy does; `x` and `height` too.
-- I keep the vocabulary of `Axes.bar` whatever my orientation: `x` is the position axis, `height` the value axis, `width` the thickness and `bottom` the base of the bars. `BpAxes>>barhY:width:` maps the arguments of `Axes.barh` on them, so its `height` and `left` arguments are my `width:` and `bottom:`.
-- Strings in `x` are categories, as the matplotlib category axis: each distinct one takes the next position from 0 in order of appearance, and the categories label the ticks of my position axis (`managedTicksOn:`). `tickLabel:` labels the bars at their positions instead; with numbers and no tick labels, my axes choose the ticks.
-- As matplotlib 3.7, `label:` takes one label, for one legend entry, or one per bar, for an entry per bar; labels starting with an underscore are hidden, which lets bars of the same color share one entry.
-- The bottoms of the bars are sticky on the value axis: autoscaling adds no margin below them, as matplotlib sticky edges.
+- My settings take symbols (`align: #edge`, `orientation: #horizontal`). Each setting takes one value for all bars or one per bar, broadcast as numpy does; `x` and `height` too.
+- I keep the vocabulary of `BpAxes>>barX:height:` whatever my orientation: `x` is the position axis, `height` the value axis, `width` the thickness and `bottom` the base of the bars. `BpAxes>>barhY:width:` maps the arguments of `Axes.barh` on them, so its `height` and `left` arguments are my `width:` and `bottom:`.
+- Strings in `x` are categories: each distinct one takes the next position from 0 in order of appearance, and the categories label the ticks of my position axis (`managedTicksOn:`). `tickLabel:` labels the bars at their positions instead; with numbers and no tick labels, my axes choose the ticks.
+- `label:` takes one label, for one legend entry, or one per bar, for an entry per bar; labels starting with an underscore are hidden, which lets bars of the same color share one entry.
+- The bottoms of the bars are sticky on the value axis: autoscaling adds no margin below them.
 
 ## Usage
 
 1. `BpAxes>>barX:height:` and `BpAxes>>barhY:width:` create me with my data (`x:height:`) and add me to the axes (see `BpArtist`), which give me one color of their cycle.
 2. My axes read my `stickyValuesOn:` (the bottoms), `managedTicksOn:` (categories or tick labels) and `logAxes` (the value axis when `log:` is true).
 
-- `positions`, `dataValues` (matplotlib `BarContainer.datavalues`) and `patches` are the results of my last computation.
+- `positions`, `dataValues` and `patches` are the results of my last computation.
 
 ## Implementation Notes
 
-- I have one slot and setter per matplotlib argument, hence many slots.
+- I have one slot and setter per option, hence many slots.
 - Not supported yet: error bars (xerr, yerr, ecolor, capsize), hatches, `Axes.bar_label`.
-- Unlike matplotlib, I take a color of the cycle even when `color:` is given, because my axes give it to me before I am configured.
+- I take a color of the cycle even when `color:` is given, because my axes give it to me before I am configured.
 - My categories are my own: several bar plots in the same axes share positions only when their categories come in the same order.
 
 ## Invariants and Assumptions
@@ -66,7 +66,7 @@ Class {
 
 { #category : 'examples' }
 BpBarPlot class >> exampleBarColors [
-	"matplotlib gallery: Bar color demo (bar_colors): categories, one color and one label per bar; the underscore hides the second red label from the legend."
+	"Gallery: Bar color demo (bar_colors): categories, one color and one label per bar; the underscore hides the second red label from the legend."
 
 	<sampleInstance>
 	| figure axes |
@@ -83,7 +83,7 @@ BpBarPlot class >> exampleBarColors [
 
 { #category : 'examples' }
 BpBarPlot class >> exampleGrouped [
-	"matplotlib gallery: Grouped bar chart with labels (barchart), without the bar labels: three bar plots shifted by their width; the middle one labels the ticks with the species (set_xticks)."
+	"Gallery: Grouped bar chart with labels (barchart), without the bar labels: three bar plots shifted by their width; the middle one labels the ticks with the species."
 
 	<sampleInstance>
 	| species means figure axes width |
@@ -111,7 +111,7 @@ BpBarPlot class >> exampleGrouped [
 
 { #category : 'examples' }
 BpBarPlot class >> exampleHorizontal [
-	"matplotlib gallery: Horizontal bar chart (barh), without the error bars: the names label the ticks of the y axis, from top to bottom as with invert_yaxis."
+	"Gallery: Horizontal bar chart (barh), without the error bars: the names label the ticks of the y axis, from top to bottom."
 
 	<sampleInstance>
 	| random people figure axes |
@@ -146,7 +146,7 @@ BpBarPlot class >> exampleInteractiveBars [
 
 { #category : 'examples' }
 BpBarPlot class >> examplePlotType [
-	"matplotlib plot types: bar(x, height), eight bars one unit wide outlined in white."
+	"Plot types: bar(x, height), eight bars one unit wide outlined in white."
 
 	<sampleInstance>
 	| figure axes |
@@ -166,7 +166,7 @@ BpBarPlot class >> examplePlotType [
 
 { #category : 'examples' }
 BpBarPlot class >> exampleStacked [
-	"matplotlib gallery: Stacked bar chart (bar_stacked): each bar plot starts on the tops of the previous one (bottom:)."
+	"Gallery: Stacked bar chart (bar_stacked): each bar plot starts on the tops of the previous one (bottom:)."
 
 	<sampleInstance>
 	| species weightCounts figure axes bottom |
@@ -201,7 +201,7 @@ BpBarPlot class >> exampleThreeBars [
 
 { #category : 'script' }
 BpBarPlot class >> scriptBarColors [
-	"Reproduce the matplotlib gallery 'Bar color demo': one color and one legend label per bar."
+	"Reproduce the gallery 'Bar color demo': one color and one legend label per bar."
 
 	<example>
 	^ self exampleBarColors show: 'bar_colors'
@@ -209,7 +209,7 @@ BpBarPlot class >> scriptBarColors [
 
 { #category : 'script' }
 BpBarPlot class >> scriptGrouped [
-	"Reproduce the matplotlib gallery 'Grouped bar chart with labels', without the bar labels: three groups of three bars."
+	"Reproduce the gallery 'Grouped bar chart with labels', without the bar labels: three groups of three bars."
 
 	<example>
 	^ self exampleGrouped show: 'barchart'
@@ -217,7 +217,7 @@ BpBarPlot class >> scriptGrouped [
 
 { #category : 'script' }
 BpBarPlot class >> scriptHorizontal [
-	"Reproduce the matplotlib gallery 'Horizontal bar chart', without the error bars."
+	"Reproduce the gallery 'Horizontal bar chart', without the error bars."
 
 	<example>
 	^ self exampleHorizontal show: 'barh'
@@ -233,7 +233,7 @@ BpBarPlot class >> scriptInteraction [
 
 { #category : 'script' }
 BpBarPlot class >> scriptPlotType [
-	"Reproduce the matplotlib plot type bar(x, height)."
+	"Reproduce the plot type bar(x, height)."
 
 	<example>
 	^ self examplePlotType show: 'bar(x, height)'
@@ -241,7 +241,7 @@ BpBarPlot class >> scriptPlotType [
 
 { #category : 'script' }
 BpBarPlot class >> scriptStacked [
-	"Reproduce the matplotlib gallery 'Stacked bar chart': bars on top of each other with bottom:."
+	"Reproduce the gallery 'Stacked bar chart': bars on top of each other with bottom:."
 
 	<example>
 	^ self exampleStacked show: 'bar_stacked'
@@ -284,7 +284,7 @@ BpBarPlot >> bottom [
 
 { #category : 'accessing - options' }
 BpBarPlot >> bottom: aNumberOrCollection [
-	"Set where the bars start on the value axis (0 by default), one for all or one per bar, as matplotlib bottom (left for barh)."
+	"Set where the bars start on the value axis (0 by default), one for all or one per bar."
 
 	bottom := aNumberOrCollection.
 	self refresh
@@ -322,7 +322,7 @@ BpBarPlot >> color [
 
 { #category : 'accessing - style' }
 BpBarPlot >> color: aColorOrCollection [
-	"Set the fill color of the bars, one for all or one per bar (a Color or a matplotlib name). Without it, the bars take the color my axes give me from their cycle."
+	"Set the fill color of the bars, one for all or one per bar (a Color or a name known by `BpColors`). Without it, the bars take the color my axes give me from their cycle."
 
 	color := aColorOrCollection.
 	self refresh
@@ -341,7 +341,7 @@ BpBarPlot >> compute [
 
 { #category : 'accessing - results' }
 BpBarPlot >> dataValues [
-	"Answer the height of each bar (matplotlib BarContainer.datavalues)."
+	"Answer the height of each bar."
 
 	^ heights
 ]
@@ -403,7 +403,7 @@ BpBarPlot >> isMany: aValue [
 
 { #category : 'private - style' }
 BpBarPlot >> isShownLabel: aStringOrNil [
-	"Answer whether aStringOrNil gives a legend entry: matplotlib hides labels starting with an underscore."
+	"Answer whether aStringOrNil gives a legend entry: labels starting with an underscore are hidden."
 
 	^ aStringOrNil isNotNil and: [ aStringOrNil asString isNotEmpty and: [ aStringOrNil asString first ~= $_ ] ]
 ]
@@ -416,7 +416,7 @@ BpBarPlot >> label [
 
 { #category : 'axes' }
 BpBarPlot >> legendEntries [
-	"Answer one entry for my label, or one per bar when my label is a collection, as matplotlib; labels starting with an underscore are hidden."
+	"Answer one entry for my label, or one per bar when my label is a collection; labels starting with an underscore are hidden."
 
 	positions ifEmpty: [ ^ #(  ) ].
 	(self isMany: label) ifFalse: [
@@ -458,7 +458,7 @@ BpBarPlot >> log: aBoolean [
 
 { #category : 'axes' }
 BpBarPlot >> logAxes [
-	"With log true, my value axis is on a log scale, as matplotlib."
+	"With log true, my value axis is on a log scale."
 
 	^ log
 		  ifTrue: [ { self valueAxis } ]
@@ -525,7 +525,7 @@ BpBarPlot >> orientation [
 
 { #category : 'accessing - options' }
 BpBarPlot >> orientation: aSymbol [
-	"Set #vertical bars (matplotlib bar, the default) or #horizontal ones (barh)."
+	"Set #vertical bars (`BpAxes>>barX:height:`, the default) or #horizontal ones (`BpAxes>>barhY:width:`)."
 
 	(#( #vertical #horizontal ) includes: aSymbol) ifFalse: [ ^ self error: 'Unknown orientation: ' , aSymbol printString ].
 	orientation := aSymbol.
@@ -571,7 +571,7 @@ BpBarPlot >> positions [
 
 { #category : 'axes' }
 BpBarPlot >> stickyValuesOn: anAxis [
-	"Answer the bottoms of my bars on my value axis: autoscaling adds no margin beyond them, as matplotlib sticky edges."
+	"Answer the bottoms of my bars on my value axis: autoscaling adds no margin beyond them."
 
 	anAxis = self valueAxis ifFalse: [ ^ #(  ) ].
 	^ ((1 to: positions size) collect: [ :index | self bottomAt: index ] as: Set) asArray
@@ -585,7 +585,7 @@ BpBarPlot >> tickLabel [
 
 { #category : 'accessing - options' }
 BpBarPlot >> tickLabel: aStringOrCollection [
-	"Label the ticks at the positions of the bars (matplotlib tick_label), one label for all or one per bar."
+	"Label the ticks at the positions of the bars, one label for all or one per bar."
 
 	tickLabel := aStringOrCollection.
 	self refresh
@@ -622,7 +622,7 @@ BpBarPlot >> x [
 
 { #category : 'accessing - data' }
 BpBarPlot >> x: aCollectionOrValue [
-	"Set the positions of the bars (matplotlib x): numbers, or category names placed from 0."
+	"Set the positions of the bars: numbers, or category names placed from 0."
 
 	x := aCollectionOrValue.
 	self refresh

@@ -1,5 +1,5 @@
 "
-I test `BpLine`: its line and markers, the matplotlib defaults of widths, sizes and colors, the dashes of the line styles, matplotlib format strings and their errors, and legend entries.
+I test `BpLine`: its line and markers, the default widths, sizes and colors, the dashes of the line styles, format strings and their errors, and legend entries.
 "
 Class {
 	#name : 'BpLineTest',
@@ -29,7 +29,7 @@ BpLineTest >> testAlphaMakesTheLineTransparent [
 ]
 
 { #category : 'tests' }
-BpLineTest >> testColorAcceptsMatplotlibNames [
+BpLineTest >> testColorAcceptsColorNames [
 
 	self
 		assert: (self line
@@ -39,7 +39,7 @@ BpLineTest >> testColorAcceptsMatplotlibNames [
 ]
 
 { #category : 'tests' }
-BpLineTest >> testDashesGrowWithTheLineWidthAsInMatplotlib [
+BpLineTest >> testDashesGrowWithTheLineWidth [
 
 	self
 		assert: (self line
@@ -186,7 +186,7 @@ BpLineTest >> testLinePatchGoesThroughThePoints [
 ]
 
 { #category : 'tests' }
-BpLineTest >> testLineStyleAcceptsMatplotlibStrings [
+BpLineTest >> testLineStyleAcceptsStrings [
 
 	| dashed |
 	dashed := self line

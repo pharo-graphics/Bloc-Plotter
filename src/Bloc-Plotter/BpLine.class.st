@@ -1,5 +1,5 @@
 "
-I am a line plot of a `BpAxes` (matplotlib `Axes.plot` and its `Line2D`): a line through points given by their x and y values, with an optional marker at each point. `format:` reads a matplotlib format string such as 'o-' or 'r--'; the setters (`color:`, `lineStyle:`, `lineWidth:`, `marker:`, `markerSize:`, `markerFaceColor:`, `markerEdgeColor:`, `markerEdgeWidth:`) take the matplotlib keyword arguments, named in camel case (`markerFaceColor:` for markerfacecolor).
+I am a line plot of a `BpAxes` (`BpAxes>>plotX:y:`): a line through points given by their x and y values, with an optional marker at each point. `format:` reads a format string such as 'o-' or 'r--'; the setters (`color:`, `lineStyle:`, `lineWidth:`, `marker:`, `markerSize:`, `markerFaceColor:`, `markerEdgeColor:`, `markerEdgeWidth:`) set one property each.
 
 ## Examples
 
@@ -12,9 +12,9 @@ BpLine scriptFormats
 ## Design Rationale
 
 - My line is one `BpPolygonPatch` (open) through all the points, and each marker is a `BpMarkerPatch`, as in `BpScatterPlot`: interaction handlers (`whenPatch:do:`) can tell the line from the points.
-- A format string sets the same slots as the setters, so a setter sent afterwards wins, as matplotlib keyword arguments win over the format. A marker without a line style draws no line ('o' draws only circles), and a string that is only a color name ('tan', 'C1') sets only the color.
-- I follow matplotlib defaults: 1.5 point wide lines, 6 point markers with 1 point edges, and dashes that grow with the width of the line (`dashPatterns`, in points for a one point line). Solid lines have projecting caps, dashed ones butt caps.
-- My patches are drawn above the grid (`isAboveGrid`), as matplotlib lines, while bars and scatter points are drawn below.
+- A format string sets the same slots as the setters, so a setter sent afterwards wins over the format. A marker without a line style draws no line ('o' draws only circles), and a string that is only a color name ('tan', 'C1') sets only the color.
+- My defaults are 1.5 point wide lines, 6 point markers with 1 point edges, and dashes that grow with the width of the line (`dashPatterns`, in points for a one point line). Solid lines have projecting caps, dashed ones butt caps.
+- My patches are drawn above the grid (`isAboveGrid`), while bars and scatter points are drawn below.
 
 ## Usage
 
@@ -86,7 +86,7 @@ BpLine class >> exampleFormats [
 
 { #category : 'examples' }
 BpLine class >> examplePlotType [
-	"Answer the figure of the plot type page of matplotlib (plot_types/basic/plot): markers only, a line, and a line with markers, with fixed limits and ticks."
+	"Answer the figure of the plot type page (plot_types/basic/plot): markers only, a line, and a line with markers, with fixed limits and ticks."
 
 	<sampleInstance>
 	| figure axes x y x2 y2 |
@@ -122,7 +122,7 @@ BpLine class >> exampleSine [
 
 { #category : 'format' }
 BpLine class >> formatPartsOf: aString [
-	"Answer the parts of the matplotlib format string aString, as a dictionary with the keys #marker, #lineStyle and #color."
+	"Answer the parts of the format string aString, as a dictionary with the keys #marker, #lineStyle and #color."
 
 	| stream parts |
 	parts := Dictionary new.
@@ -149,7 +149,7 @@ BpLine class >> readFormatPartFrom: aStream into: aDictionary [
 
 { #category : 'script' }
 BpLine class >> scriptFormats [
-	"Show three curves drawn with matplotlib format strings and their legend."
+	"Show three curves drawn with format strings (see `BpLine>>format:`) and their legend."
 
 	<example>
 	^ self exampleFormats show: 'plot format strings'
@@ -157,7 +157,7 @@ BpLine class >> scriptFormats [
 
 { #category : 'script' }
 BpLine class >> scriptPlotType [
-	"Show the figure of the plot type page of matplotlib: markers only, a line, and a line with markers."
+	"Show the figure of the plot type page: markers only, a line, and a line with markers."
 
 	<example>
 	^ self examplePlotType show: 'plot'
@@ -174,7 +174,7 @@ BpLine class >> x: aCollectionOfNumbers y: anotherCollectionOfNumbers [
 
 { #category : 'accessing' }
 BpLine >> color: aColorOrName [
-	"Set the color of my line and, by default, of my markers (matplotlib color)."
+	"Set the color of my line and, by default, of my markers."
 
 	color := aColorOrName.
 	self refresh
@@ -200,7 +200,7 @@ BpLine >> faceColor [
 
 { #category : 'accessing - format' }
 BpLine >> format: aString [
-	"Set my marker, line style and color from a matplotlib format string '[marker][line][color]', in any order ('o-', 'r--', '^k:', 'C1', or a whole color name such as 'tan'). A marker without a line style draws no line. Setters sent afterwards win."
+	"Set my marker, line style and color from a format string '[marker][line][color]', in any order ('o-', 'r--', '^k:', 'C1', or a whole color name such as 'tan'). A marker without a line style draws no line. Setters sent afterwards win."
 
 	| parts |
 	(self isColorName: aString) ifTrue: [ ^ self color: aString ].
@@ -235,7 +235,7 @@ BpLine >> isAboveGrid [
 
 { #category : 'axes' }
 BpLine >> legendEntries [
-	"Answer my label with a short piece of my line, with one marker in its middle, as matplotlib legends."
+	"Answer my label with a short piece of my line, with one marker in its middle."
 
 	(label isNil or: [ points isEmpty ]) ifTrue: [ ^ #(  ) ].
 	^ { (label asString -> self newSwatch) }
@@ -262,7 +262,7 @@ BpLine >> linePatch [
 
 { #category : 'accessing' }
 BpLine >> lineStyle: aSymbolOrString [
-	"Set my line style: #solid, #dashed, #dashdot, #dotted or #none, or a matplotlib string ('-', '--', '-.', ':', 'None', ...)."
+	"Set my line style: #solid, #dashed, #dashdot, #dotted or #none, or a string ('-', '--', '-.', ':', 'None', ...)."
 
 	lineStyle := self class lineStyleOf: aSymbolOrString.
 	self refresh

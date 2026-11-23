@@ -1,5 +1,5 @@
 "
-I am the marker of one point of a `BpScatterPlot` or a `BpLine`, of a flier or a mean of a `BpBoxPlot`, or of a head of a `BpStemPlot`. I know the `index` of my point, its `dataPoint`, my `area` (matplotlib s, in points squared) and my `amount` (the number of c mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
+I am the marker of one point of a `BpScatterPlot` or a `BpLine`, of a flier or a mean of a `BpBoxPlot`, or of a head of a `BpStemPlot`. I know the `index` of my point, its `dataPoint`, my `area` (in points squared, see `BpScatterPlot>>s:`) and my `amount` (the number of `BpScatterPlot>>c:` mapped to my color, or nil). I take the shape of my `BpMarker` at my size, centered on my point. See `BpPatch` for the life cycle.
 
 ## Examples
 
@@ -9,7 +9,7 @@ BpMarkerPatch exampleCircle
 
 ## Implementation Notes
 
-- The side of my unit cell is the square root of my area, in points, so that the area of a circle grows with s as in matplotlib.
+- The side of my unit cell is the square root of my area, in points, so that the area of a circle grows with the size given to `BpScatterPlot>>s:`.
 - A text marker is shown by a `BlTextElement` child, centered by a `BlFrameLayout`.
 "
 Class {
@@ -39,7 +39,7 @@ BpMarkerPatch class >> exampleCircle [
 
 { #category : 'accessing' }
 BpMarkerPatch >> amount [
-	"Answer the number of my point mapped to my color (matplotlib c), or nil when my color was given."
+	"Answer the number of my point mapped to my color (see `BpScatterPlot>>c:`), or nil when my color was given."
 
 	^ amount
 ]
@@ -52,7 +52,7 @@ BpMarkerPatch >> amount: aNumberOrNil [
 
 { #category : 'accessing' }
 BpMarkerPatch >> area [
-	"Answer my size in points squared (matplotlib s)."
+	"Answer my size in points squared (see `BpScatterPlot>>s:`)."
 
 	^ area
 ]

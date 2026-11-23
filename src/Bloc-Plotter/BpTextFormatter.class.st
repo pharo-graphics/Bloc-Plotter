@@ -1,5 +1,5 @@
 "
-I format numbers the way matplotlib pies expect: C printf strings for `autopct` (`printf:with:`, e.g. `'%1.1f%%'`) and Python replacement fields for `pie_label` (`format:absVal:frac:`, e.g. `'{absval:d}\n{frac:.1%}'`, where the two characters `\n` stand for a line break).
+I format numbers the way pies expect: C printf strings for `BpPie>>autoPct:` (`printf:with:`, e.g. `'%1.1f%%'`) and Python replacement fields for `BpPie>>addLabels:` (`format:absVal:frac:`, e.g. `'{absval:d}\n{frac:.1%}'`, where the two characters `\n` stand for a line break).
 
 ## Examples
 
@@ -25,7 +25,7 @@ Class {
 
 { #category : 'formatting' }
 BpTextFormatter class >> format: aPattern absVal: anAbsoluteValue frac: aFraction [
-	"Answer aPattern where each Python replacement field {absval} or {frac}, with an optional format spec (d, .Nf, .N%), is replaced by the corresponding value. The two characters \n stand for a line break. This is the format matplotlib uses for the labels of pie_label."
+	"Answer aPattern where each Python replacement field {absval} or {frac}, with an optional format spec (d, .Nf, .N%), is replaced by the corresponding value. The two characters \n stand for a line break. This is the format of the labels of `BpPie>>addLabels:`."
 
 	| in values |
 	values := Dictionary new
@@ -89,7 +89,7 @@ BpTextFormatter class >> printField: aField from: aDictionary on: anOutStream [
 
 { #category : 'formatting' }
 BpTextFormatter class >> printf: aPattern with: aNumber [
-	"Answer aPattern where each C printf conversion (%f with an optional width and precision, %d, and %% for a percent sign) is replaced by aNumber. This is the format matplotlib uses for the autopct argument of pie."
+	"Answer aPattern where each C printf conversion (%f with an optional width and precision, %d, and %% for a percent sign) is replaced by aNumber. This is the format of `BpPie>>autoPct:`."
 
 	| in |
 	in := aPattern readStream.
@@ -104,7 +104,7 @@ BpTextFormatter class >> printf: aPattern with: aNumber [
 
 { #category : 'script' }
 BpTextFormatter class >> scriptFormats [
-	"Show the two format families: printf strings (matplotlib autopct) applied to a percentage, and Python replacement fields (matplotlib pie_label) applied to a value and its fraction. Answers the formatted strings."
+	"Show the two format families: printf strings (`BpPie>>autoPct:`) applied to a percentage, and Python replacement fields (`BpPie>>addLabels:`) applied to a value and its fraction. Answers the formatted strings."
 
 	<example>
 	^ {

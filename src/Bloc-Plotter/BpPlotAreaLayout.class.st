@@ -1,5 +1,5 @@
 "
-I am the layout of a `BpPlotArea`: I place each patch where its data coordinates are, through the data transform of the plot area, each `BpGridLine` across the plot area at its location, and the legend in the upper right corner (matplotlib loc='upper right').
+I am the layout of a `BpPlotArea`: I place each patch where its data coordinates are, through the data transform of the plot area, each `BpGridLine` across the plot area at its location, and the legend in the upper right corner.
 
 ## Examples
 

@@ -1,5 +1,5 @@
 "
-I check `BpBarPlot` against matplotlib `Axes.bar` and `Axes.barh`: the rectangle of each bar (position, width, bottom, alignment, orientation), the broadcasting of settings given once, categories and tick labels, styles, legend entries, sticky bottoms and log scale.
+I check `BpBarPlot`, as `BpAxes>>barX:height:` and `BpAxes>>barhY:width:` create it: the rectangle of each bar (position, width, bottom, alignment, orientation), the broadcasting of settings given once, categories and tick labels, styles, legend entries, sticky bottoms and log scale.
 
 ## Implementation Notes
 

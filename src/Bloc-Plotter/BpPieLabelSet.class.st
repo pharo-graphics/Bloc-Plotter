@@ -1,5 +1,5 @@
 "
-I am a set of texts of a `BpPie`, one per wedge, at the same distance from the center and with the same style. I am what a call to matplotlib `pie_label` adds, and also how the pie shows its `labels` and `autopct` percentages.
+I am a set of texts of a `BpPie`, one per wedge, at the same distance from the center and with the same style. I am what `BpPie>>addLabels:` adds, and also how the pie shows its `labels` and `autoPct` percentages.
 
 ## Examples
 
@@ -30,7 +30,7 @@ Class {
 
 { #category : 'examples' }
 BpPieLabelSet class >> examplePercents [
-	"Answer the label set of matplotlib ax.pie_label(pie, '{frac:.1%}', distance=0.7)."
+	"Answer a label set showing the percentage of each wedge with one decimal, at 0.7 times the radius."
 
 	<sampleInstance>
 	^ self labels: '{frac:.1%}' distance: 0.7
@@ -38,7 +38,7 @@ BpPieLabelSet class >> examplePercents [
 
 { #category : 'instance creation' }
 BpPieLabelSet class >> labels: aSource distance: aNumber [
-	"Answer a label set like the ones of matplotlib pie_label. aSource is a collection of strings (one per wedge), a format string using {absval} and {frac} (see BpTextFormatter class>>format:absVal:frac:), or a block receiving the wedge."
+	"Answer a label set as `BpPie>>addLabels:` adds. aSource is a collection of strings (one per wedge), a format string using {absval} and {frac} (see BpTextFormatter class>>format:absVal:frac:), or a block receiving the wedge."
 
 	| block |
 	block := aSource isString
@@ -55,7 +55,7 @@ BpPieLabelSet class >> labels: aSource distance: aNumber [
 
 { #category : 'instance creation' }
 BpPieLabelSet class >> percent: aSource distance: aNumber [
-	"Answer a label set showing the percentage of each wedge, like the autopct argument of matplotlib pie. aSource is a printf format string (see BpTextFormatter class>>printf:with:) or a block receiving the percentage."
+	"Answer a label set showing the percentage of each wedge (see `BpPie>>autoPct:`). aSource is a printf format string (see BpTextFormatter class>>printf:with:) or a block receiving the percentage."
 
 	| block |
 	block := aSource isString

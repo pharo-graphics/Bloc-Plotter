@@ -68,7 +68,7 @@ BpScatterPlotTest >> testDefaultColorIsTheFirstColorOfTheCycle [
 ]
 
 { #category : 'tests' }
-BpScatterPlotTest >> testDefaultSizeIsTheSquareOfTheMarkerSizeOfMatplotlib [
+BpScatterPlotTest >> testDefaultSizeIsTheSquareOfASixPointMarker [
 
 	self assert: self scatter patches first area equals: 36
 ]

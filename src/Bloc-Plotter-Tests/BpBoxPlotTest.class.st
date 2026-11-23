@@ -1,5 +1,5 @@
 "
-I check `BpBoxPlot` against matplotlib `Axes.boxplot`: the parts built for each dataset and their geometry (box between the quartiles, median, whiskers, caps, notch, fliers, means), their default and given styles, horizontal boxes, positions and widths, and the legend entry.
+I check `BpBoxPlot`: the parts built for each dataset and their geometry (box between the quartiles, median, whiskers, caps, notch, fliers, means), their default and given styles, horizontal boxes, positions and widths, and the legend entry.
 
 ## Implementation Notes
 
@@ -52,12 +52,12 @@ BpBoxPlotTest >> testBoxIsABlackOutlineByDefault [
 ]
 
 { #category : 'tests' }
-BpBoxPlotTest >> testBoxPropsStyleTheBox [
+BpBoxPlotTest >> testBoxPropertiesStyleTheBox [
 
 	| box |
 	box := ((self boxPlot
 		         patchArtist: true;
-		         boxProps: {
+		         boxProperties: {
 			         (#faceColor -> 'C1').
 			         (#edgeColor -> 'white').
 			         (#lineWidth -> 0.5) } asDictionary;
@@ -195,17 +195,17 @@ BpBoxPlotTest >> testMedianCrossesTheBox [
 ]
 
 { #category : 'tests' }
-BpBoxPlotTest >> testMedianIsOrangeAsMatplotlib [
+BpBoxPlotTest >> testMedianIsOrangeByDefault [
 
 	self assert: (self boxPlot parts at: #medians) first border paint color equals: BpColors tab10 second
 ]
 
 { #category : 'tests' }
-BpBoxPlotTest >> testMedianPropsStyleTheMedian [
+BpBoxPlotTest >> testMedianPropertiesStyleTheMedian [
 
 	| median |
 	median := ((self boxPlot
-		            medianProps: {
+		            medianProperties: {
 			            (#color -> 'white').
 			            (#lineWidth -> 0.5) } asDictionary;
 		            yourself) parts at: #medians) first.
@@ -322,12 +322,12 @@ BpBoxPlotTest >> testUnknownOrientationRaisesError [
 ]
 
 { #category : 'tests' }
-BpBoxPlotTest >> testWhiskerAndCapPropsStyleThem [
+BpBoxPlotTest >> testWhiskerAndCapPropertiesStyleThem [
 
 	| parts |
 	parts := (self boxPlot
-		          whiskerProps: { (#color -> 'C0') } asDictionary;
-		          capProps: { (#lineWidth -> 2) } asDictionary;
+		          whiskerProperties: { (#color -> 'C0') } asDictionary;
+		          capProperties: { (#lineWidth -> 2) } asDictionary;
 		          yourself) parts.
 	self assert: (parts at: #whiskers) first border paint color equals: BpColors tab10 first.
 	self assert: ((parts at: #caps) first border width closeTo: 2 * self ppp)
