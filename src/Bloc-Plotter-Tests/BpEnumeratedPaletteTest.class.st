@@ -61,6 +61,7 @@ BpEnumeratedPaletteTest >> testMdl200GoesFromRedToBlueGrey [
 { #category : 'tests' }
 BpEnumeratedPaletteTest >> testMdlMixedSchemesAreNamedAfterTheirRow [
 
+	self assert: BpMDLChartingPalette mdl200Mixed name equals: 'mdl200Mixed'.
 	self assert: BpMDLChartingPalette mdl300Mixed name equals: 'mdl300Mixed'.
 	self assert: BpMDLChartingPalette mdl400Mixed name equals: 'mdl400Mixed'.
 	self assert: BpMDLChartingPalette mdl500Mixed name equals: 'mdl500Mixed'
@@ -69,6 +70,7 @@ BpEnumeratedPaletteTest >> testMdlMixedSchemesAreNamedAfterTheirRow [
 { #category : 'tests' }
 BpEnumeratedPaletteTest >> testMdlMixedSchemesHoldTheColorsOfTheirRow [
 
+	self assert: BpMDLChartingPalette mdl200Mixed colors asSet equals: BpMDLChartingPalette mdl200 colors asSet.
 	self assert: BpMDLChartingPalette mdl300Mixed colors asSet equals: BpMDLChartingPalette mdl300 colors asSet.
 	self assert: BpMDLChartingPalette mdl400Mixed colors asSet equals: BpMDLChartingPalette mdl400 colors asSet.
 	self assert: BpMDLChartingPalette mdl500Mixed colors asSet equals: BpMDLChartingPalette mdl500 colors asSet
@@ -79,6 +81,7 @@ BpEnumeratedPaletteTest >> testMdlMixedSchemesListTheirHuesInTheSameOrder [
 
 	| orders |
 	orders := {
+		          (BpMDLChartingPalette mdl200 -> BpMDLChartingPalette mdl200Mixed).
 		          (BpMDLChartingPalette mdl300 -> BpMDLChartingPalette mdl300Mixed).
 		          (BpMDLChartingPalette mdl400 -> BpMDLChartingPalette mdl400Mixed).
 		          (BpMDLChartingPalette mdl500 -> BpMDLChartingPalette mdl500Mixed) } collect: [ :each |
@@ -128,7 +131,7 @@ BpEnumeratedPaletteTest >> testMdlSchemesHaveNineteenDistinctColors [
 
 	| palettes |
 	palettes := BpMDLChartingPalette schemes collect: [ :each | BpMDLChartingPalette perform: each ].
-	self assert: palettes size equals: 7.
+	self assert: palettes size equals: 8.
 	self assert: (palettes allSatisfy: [ :each | each size = 19 and: [ each colors asSet size = 19 ] ])
 ]
 

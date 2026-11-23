@@ -1,5 +1,5 @@
 "
-I am a palette of the Material Design colors, to tell things apart without ordering them. My schemes come from four rows of the Material Design color table, from the lightest to the darkest: `mdl200`, `mdl300`, `mdl400` and `mdl500` keep the order of the table, `mdl300Mixed`, `mdl400Mixed` and `mdl500Mixed` hold the colors of the last three in an order that separates close hues.
+I am a palette of the Material Design colors, to tell things apart without ordering them. My schemes come from four rows of the Material Design color table, from the lightest to the darkest: `mdl200`, `mdl300`, `mdl400` and `mdl500` keep the order of the table, `mdl200Mixed`, `mdl300Mixed`, `mdl400Mixed` and `mdl500Mixed` hold their colors in an order that separates close hues.
 
 ## Examples
 
@@ -10,12 +10,12 @@ BpMDLChartingPalette exampleMDLCharting
 ## Design Rationale
 
 - A row holds 19 colors in the order of the table: red, pink, purple, deep purple, indigo, blue, light blue, cyan, teal, green, light green, lime, yellow, amber, orange, deep orange, brown, grey, blue grey. Colors next to each other have close hues, so the first artists of a chart are hard to tell apart. The mixed schemes are for charts with a few artists.
-- The three mixed schemes share one order, and so do the four rows: the same index is the same hue in all of them, so a chart can move from one to another and keep its hues.
+- The four mixed schemes share one order, and so do the four rows: the same index is the same hue in all of them, so a chart can move from one to another and keep its hues.
 
 ## Implementation Notes
 
 - The colors come from https://materialui.co/colors.
-- The order of the mixed schemes (`mixedOrder`) was computed once on OKLab distances, taking the worst of the rows 300, 400 and 500, in normal vision and in simulated protanopia and deuteranopia. Its first five colors are all distinct from each other. Further on, only the colors next to each other are.
+- The order of the mixed schemes (`mixedOrder`) was computed once on OKLab distances, taking the worst of the rows 300, 400 and 500, in normal vision and in simulated protanopia and deuteranopia. Its first five colors are all distinct from each other. Further on, only the colors next to each other are. The row 200 was not part of the computation: its paler colors are closer to each other, but the order separates them much more than the one of the table.
 
 ## Invariants and Assumptions
 
@@ -31,7 +31,7 @@ Class {
 
 { #category : 'examples' }
 BpMDLChartingPalette class >> exampleMDLCharting [
-	"Show the four rows of Material Design colors, from the lightest to the darkest, then the mixed versions of the last three."
+	"Show the four rows of Material Design colors, from the lightest to the darkest, then their mixed versions."
 
 	<example>
 	^ self
@@ -40,6 +40,7 @@ BpMDLChartingPalette class >> exampleMDLCharting [
 			  self instanceMdl300.
 			  self instanceMdl400.
 			  self instanceMdl500.
+			  self instanceMdl200Mixed.
 			  self instanceMdl300Mixed.
 			  self instanceMdl400Mixed.
 			  self instanceMdl500Mixed }
@@ -51,6 +52,13 @@ BpMDLChartingPalette class >> instanceMdl200 [
 
 	<sampleInstance>
 	^ self mdl200
+]
+
+{ #category : 'instances' }
+BpMDLChartingPalette class >> instanceMdl200Mixed [
+
+	<sampleInstance>
+	^ self mdl200Mixed
 ]
 
 { #category : 'instances' }
@@ -104,6 +112,12 @@ BpMDLChartingPalette class >> mdl200 [
 			  #( #( 239 154 154 ) #( 244 143 177 ) #( 206 147 216 ) #( 179 157 219 ) #( 159 168 218 ) #( 144 202 249 ) #( 129 212 250 )
 			     #( 128 222 234 ) #( 128 203 196 ) #( 165 214 167 ) #( 197 225 165 ) #( 230 238 156 ) #( 255 245 157 ) #( 255 224 130 )
 			     #( 255 204 128 ) #( 255 171 145 ) #( 188 170 164 ) #( 238 238 238 ) #( 176 190 197 ) )
+]
+
+{ #category : 'instance creation - schemes' }
+BpMDLChartingPalette class >> mdl200Mixed [
+
+	^ self mixed: self mdl200
 ]
 
 { #category : 'instance creation - schemes' }
@@ -175,5 +189,5 @@ BpMDLChartingPalette class >> mixedOrder [
 BpMDLChartingPalette class >> schemes [
 	"Answer the selectors of my schemes."
 
-	^ #( #mdl200 #mdl300 #mdl400 #mdl500 #mdl300Mixed #mdl400Mixed #mdl500Mixed )
+	^ #( #mdl200 #mdl300 #mdl400 #mdl500 #mdl200Mixed #mdl300Mixed #mdl400Mixed #mdl500Mixed )
 ]
