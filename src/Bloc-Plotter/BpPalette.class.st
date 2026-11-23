@@ -74,7 +74,7 @@ BpPalette class >> demoRowOf: aPalette [
 	| label swatches |
 	label := BlTextElement new
 		         text: (aPalette name asRopedText fontSize: 11);
-		         width: 70;
+		         width: 110;
 		         yourself.
 	swatches := aPalette sampleColors collect: [ :each |
 		            BlElement new
