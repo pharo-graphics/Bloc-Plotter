@@ -16,10 +16,11 @@ BpFigure scriptBar.
 BpFigure scriptStem.
 BpFigure scriptFillBetween.
 BpFigure scriptStackPlot.
+BpFigure scriptStairs.
 BpFigure scriptSave
 ```
 
-More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween` and `BpStackPlot`.
+More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot` and `BpStairs`.
 
 ## Design Rationale
 
@@ -167,6 +168,14 @@ BpFigure class >> scriptStackPlot [
 
 	<example>
 	^ BpStackPlot exampleWorldPopulation show: 'stackplot'
+]
+
+{ #category : 'script' }
+BpFigure class >> scriptStairs [
+	"Show the figure of the gallery stairs demo: step histograms, filled and horizontal steps (see `BpStairs`)."
+
+	<example>
+	^ BpStairs exampleStairsDemo show: 'stairs'
 ]
 
 { #category : 'script' }
