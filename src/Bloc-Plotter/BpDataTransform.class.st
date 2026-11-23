@@ -1,5 +1,5 @@
 "
-I convert data coordinates to the pixels of a plot area: x goes right, y goes up, each axis on a linear or log scale. Patches and ticks ask me `pointFor:` or `rectangleFor:`.
+I convert data coordinates to the pixels of a plot area: x goes right, y goes up, each axis on a linear or log scale. Patches and ticks ask me `pointFor:`, bars ask me `pixelBoundsOf:`. My subclass `BpPolarTransform` takes the x as an angle and the y as a radius.
 
 ## Examples
 
@@ -9,8 +9,8 @@ BpDataTransform instanceLogScale
 
 ## Usage
 
-1. `BpChart>>initialize` creates me and gives me to its `BpPlotArea`.
-2. `BpChart>>rebuild` sets my limits and scales, and `BpChart>>plotBounds:` my extent.
+1. `BpChart>>newTransform` creates me, and `BpChart>>initialize` gives me to its `BpPlotArea`.
+2. `BpChart>>rebuild` sets my limits and scales and lets me prepare the patches (`preparePatch:`), and `BpChart>>plotBounds:` my extent.
 3. `BpRectanglePatch>>pixelBoundsWith:`, `BpPolygonPatch>>pixelBoundsWith:` and `BpTick>>layoutIn:context:` convert their data coordinates with me.
 
 - I am mutable and shared by the chart and its plot area: points computed from me are valid until the next rebuild or layout.
@@ -92,6 +92,13 @@ BpDataTransform >> initialize [
 ]
 
 { #category : 'transforming' }
+BpDataTransform >> pixelBoundsOf: aRectanglePatch [
+	"Answer the pixel bounds of aRectanglePatch in the plot area."
+
+	^ self rectangleFor: aRectanglePatch dataBounds
+]
+
+{ #category : 'transforming' }
 BpDataTransform >> pointFor: aDataPoint [
 	"Answer the pixel position in the plot area of aDataPoint, the y axis going up."
 
@@ -99,6 +106,13 @@ BpDataTransform >> pointFor: aDataPoint [
 	xFraction := self fractionOf: aDataPoint x limits: xLimits scale: xScale.
 	yFraction := self fractionOf: aDataPoint y limits: yLimits scale: yScale.
 	^ xFraction * extent x @ (1 - yFraction * extent y)
+]
+
+{ #category : 'transforming' }
+BpDataTransform >> preparePatch: aPatch [
+	"Give aPatch the shape it needs to be shown with me, before it is measured. Nothing to do: patches are built for an x and a y axis."
+
+	
 ]
 
 { #category : 'transforming' }

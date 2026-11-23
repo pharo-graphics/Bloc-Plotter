@@ -9,7 +9,7 @@ BpTick instanceXTick
 
 ## Usage
 
-1. `BpChart>>newTicksOn:` creates me with `axis:location:text:`, and `BpChart>>rebuildTicks` adds my `elements` to the chart.
+1. `BpChart>>newTickOn:location:text:` creates me with `axis:location:text:`, and `BpChart>>rebuildTicks` adds my `elements` to the chart.
 2. `BpChartLayout` sends me `layoutIn:context:` to place my mark and my label from the data transform of the chart.
 3. The chart replaces me at each rebuild.
 "

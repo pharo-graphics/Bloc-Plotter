@@ -84,6 +84,26 @@ BpFigureTest >> testPaletteIsGivenToAllCharts [
 ]
 
 { #category : 'tests' }
+BpFigureTest >> testRowsColumnsChartClassCreatesChartsOfThatClass [
+
+	| figure |
+	figure := BpFigure rows: 1 columns: 2 chartClass: BpPolarChart.
+	self assert: figure charts size equals: 2.
+	self assert: (figure charts allSatisfy: [ :each | each class = BpPolarChart ])
+]
+
+{ #category : 'tests' }
+BpFigureTest >> testRowsColumnsChartClassGivesThePalette [
+
+	| figure palette |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	figure palette: palette.
+	figure rows: 1 columns: 2 chartClass: BpPolarChart.
+	self assert: (figure charts allSatisfy: [ :each | each palette == palette ])
+]
+
+{ #category : 'tests' }
 BpFigureTest >> testRowsColumnsCreatesAGridOfCharts [
 
 	self assert: (BpFigure rows: 2 columns: 3) charts size equals: 6

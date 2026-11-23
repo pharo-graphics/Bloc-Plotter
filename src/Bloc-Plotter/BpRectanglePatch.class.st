@@ -1,5 +1,5 @@
 "
-I am a bar: the rectangle of one bin of one dataset of a `BpHistogram`, or of one bar of a `BpBarPlot`. I know the index of my `bin` (the index of the bar in a bar plot) and my `amount`, the count or density of the bin, or the height of the bar. See `BpPatch` for the life cycle.
+I am a bar: the rectangle of one bin of one dataset of a `BpHistogram`, or of one bar of a `BpBarPlot`. I know the index of my `bin` (the index of the bar in a bar plot) and my `amount`, the count or density of the bin, or the height of the bar. In a `BpPolarChart` I am a sector. See `BpPatch` for the life cycle.
 
 ## Examples
 
@@ -44,6 +44,13 @@ BpRectanglePatch >> amount: aNumber [
 	amount := aNumber
 ]
 
+{ #category : 'layout' }
+BpRectanglePatch >> bePolar [
+	"Become a sector; the polar transform gives it its angles and radii when I am measured."
+
+	self geometry: BlAnnulusSectorGeometry new
+]
+
 { #category : 'accessing' }
 BpRectanglePatch >> bin [
 	"Answer the index of the bin I show."
@@ -72,5 +79,5 @@ BpRectanglePatch >> dataBounds: aRectangle [
 { #category : 'layout' }
 BpRectanglePatch >> pixelBoundsWith: aTransform [
 
-	^ aTransform rectangleFor: dataBounds
+	^ aTransform pixelBoundsOf: self
 ]

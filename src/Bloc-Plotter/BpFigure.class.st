@@ -18,10 +18,11 @@ BpFigure exampleStackPlot.
 BpFigure exampleStairs.
 BpFigure exampleViolinPlot.
 BpFigure exampleErrorBar.
-BpFigure exampleBoxPlot
+BpFigure exampleBoxPlot.
+BpFigure examplePolarBar
 ```
 
-More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs`, `BpViolinPlot` and `BpErrorBar`.
+More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatterPlot`, `BpLine`, `BpBoxPlot`, `BpBarPlot`, `BpStemPlot`, `BpFillBetween`, `BpStackPlot`, `BpStairs`, `BpViolinPlot`, `BpErrorBar` and `BpPolarChart`.
 
 ## Design Rationale
 
@@ -32,7 +33,7 @@ More figures of the gallery are shown by the scripts of `BpHistogram`, `BpScatte
 
 ## Usage
 
-1. `rows:columns:` (also on the class side) creates my charts, row by row, in a `BlGridLayout`.
+1. `rows:columns:` (also on the class side) creates my charts, row by row, in a `BlGridLayout`; `rows:columns:chartClass:` creates charts of another class, such as `BpPolarChart`.
 2. Plots are added to my charts (`chartAtRow:column:`, `charts`), for example with `BpChart>>hist:`.
 3. `show:` opens me in a space of my extent.
 
@@ -176,6 +177,14 @@ BpFigure class >> examplePlot [
 
 	<example>
 	^ self instanceLinePlotType show: 'plot'
+]
+
+{ #category : 'examples' }
+BpFigure class >> examplePolarBar [
+	"Show the figure of the gallery bar chart on polar axis: bars of random radii and widths around a center (see `BpPolarChart`)."
+
+	<example>
+	^ self instancePolarBar show: 'polar_bar'
 ]
 
 { #category : 'examples' }
@@ -1161,6 +1170,43 @@ BpFigure class >> instanceMultiHistStyles [
 	^ figure
 ]
 
+{ #category : 'instances - polar' }
+BpFigure class >> instancePolarArtists [
+	"A line, a scatter plot, a histogram and a filled curve in polar charts: the angles are the x of the artists, the radii their y."
+
+	<sampleInstance>
+	| random figure angles |
+	random := Random seed: 19680801.
+	figure := self rows: 2 columns: 2 chartClass: BpPolarChart.
+	figure extent: 800 @ 800.
+	angles := (0 to: 360) collect: [ :each | each degreesToRadians ].
+	(figure chartAtRow: 1 column: 1)
+		plotX: angles y: (angles collect: [ :each | 1 + (4 * each) cos ]);
+		title: 'plotX:y:'.
+	BpPolarChart showPointsIn: (figure chartAtRow: 1 column: 2) random: random.
+	BpPolarChart showHistogramIn: (figure chartAtRow: 2 column: 1) random: random.
+	((figure chartAtRow: 2 column: 2) fillBetweenX: angles y1: (angles collect: [ :each | 2 + (3 * each) sin ])) alpha: 0.5.
+	(figure chartAtRow: 2 column: 2) title: 'fillBetweenX:y1:'.
+	^ figure
+]
+
+{ #category : 'instances - polar' }
+BpFigure class >> instancePolarBar [
+	"Gallery: Bar chart on polar axis (polar_bar): twenty bars of random radii and widths, colored by their radius through viridis."
+
+	<sampleInstance>
+	| random count radii figure |
+	random := Random seed: 19680801.
+	count := 20.
+	radii := (1 to: count) collect: [ :each | 10 * random next ].
+	figure := self rows: 1 columns: 1 chartClass: BpPolarChart.
+	(figure charts first barX: ((0 to: count - 1) collect: [ :each | Float twoPi * each / count ]) height: radii)
+		width: ((1 to: count) collect: [ :each | Float pi / 4 * random next ]);
+		color: (radii collect: [ :each | BpInterpolatedPalette viridis colorAt: each / 10 ]);
+		alpha: 0.5.
+	^ figure
+]
+
 { #category : 'instances - scatter plot' }
 BpFigure class >> instanceScatter [
 	"Gallery: Scatter plot (scatter): random points with random sizes and colors."
@@ -1546,6 +1592,15 @@ BpFigure class >> rows: aRowCount columns: aColumnCount [
 		  yourself
 ]
 
+{ #category : 'instance creation' }
+BpFigure class >> rows: aRowCount columns: aColumnCount chartClass: aChartClass [
+	"Answer a figure with a grid of charts that are instances of aChartClass, `BpChart` or one of its subclasses."
+
+	^ self new
+		  rows: aRowCount columns: aColumnCount chartClass: aChartClass;
+		  yourself
+]
+
 { #category : 'scripts' }
 BpFigure class >> scriptSave [
 	"Save the histtypes figure of the gallery as SVG and PDF (vector graphics) and as PNG at 200 dots per inch, in the image directory, and inspect the files."
@@ -1637,6 +1692,13 @@ BpFigure >> rows [
 BpFigure >> rows: aRowCount columns: aColumnCount [
 	"Replace my charts by a grid of aRowCount by aColumnCount new charts."
 
+	self rows: aRowCount columns: aColumnCount chartClass: BpChart
+]
+
+{ #category : 'accessing' }
+BpFigure >> rows: aRowCount columns: aColumnCount chartClass: aChartClass [
+	"Replace my charts by a grid of aRowCount by aColumnCount new instances of aChartClass, `BpChart` or one of its subclasses."
+
 	rows := aRowCount.
 	columns := aColumnCount.
 	self removeChildren.
@@ -1645,7 +1707,7 @@ BpFigure >> rows: aRowCount columns: aColumnCount [
 		 cellSpacing: 4;
 		 yourself).
 	charts := (1 to: aRowCount * aColumnCount) collect: [ :each |
-		          BpChart new
+		          aChartClass new
 			          palette: palette;
 			          yourself ].
 	self addChildren: charts

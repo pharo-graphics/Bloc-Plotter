@@ -42,8 +42,9 @@ BpChartLayout >> layout: aChart in: aRectangle context: aBlElementBoundsUpdater 
 	title := aChart titleElement.
 	title
 		applyLayoutIn:
-		(plot center x - (title measuredExtent x / 2) @ (plot top - 6 - title measuredExtent y) extent: title measuredExtent)
-		context: aBlElementBoundsUpdater
+		(plot center x - (title measuredExtent x / 2) @ (aChart titleBottom - title measuredExtent y) extent: title measuredExtent)
+		context: aBlElementBoundsUpdater.
+	aChart layoutLegendContext: aBlElementBoundsUpdater
 ]
 
 { #category : 'measure' }

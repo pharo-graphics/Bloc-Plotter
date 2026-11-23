@@ -50,6 +50,13 @@ BpPatch >> artist: anArtist [
 	artist := anArtist
 ]
 
+{ #category : 'layout' }
+BpPatch >> bePolar [
+	"Take the shape I need in a polar chart. Nothing to do when my shape is made of points: the transform moves them."
+
+	
+]
+
 { #category : 'accessing' }
 BpPatch >> dataBounds [
 	"Answer the rectangle I cover in data coordinates."

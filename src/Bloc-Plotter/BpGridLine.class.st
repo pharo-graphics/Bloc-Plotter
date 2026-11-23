@@ -13,7 +13,7 @@ BpGridLine instanceVertical
 
 ## Usage
 
-1. `BpChart>>rebuild` creates me with `axis:location:` for each tick when `BpChart>>grid:` was sent true, and gives me to its `BpPlotArea` (`gridLines:`).
+1. `BpChart>>newGridLineFor:` creates me with `axis:location:` for each tick when `BpChart>>grid:` was sent true, and gives me to its `BpPlotArea` (`gridLines:`).
 2. `BpPlotAreaLayout` places me with `boundsWith:in:`; the chart replaces me at each rebuild.
 "
 Class {

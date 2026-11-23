@@ -13,11 +13,12 @@ BpChart instanceHistogram
 - My scales follow my artists (`BpArtist>>logAxes`): a histogram with `log: true` puts its value axis on a log scale.
 - Ticks are placed at fixed locations when given (`xTicks:`, `yTicks:`), else where an artist manages them (`BpArtist>>managedTicksOn:`: a box plot puts one at each box, a bar plot one at each category), otherwise their number is a setting (`xTickCount`, 6 by default, and `yTickCount`, 8) instead of depending on the axis length: computing it from my size would change my children during the layout pass and trigger another layout.
 - My title is a `BpText`, so a line break gives a title on several lines.
+- The transform, the ticks, the grid lines and the place of the legend are created or chosen by methods of their own (`newTransform`, `newTickOn:location:text:`, `newGridLineFor:`, `showLegend:`), which `BpPolarChart` redefines.
 - I have one slot per setting, hence many slots.
 
 ## Usage
 
-1. `BpFigure>>rows:columns:` creates me; I can also be shown alone.
+1. `BpFigure>>rows:columns:chartClass:` creates me; I can also be shown alone.
 2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:` and `errorBarX:y:xErr:yErr:` create an artist, and `addArtist:` gives it the next colors of my palette (`nextColors:`). `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpChartLayout` computes my plot bounds from the size of my tick labels and title, which gives its extent to my data transform.
@@ -282,7 +283,7 @@ BpChart >> initialize [
 	palette := BpPalette default.
 	colorIndex := 0.
 	plotBounds := 0 @ 0 corner: 1 @ 1.
-	transform := BpDataTransform new.
+	transform := self newTransform.
 	plotArea := BpPlotArea new
 		            dataTransform: transform;
 		            yourself.
@@ -297,6 +298,13 @@ BpChart >> initialize [
 			plotArea.
 			titleElement }.
 	self rebuild
+]
+
+{ #category : 'layout' }
+BpChart >> layoutLegendContext: aBlElementBoundsUpdater [
+	"Place my legend. Nothing to do: my plot area places it."
+
+	
 ]
 
 { #category : 'plotting' }
@@ -365,6 +373,21 @@ BpChart >> managedTicksOn: anAxis [
 ]
 
 { #category : 'private - building' }
+BpChart >> newGridLineFor: aTick [
+
+	^ BpGridLine axis: aTick axis location: aTick location
+]
+
+{ #category : 'private - building' }
+BpChart >> newGridLines [
+	"Answer a line for each of my ticks when my grid is shown."
+
+	^ showGrid
+		  ifTrue: [ ticks collect: [ :each | self newGridLineFor: each ] ]
+		  ifFalse: [ #(  ) ]
+]
+
+{ #category : 'private - building' }
 BpChart >> newLegend [
 
 	| entries |
@@ -372,6 +395,12 @@ BpChart >> newLegend [
 	entries := artists flatCollect: [ :each | each legendEntries ].
 	entries ifEmpty: [ ^ nil ].
 	^ BpLegend entries: entries
+]
+
+{ #category : 'private - building' }
+BpChart >> newTickOn: anAxis location: aNumber text: aString [
+
+	^ BpTick axis: anAxis location: aNumber text: aString
 ]
 
 { #category : 'private - building' }
@@ -388,7 +417,13 @@ BpChart >> newTicksOn: anAxis [
 		          ifNil: [
 		          managed ifNil: [ self defaultLabelsFor: locations on: anAxis ] ifNotNil: [ managed collect: [ :each | each value ] ] ]
 		          ifNotNil: [ locations collect: [ :each | (formatter value: each) asString ] ].
-	^ locations asArray with: labels asArray collect: [ :location :text | BpTick axis: anAxis location: location text: text ]
+	^ locations asArray with: labels asArray collect: [ :location :text | self newTickOn: anAxis location: location text: text ]
+]
+
+{ #category : 'private - building' }
+BpChart >> newTransform [
+
+	^ BpDataTransform new
 ]
 
 { #category : 'plotting' }
@@ -462,18 +497,19 @@ BpChart >> plotX: xValues y: yValues format: aString [
 BpChart >> rebuild [
 	"Recompute my scales and limits from my artists, then show their patches, my legend, my ticks and my grid."
 
+	| patches |
 	self updateScales.
 	transform
 		xScale: xScale;
 		yScale: yScale;
 		xLimits: (xLimits ifNil: [ self autoScale: #x ]);
 		yLimits: (yLimits ifNil: [ self autoScale: #y ]).
-	plotArea patches: self patches.
-	plotArea legend: self newLegend.
+	patches := self patches.
+	patches do: [ :each | transform preparePatch: each ].
+	plotArea patches: patches.
+	self showLegend: self newLegend.
 	self rebuildTicks.
-	plotArea gridLines: (showGrid
-		 ifTrue: [ ticks collect: [ :each | BpGridLine axis: each axis location: each location ] ]
-		 ifFalse: [ #(  ) ])
+	plotArea gridLines: self newGridLines
 ]
 
 { #category : 'private - building' }
@@ -498,6 +534,13 @@ BpChart >> scatterX: xValues y: yValues [
 	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured with s:, c:, marker:, alpha:, ... (see `BpScatterPlot`)."
 
 	^ self addArtist: (BpScatterPlot x: xValues y: yValues)
+]
+
+{ #category : 'private - building' }
+BpChart >> showLegend: aLegendOrNil [
+	"Show aLegendOrNil instead of my current legend, in my plot area."
+
+	plotArea legend: aLegendOrNil
 ]
 
 { #category : 'plotting' }
@@ -582,6 +625,13 @@ BpChart >> title: aString [
 	"Set the title shown above my plot area; a line break gives a title on several lines."
 
 	titleElement text: (aString asRopedText fontSize: 14)
+]
+
+{ #category : 'layout' }
+BpChart >> titleBottom [
+	"Answer the y below my title, above my plot area."
+
+	^ plotBounds top - 6
 ]
 
 { #category : 'accessing' }
