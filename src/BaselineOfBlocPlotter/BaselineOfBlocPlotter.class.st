@@ -25,7 +25,7 @@ BaselineOfBlocPlotter >> baseline: spec [
 
 	<baseline>
 	spec for: #common do: [
-		spec baseline: 'Bloc' with: [ spec repository: 'github://pharo-graphics/Bloc:v3.0.0/src' ].
+		spec baseline: 'Bloc' with: [ spec repository: 'github://pharo-graphics/Bloc:v3.1.0/src' ].
 		spec
 			package: 'Bloc-Plotter' with: [ spec requires: #( 'Bloc' ) ];
 			package: 'Bloc-Plotter-Tests' with: [ spec requires: #( 'Bloc-Plotter' ) ].
