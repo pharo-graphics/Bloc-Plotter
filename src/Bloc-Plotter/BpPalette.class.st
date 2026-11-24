@@ -52,13 +52,14 @@ BpPalette class >> default [
 
 { #category : 'private - demo' }
 BpPalette class >> demoOpen: aCollectionOfPalettes title: aString [
-	"Open a space showing each palette on a row."
+	"Open a space showing each palette on a row, large enough for the palette with the most sample colors."
 
-	| space |
+	| space swatchCount |
+	swatchCount := (aCollectionOfPalettes collect: [ :each | each sampleColors size ]) max.
 	space := BlSpace new.
 	space
 		title: aString;
-		extent: 480 @ (aCollectionOfPalettes size * 18 + 20).
+		extent: (swatchCount * 12 + 186 max: 480) @ (aCollectionOfPalettes size * 18 + 20).
 	space root
 		layout: (BlLinearLayout vertical cellSpacing: 3);
 		padding: (BlInsets all: 8);
@@ -74,12 +75,12 @@ BpPalette class >> demoRowOf: aPalette [
 	| label swatches |
 	label := BlTextElement new
 		         text: (aPalette name asRopedText fontSize: 11);
-		         width: 110;
+		         width: 170;
 		         yourself.
 	swatches := aPalette sampleColors collect: [ :each |
 		            BlElement new
 			            background: each;
-			            extent: 18 @ 14;
+			            extent: 12 @ 14;
 			            yourself ].
 	^ BlElement new
 		  layout: BlLinearLayout horizontal;
