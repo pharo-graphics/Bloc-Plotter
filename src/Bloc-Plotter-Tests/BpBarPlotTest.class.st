@@ -36,6 +36,16 @@ BpBarPlotTest >> testAlphaMakesTheBarsTransparent [
 		  yourself) patches first background paint color alpha closeTo: 0.5 precision: 0.01)
 ]
 
+{ #category : 'tests - instances' }
+BpBarPlotTest >> testBarhYWidthAnswersHorizontalBars [
+
+	| bars |
+	bars := BpBarPlot barhY: #( 1 2 ) width: #( 3 4 ).
+	self assert: bars orientation equals: #horizontal.
+	self assert: bars positions equals: #( 1 2 ).
+	self assert: bars patches second dataBounds corner x equals: 4
+]
+
 { #category : 'tests' }
 BpBarPlotTest >> testBarsAreBelowTheGrid [
 
@@ -211,6 +221,24 @@ BpBarPlotTest >> testHorizontalTicksAreOnTheYAxis [
 		        yourself.
 	self assert: (bars managedTicksOn: #x) isNil.
 	self assert: (bars managedTicksOn: #y) size equals: 3
+]
+
+{ #category : 'tests - instances' }
+BpBarPlotTest >> testInstanceHorizontalBarsLabelsTheYAxis [
+
+	self assert: (BpBarPlot instanceHorizontalBars managedTicksOn: #y) size equals: 5
+]
+
+{ #category : 'tests - instances' }
+BpBarPlotTest >> testInstancePlotTypeHasEightBars [
+
+	self assert: BpBarPlot instancePlotType patches size equals: 8
+]
+
+{ #category : 'tests - instances' }
+BpBarPlotTest >> testInstanceThreeBarsHasAPositionPerFruit [
+
+	self assert: BpBarPlot instanceThreeBars positions equals: #( 0 1 2 )
 ]
 
 { #category : 'tests' }

@@ -4,7 +4,9 @@ I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), 
 ## Examples
 
 ```
-BpChart instanceHistogram
+BpChart instanceHistogram.
+BpChart instanceGroupedBars.
+BpChart instanceStackedBars
 ```
 
 ## Design Rationale
@@ -18,8 +20,8 @@ BpChart instanceHistogram
 
 ## Usage
 
-1. `BpFigure>>rows:columns:chartClass:` creates me; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:` and `densityPlot:` create an artist, and `addArtist:` gives it the next colors of my palette (`nextColors:`). `palette:` changes the palette and recolors the artists already added.
+1. `BpFigure>>rows:columns:chartClass:` creates me, or I am built apart and placed with `BpFigure>>chartAtRow:column:put:`; I can also be shown alone.
+2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:` and `densityPlot:` create an artist, and `addArtist:` gives it the next colors of my palette (`nextColors:`) and answers it; it also adds an artist built apart, as `BpBarPlot class>>barX:height:`. `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`), color bars (`BpColorBar`, added by `addColorBarFor:`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpChartLayout` computes my plot bounds from the size of my tick labels, title and color bars, which gives its extent to my data transform.
 
@@ -64,6 +66,33 @@ Class {
 }
 
 { #category : 'instances' }
+BpChart class >> instanceGroupedBars [
+	"Gallery: Grouped bar chart with labels (barchart), without the bar labels: three bar plots shifted by their width; the middle one labels the ticks with the species."
+
+	<sampleInstance>
+	| species means chart width |
+	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
+	means := {
+		         ('Bill Depth' -> #( 18.35 18.43 14.98 )).
+		         ('Bill Length' -> #( 38.79 48.83 47.50 )).
+		         ('Flipper Length' -> #( 189.95 195.82 217.19 )) }.
+	chart := self new.
+	width := 0.25.
+	means withIndexDo: [ :each :index |
+		| offset |
+		offset := width * (index - 1).
+		(chart barX: ((0 to: 2) collect: [ :position | position + offset ]) height: each value)
+			width: width;
+			label: each key ].
+	chart artists second tickLabel: species.
+	chart
+		title: 'Penguin attributes by species';
+		yLimits: #( 0 250 );
+		legend.
+	^ chart
+]
+
+{ #category : 'instances' }
 BpChart class >> instanceHistogram [
 	"Answer a chart showing a histogram, with a title."
 
@@ -75,6 +104,30 @@ BpChart class >> instanceHistogram [
 		         yourself.
 	(chart hist: ((1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ])) bins: 20.
 	chart title: 'normal samples'.
+	^ chart
+]
+
+{ #category : 'instances' }
+BpChart class >> instanceStackedBars [
+	"Gallery: Stacked bar chart (bar_stacked): each bar plot starts on the tops of the previous one (bottom:)."
+
+	<sampleInstance>
+	| species weightCounts chart bottom |
+	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
+	weightCounts := {
+		                ('Below' -> #( 70 31 58 )).
+		                ('Above' -> #( 82 37 66 )) }.
+	chart := self new.
+	bottom := #( 0 0 0 ).
+	weightCounts do: [ :each |
+		(chart barX: species height: each value)
+			width: 0.5;
+			label: each key;
+			bottom: bottom.
+		bottom := bottom with: each value collect: [ :base :count | base + count ] ].
+	chart
+		title: 'Number of penguins with above average body mass';
+		legend.
 	^ chart
 ]
 

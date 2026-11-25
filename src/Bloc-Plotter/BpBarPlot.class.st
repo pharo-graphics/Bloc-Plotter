@@ -22,7 +22,7 @@ BpBarPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>barX:height:` and `BpChart>>barhY:width:` create me with my data (`x:height:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette.
+1. `BpChart>>barX:height:` and `BpChart>>barhY:width:` create me with my data (`x:height:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette. I can also be created apart with `BpBarPlot class>>barX:height:` or `barhY:width:`, and added with `BpChart>>addArtist:`.
 2. My chart reads my `stickyValuesOn:` (the bottoms), `managedTicksOn:` (categories or tick labels) and `logAxes` (the value axis when `log:` is true).
 
 - `positions`, `dataValues` and `patches` are the results of my last computation.
@@ -31,7 +31,7 @@ BpBarPlot exampleInteraction
 
 - I have one slot and setter per option, hence many slots.
 - Not supported yet: error bars (xerr, yerr, ecolor, capsize), hatches, bar labels.
-- I take a color of the palette even when `color:` is given, because my chart gives it to me before I am configured.
+- I take a color of the palette even when `color:` is given, because my chart gives it to me without looking at my settings.
 - My categories are my own: several bar plots in the same chart share positions only when their categories come in the same order.
 
 ## Invariants and Assumptions
@@ -63,12 +63,40 @@ Class {
 	#tag : 'Bar'
 }
 
+{ #category : 'instance creation' }
+BpBarPlot class >> barX: aCollectionOrValue height: aCollectionOrNumber [
+	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured with width:, bottom:, align:, color:, tickLabel:, ... (see `BpBarPlot`)."
+
+	^ self new
+		x: aCollectionOrValue 
+		height: aCollectionOrNumber;
+		yourself
+]
+
+{ #category : 'instance creation' }
+BpBarPlot class >> barhY: aCollectionOrValue width: aCollectionOrNumber [
+	"Answer horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, the horizontal counterpart of `barX:height:`."
+
+	^ self new
+		  orientation: #horizontal;
+		  x: aCollectionOrValue height: aCollectionOrNumber;
+		  yourself
+]
+
 { #category : 'examples' }
 BpBarPlot class >> exampleBarColors [
 	"Reproduce the gallery 'Bar color demo': one color and one legend label per bar."
 
 	<example>
-	^ BpFigure instanceBarColors show: 'bar_colors'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceBarColors.
+	chart
+		title: 'Fruit supply by kind and color';
+		legend.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'bar Colors'
 ]
 
 { #category : 'examples' }
@@ -76,7 +104,10 @@ BpBarPlot class >> exampleGrouped [
 	"Reproduce the gallery 'Grouped bar chart with labels', without the bar labels: three groups of three bars."
 
 	<example>
-	^ BpFigure instanceBarPlotGrouped show: 'barchart'
+	| figure |
+	figure := BpFigure new.
+	figure chartAtRow: 1 column: 1 put: BpChart instanceGroupedBars.
+	^ figure show: 'barchart'
 ]
 
 { #category : 'examples' }
@@ -84,7 +115,13 @@ BpBarPlot class >> exampleHorizontal [
 	"Reproduce the gallery 'Horizontal bar chart', without the error bars."
 
 	<example>
-	^ BpFigure instanceBarPlotHorizontal show: 'barh'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceHorizontalBars.
+	chart title: 'How fast do you want to go today?'.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'barh'
 ]
 
 { #category : 'examples' }
@@ -92,7 +129,20 @@ BpBarPlot class >> exampleInteraction [
 	"Interaction handlers on bars: hover a bar to highlight it, click it to see its category and height."
 
 	<example>
-	^ BpFigure instanceInteractiveBars show: 'Bar interaction'
+	| figure chart bars |
+	figure := BpFigure new.
+	chart := BpChart new.
+	bars := chart addArtist: self instanceThreeBars.
+	chart title: 'Click a bar'.
+	bars
+		whenPatch: BlMouseEnterEvent do: [ :event :bar | bar background: (chart palette colorAt: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :bar | bar background: (chart palette colorAt: 1) ];
+		whenPatch: BlClickEvent do: [ :event :bar |
+			chart title: ('{1}: {2}' format: {
+				 (bars x at: bar bin).
+				 bar amount }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Bar interaction'
 ]
 
 { #category : 'examples' }
@@ -100,7 +150,17 @@ BpBarPlot class >> examplePlotType [
 	"Reproduce the plot type bar(x, height)."
 
 	<example>
-	^ BpFigure instanceBarPlotType show: 'bar(x, height)'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instancePlotType.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7).
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'bar(x, height)'
 ]
 
 { #category : 'examples' }
@@ -108,17 +168,58 @@ BpBarPlot class >> exampleStacked [
 	"Reproduce the gallery 'Stacked bar chart': bars on top of each other with bottom:."
 
 	<example>
-	^ BpFigure instanceBarPlotStacked show: 'bar_stacked'
+	| figure |
+	figure := BpFigure new.
+	figure chartAtRow: 1 column: 1 put: BpChart instanceStackedBars.
+	^ figure show: 'bar_stacked'
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instanceBarColors [
+	"Gallery: Bar color demo (bar_colors): categories, one color and one label per bar; the underscore hides the second red label from the legend."
+
+	<sampleInstance>
+	| chartPlotter |
+	chartPlotter := self
+		barX: #( 'apple' 'blueberry' 'cherry' 'orange' ) 
+		height: #( 40 100 30 55 ).
+	chartPlotter
+		label: #( 'red' 'blue' '_red' 'orange' );
+		color: (#( 1 2 1 5 ) collect: [ :each | BpQualitativePalette set1 colorAt: each ]).
+	^ chartPlotter
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instanceHorizontalBars [
+	"Gallery: Horizontal bar chart (barh), without the error bars: the names label the ticks of the y axis, from top to bottom."
+
+	<sampleInstance>
+	| random people |
+	random := Random seed: 19680801.
+	people := #( 'Tom' 'Dick' 'Harry' 'Slim' 'Jim' ).
+	^ (self barhY: #( 4 3 2 1 0 ) width: (people collect: [ :each | 3 + (10 * random next) ]))
+		  tickLabel: people;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instancePlotType [
+	"Plot types: bar(x, height), eight bars one unit wide outlined in white."
+
+	<sampleInstance>
+	^ (self barX: ((0 to: 7) collect: [ :each | each + 0.5 ]) height: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ))
+		  width: 1;
+		  edgeColor: ((BpSequentialPalette greys: 9) colorAt: 1);
+		  lineWidth: 0.7;
+		  yourself
 ]
 
 { #category : 'instances' }
 BpBarPlot class >> instanceThreeBars [
-	"Answer three bars of fruits, in a new chart."
+	"Answer three bars of fruits."
 
 	<sampleInstance>
-	^ (BpChart new
-		   extent: 400 @ 300;
-		   yourself) barX: #( 'apple' 'blueberry' 'cherry' ) height: #( 40 100 30 )
+	^ self barX: #( 'apple' 'blueberry' 'cherry' ) height: #( 40 100 30 )
 ]
 
 { #category : 'accessing - options' }

@@ -224,6 +224,30 @@ BpChartTest >> testHorizontalHistogramsStickToZeroOnX [
 	self assert: chart xLimits first equals: 0
 ]
 
+{ #category : 'tests - instances' }
+BpChartTest >> testInstanceGroupedBarsAreSideBySide [
+
+	| artists |
+	artists := BpChart instanceGroupedBars artists.
+	self assert: artists first patches first dataBounds corner x equals: artists second patches first dataBounds origin x
+]
+
+{ #category : 'tests - instances' }
+BpChartTest >> testInstanceGroupedBarsHasABarPlotPerAttribute [
+
+	self
+		assert: (BpChart instanceGroupedBars artists collect: [ :each | each label ] as: Array)
+		equals: #( 'Bill Depth' 'Bill Length' 'Flipper Length' )
+]
+
+{ #category : 'tests - instances' }
+BpChartTest >> testInstanceStackedBarsStartOnTheTopsOfThePreviousOnes [
+
+	| artists |
+	artists := BpChart instanceStackedBars artists.
+	self assert: artists second patches first dataBounds origin y equals: artists first patches first dataBounds corner y
+]
+
 { #category : 'tests' }
 BpChartTest >> testLegendShowsTheLabels [
 

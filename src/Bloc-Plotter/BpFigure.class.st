@@ -1,5 +1,15 @@
 "
-I am a figure: a grid of `BpChart`. Plots are added to the charts answered by `chartAtRow:column:`, `show:` opens me, and `saveAsSVG:`, `saveAsPDF:` and `saveAsPNG:` save me.
+I am a figure: a grid of `BpChart`. I'm the page, and a `BpChart` is one plot on it. Both are BlElement
+  subclasses, but neither inherits from the other: a figure contains charts.
+
+```
+  BpFigure            	grid, palette, window, export
+   └─ BpChart (1..n)  	scales, limits, ticks, title, legend
+       └─ BpArtist    	histogram, bars, scatter, line…
+           └─ patches 	the shapes drawn
+```
+
+Plots are added to the charts answered by `chartAtRow:column:`, `chartAtRow:column:put:` places a chart of yours, `show:` opens me, and `saveAsSVG:`, `saveAsPDF:` and `saveAsPNG:` save me.
 
 ## Examples
 
@@ -32,6 +42,7 @@ More figures of the gallery are shown by the examples of `BpHistogram`, `BpScatt
 ## Design Rationale
 
 - Rows and columns are counted from 1, as Pharo collections: `chartAtRow: 1 column: 1` is the top left chart.
+- My palettes are handled by a `BpPaletteSource`: by default (`chartPersonalPalette`) each chart has its own palette, and after `uniquePalette:` all my charts take the same one, the ones I create or am given later too. `palette` answers the unique palette, and raises an error when each chart has its own.
 - My default extent is 640 by 480, so that the figures of the gallery keep their proportions. `figureExtent` answers the size asked with `extent:`: `show:` sizes its space with it, since `extent` is only known once I am laid out.
 
 - Each format has its own message, so the format never depends on the name of the file. SVG and PDF are vector graphics; `saveAsPNG:dpi:` sets the resolution of a PNG, 100 dots per inch giving my extent in pixels.
@@ -39,13 +50,14 @@ More figures of the gallery are shown by the examples of `BpHistogram`, `BpScatt
 ## Usage
 
 1. `rows:columns:` (also on the class side) creates my charts, row by row, in a `BlGridLayout`; `rows:columns:chartClass:` creates charts of another class, such as `BpPolarChart` or `BpKiviat`.
-2. Plots are added to my charts (`chartAtRow:column:`, `charts`), for example with `BpChart>>hist:`.
+2. Plots are added to my charts (`chartAtRow:column:`, `charts`), for example with `BpChart>>hist:`. A chart built apart replaces one of mine with `chartAtRow:column:put:`.
 3. `show:` opens me in a space of my extent.
 
 - I am mutable: plots can be added before or after I am shown, and `rows:columns:` replaces all my charts with what they show.
 
 ## Implementation Notes
 
+- Bloc keeps the array given to `addChildren:`, so my charts are added as a copy of my collection.
 - Saving uses the exporters of Bloc (`BAExporter`): they draw me on an Alexandrie canvas over a Cairo SVG, PDF or image surface, so what is saved is exactly what is shown. The SVG draws texts as glyph paths; the PDF keeps them as text.
 "
 Class {
@@ -57,7 +69,7 @@ Class {
 		'rows',
 		'columns',
 		'charts',
-		'palette'
+		'paletteSource'
 	],
 	#category : 'Bloc-Plotter-Chart',
 	#package : 'Bloc-Plotter',
@@ -162,7 +174,7 @@ BpFigure class >> exampleBar [
 	"Show the figure of the gallery bar color demo: one bar per category, with its own color and legend label (see `BpBarPlot`)."
 
 	<example>
-	^ self instanceBarColors show: 'bar'
+	^ BpBarPlot exampleBarColors
 ]
 
 { #category : 'examples' }
@@ -381,111 +393,6 @@ BpFigure class >> instanceArtistsInOneChart [
 		title: 'BpHistogram and BpScatterPlot';
 		legend;
 		grid: true.
-	^ figure
-]
-
-{ #category : 'instances - bar plot' }
-BpFigure class >> instanceBarColors [
-	"Gallery: Bar color demo (bar_colors): categories, one color and one label per bar; the underscore hides the second red label from the legend."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	(chart barX: #( 'apple' 'blueberry' 'cherry' 'orange' ) height: #( 40 100 30 55 ))
-		label: #( 'red' 'blue' '_red' 'orange' );
-		color: (#( 1 2 1 5 ) collect: [ :each | BpQualitativePalette set1 colorAt: each ]).
-	chart
-		title: 'Fruit supply by kind and color';
-		legend.
-	^ figure
-]
-
-{ #category : 'instances - bar plot' }
-BpFigure class >> instanceBarPlotGrouped [
-	"Gallery: Grouped bar chart with labels (barchart), without the bar labels: three bar plots shifted by their width; the middle one labels the ticks with the species."
-
-	<sampleInstance>
-	| species means figure chart width |
-	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
-	means := {
-		         ('Bill Depth' -> #( 18.35 18.43 14.98 )).
-		         ('Bill Length' -> #( 38.79 48.83 47.50 )).
-		         ('Flipper Length' -> #( 189.95 195.82 217.19 )) }.
-	figure := self new.
-	chart := figure charts first.
-	width := 0.25.
-	means withIndexDo: [ :each :index |
-		| offset |
-		offset := width * (index - 1).
-		(chart barX: ((0 to: 2) collect: [ :position | position + offset ]) height: each value)
-			width: width;
-			label: each key ].
-	chart artists second tickLabel: species.
-	chart
-		title: 'Penguin attributes by species';
-		yLimits: #( 0 250 );
-		legend.
-	^ figure
-]
-
-{ #category : 'instances - bar plot' }
-BpFigure class >> instanceBarPlotHorizontal [
-	"Gallery: Horizontal bar chart (barh), without the error bars: the names label the ticks of the y axis, from top to bottom."
-
-	<sampleInstance>
-	| random people figure chart |
-	random := Random seed: 19680801.
-	people := #( 'Tom' 'Dick' 'Harry' 'Slim' 'Jim' ).
-	figure := self new.
-	chart := figure charts first.
-	(chart barhY: #( 4 3 2 1 0 ) width: (people collect: [ :each | 3 + (10 * random next) ])) tickLabel: people.
-	chart title: 'How fast do you want to go today?'.
-	^ figure
-]
-
-{ #category : 'instances - bar plot' }
-BpFigure class >> instanceBarPlotStacked [
-	"Gallery: Stacked bar chart (bar_stacked): each bar plot starts on the tops of the previous one (bottom:)."
-
-	<sampleInstance>
-	| species weightCounts figure chart bottom |
-	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
-	weightCounts := {
-		                ('Below' -> #( 70 31 58 )).
-		                ('Above' -> #( 82 37 66 )) }.
-	figure := self new.
-	chart := figure charts first.
-	bottom := #( 0 0 0 ).
-	weightCounts do: [ :each |
-		(chart barX: species height: each value)
-			width: 0.5;
-			label: each key;
-			bottom: bottom.
-		bottom := bottom with: each value collect: [ :base :count | base + count ] ].
-	chart
-		title: 'Number of penguins with above average body mass';
-		legend.
-	^ figure
-]
-
-{ #category : 'instances - bar plot' }
-BpFigure class >> instanceBarPlotType [
-	"Plot types: bar(x, height), eight bars one unit wide outlined in white."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	(chart barX: ((0 to: 7) collect: [ :each | each + 0.5 ]) height: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ))
-		width: 1;
-		edgeColor: ((BpSequentialPalette greys: 9) colorAt: 1);
-		lineWidth: 0.7.
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7).
 	^ figure
 ]
 
@@ -1032,26 +939,6 @@ BpFigure class >> instanceHistogramTwoDistributions [
 	^ figure
 ]
 
-{ #category : 'instances - bar plot' }
-BpFigure class >> instanceInteractiveBars [
-	"Bars with interaction handlers: hovering a bar highlights it, clicking it shows its category and height in the title."
-
-	<sampleInstance>
-	| figure chart bars |
-	figure := self new.
-	chart := figure charts first.
-	bars := chart barX: #( 'apple' 'blueberry' 'cherry' 'orange' ) height: #( 40 100 30 55 ).
-	chart title: 'Click a bar'.
-	bars
-		whenPatch: BlMouseEnterEvent do: [ :event :bar | bar background: (chart palette colorAt: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :bar | bar background: (chart palette colorAt: 1) ];
-		whenPatch: BlClickEvent do: [ :event :bar |
-			chart title: ('{1}: {2}' format: {
-				 (bars x at: bar bin).
-				 bar amount }) ].
-	^ figure
-]
-
 { #category : 'instances - box plot' }
 BpFigure class >> instanceInteractiveBoxPlot [
 	"Three filled boxes: hovering a part outlines it in red, clicking a part shows the statistics of its box in the title."
@@ -1381,7 +1268,7 @@ BpFigure class >> instanceLineFormats [
 	| figure chart t |
 	t := (0 to: 24) collect: [ :index | index / 5 ].
 	figure := self new.
-	figure palette: BpQualitativePalette set1.
+	figure uniquePalette: BpQualitativePalette set1.
 	chart := figure charts first.
 	(chart plotX: t y: t format: '--') label: 'linear'.
 	(chart plotX: t y: (t collect: [ :each | each squared ]) format: 's') label: 'quadratic'.
@@ -1975,6 +1862,24 @@ BpFigure >> chartAtRow: aRowIndex column: aColumnIndex [
 ]
 
 { #category : 'accessing' }
+BpFigure >> chartAtRow: aRowIndex column: aColumnIndex put: aChart [
+	"Replace the chart in a row and a column, both counted from 1, by aChart, and give it my palette when it is unique."
+
+	| index |
+	index := columns * (aRowIndex - 1) + aColumnIndex.
+	self replaceChild: (charts at: index) with: aChart.
+	charts at: index put: aChart.
+	paletteSource givePaletteTo: aChart
+]
+
+{ #category : 'configuring' }
+BpFigure >> chartPersonalPalette [
+	"Let each of my charts have its own palette. The charts keep the one they have."
+
+	paletteSource := BpPersonalPalette new
+]
+
+{ #category : 'accessing' }
 BpFigure >> charts [
 	"Answer my charts, row by row."
 
@@ -2003,7 +1908,7 @@ BpFigure >> figureExtent [
 BpFigure >> initialize [
 
 	super initialize.
-	palette := BpPalette default.
+	paletteSource := BpPersonalPalette new.
 	self
 		background: Color white;
 		padding: (BlInsets all: 6);
@@ -2013,16 +1918,9 @@ BpFigure >> initialize [
 
 { #category : 'accessing' }
 BpFigure >> palette [
+	"Answer the palette of all my charts. Raise an error when each chart has its own."
 
-	^ palette
-]
-
-{ #category : 'accessing' }
-BpFigure >> palette: anEnumeratedPalette [
-	"Take the colors of all my charts from anEnumeratedPalette, the ones I create later too."
-
-	palette := anEnumeratedPalette.
-	charts do: [ :each | each palette: anEnumeratedPalette ]
+	^ paletteSource palette
 ]
 
 { #category : 'inspector extensions' }
@@ -2058,11 +1956,9 @@ BpFigure >> rows: aRowCount columns: aColumnCount chartClass: aChartClass [
 		 columnCount: aColumnCount;
 		 cellSpacing: 4;
 		 yourself).
-	charts := (1 to: aRowCount * aColumnCount) collect: [ :each |
-		          aChartClass new
-			          palette: palette;
-			          yourself ].
-	self addChildren: charts
+	charts := (1 to: aRowCount * aColumnCount) collect: [ :each | aChartClass new ].
+	charts do: [ :each | paletteSource givePaletteTo: each ].
+	self addChildren: charts copy
 ]
 
 { #category : 'private - saving' }
@@ -2124,4 +2020,12 @@ BpFigure >> show: aTitle [
 		show;
 		settle.
 	^ space
+]
+
+{ #category : 'configuring' }
+BpFigure >> uniquePalette: anEnumeratedPalette [
+	"Take the colors of all my charts from anEnumeratedPalette, the ones I get later too."
+
+	paletteSource := BpUniquePalette on: anEnumeratedPalette.
+	charts do: [ :each | paletteSource givePaletteTo: each ]
 ]

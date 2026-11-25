@@ -77,7 +77,7 @@ BpCubehelixPalette class >> exampleChart [
 	<example>
 	| figure chart |
 	figure := BpFigure rows: 1 columns: 1.
-	figure palette: self instanceFiveColors.
+	figure uniquePalette: self instanceFiveColors.
 	chart := figure charts first.
 	1 to: 5 do: [ :each | (chart plotX: (0 to: 10) y: ((0 to: 10) collect: [ :x | x * each ])) label: ('times {1}' format: { each }) ].
 	chart legend.

@@ -8,12 +8,49 @@ Class {
 	#package : 'Bloc-Plotter-Tests'
 }
 
+{ #category : 'tests - palette' }
+BpFigureTest >> testArtistsOfAChartAlreadyWithTheUniquePaletteAreNotRecomputed [
+
+	| figure palette chart bars patch |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	figure uniquePalette: palette.
+	chart := BpChart new.
+	chart palette: palette.
+	bars := chart barX: #( 1 2 ) height: #( 3 4 ).
+	patch := bars patches first.
+	figure chartAtRow: 1 column: 1 put: chart.
+	self assert: bars patches first identicalTo: patch
+]
+
+{ #category : 'tests - palette' }
+BpFigureTest >> testChartPersonalPaletteLeavesThePalettesOfTheCharts [
+
+	| figure palette |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	figure
+		uniquePalette: palette;
+		chartPersonalPalette.
+	self assert: figure charts first palette identicalTo: palette
+]
+
 { #category : 'tests' }
 BpFigureTest >> testChartsAreCountedRowByRow [
 
 	| figure |
 	figure := BpFigure rows: 2 columns: 3.
 	self assert: (figure chartAtRow: 2 column: 1) identicalTo: (figure charts at: 4)
+]
+
+{ #category : 'tests - placing charts' }
+BpFigureTest >> testChartsAreNotTheCollectionOfTheChildren [
+
+	| figure chart |
+	figure := BpFigure rows: 1 columns: 2.
+	chart := figure chartAtRow: 1 column: 1.
+	figure charts at: 1 put: BpChart new.
+	self assert: figure children first identicalTo: chart
 ]
 
 { #category : 'tests' }
@@ -62,7 +99,7 @@ BpFigureTest >> testNewChartsTakeTheFigurePalette [
 	| figure palette |
 	palette := BpQualitativePalette set1.
 	figure := BpFigure new.
-	figure palette: palette.
+	figure uniquePalette: palette.
 	figure rows: 2 columns: 1.
 	self assert: (figure charts allSatisfy: [ :each | each palette == palette ])
 ]
@@ -79,8 +116,116 @@ BpFigureTest >> testPaletteIsGivenToAllCharts [
 	| figure palette |
 	palette := BpQualitativePalette set1.
 	figure := BpFigure rows: 1 columns: 2.
-	figure palette: palette.
+	figure uniquePalette: palette.
 	self assert: (figure charts allSatisfy: [ :each | each palette == palette ])
+]
+
+{ #category : 'tests - palette' }
+BpFigureTest >> testPaletteIsTheUniqueOne [
+
+	| figure palette |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	figure uniquePalette: palette.
+	self assert: figure palette identicalTo: palette
+]
+
+{ #category : 'tests - palette errors' }
+BpFigureTest >> testPaletteRaisesAnErrorWhenEachChartHasItsOwn [
+
+	self should: [ BpFigure new palette ] raise: Error
+]
+
+{ #category : 'tests - placing charts' }
+BpFigureTest >> testPlacedChartIsAChildOfTheFigure [
+
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	figure chartAtRow: 1 column: 1 put: chart.
+	self assert: chart parent identicalTo: figure.
+	self assert: (figure chartAtRow: 1 column: 1) identicalTo: chart
+]
+
+{ #category : 'tests - palette' }
+BpFigureTest >> testPlacedChartKeepsItsPaletteAfterChartPersonalPalette [
+
+	| figure palette chart |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	figure
+		uniquePalette: BpQualitativePalette tab10;
+		chartPersonalPalette.
+	chart := BpChart new.
+	chart palette: palette.
+	figure chartAtRow: 1 column: 1 put: chart.
+	self assert: chart palette identicalTo: palette
+]
+
+{ #category : 'tests - palette' }
+BpFigureTest >> testPlacedChartKeepsItsPaletteByDefault [
+
+	| figure palette chart |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart palette: palette.
+	figure chartAtRow: 1 column: 1 put: chart.
+	self assert: chart palette identicalTo: palette
+]
+
+{ #category : 'tests - placing charts' }
+BpFigureTest >> testPlacedChartKeepsTheOrderOfTheCharts [
+
+	| figure chart first |
+	figure := BpFigure rows: 1 columns: 2.
+	first := figure chartAtRow: 1 column: 1.
+	chart := BpChart new.
+	figure chartAtRow: 1 column: 2 put: chart.
+	self assert: figure children asArray equals: {
+		first.
+		chart }.
+	self assert: figure charts asArray equals: {
+		first.
+		chart }
+]
+
+{ #category : 'tests - palette' }
+BpFigureTest >> testPlacedChartTakesTheUniquePalette [
+
+	| figure palette chart |
+	palette := BpQualitativePalette set1.
+	figure := BpFigure new.
+	figure uniquePalette: palette.
+	chart := BpChart new.
+	figure chartAtRow: 1 column: 1 put: chart.
+	self assert: chart palette identicalTo: palette
+]
+
+{ #category : 'tests - placing charts' }
+BpFigureTest >> testPlacedFirstChartKeepsTheOrderOfTheCharts [
+
+	| figure chart second |
+	figure := BpFigure rows: 1 columns: 2.
+	second := figure chartAtRow: 1 column: 2.
+	chart := BpChart new.
+	figure chartAtRow: 1 column: 1 put: chart.
+	self assert: figure children asArray equals: {
+		chart.
+		second }.
+	self assert: figure charts asArray equals: {
+		chart.
+		second }
+]
+
+{ #category : 'tests - placing charts' }
+BpFigureTest >> testReplacedChartHasNoParent [
+
+	| figure replaced |
+	figure := BpFigure new.
+	replaced := figure chartAtRow: 1 column: 1.
+	figure chartAtRow: 1 column: 1 put: BpChart new.
+	self deny: replaced hasParent
 ]
 
 { #category : 'tests' }
@@ -92,13 +237,13 @@ BpFigureTest >> testRowsColumnsChartClassCreatesChartsOfThatClass [
 	self assert: (figure charts allSatisfy: [ :each | each class = BpPolarChart ])
 ]
 
-{ #category : 'tests' }
+{ #category : 'tests - palette' }
 BpFigureTest >> testRowsColumnsChartClassGivesThePalette [
 
 	| figure palette |
 	palette := BpQualitativePalette set1.
 	figure := BpFigure new.
-	figure palette: palette.
+	figure uniquePalette: palette.
 	figure rows: 1 columns: 2 chartClass: BpPolarChart.
 	self assert: (figure charts allSatisfy: [ :each | each palette == palette ])
 ]
@@ -158,6 +303,19 @@ BpFigureTest >> testSaveAsSVGWritesVectorGraphics [
 		self assert: (contents includesSubstring: 'width="640" height="480"').
 		self assert: (contents includesSubstring: '<path').
 		self deny: (contents includesSubstring: '<image') ]
+]
+
+{ #category : 'tests - palette' }
+BpFigureTest >> testUniquePaletteRecolorsThePlacedChart [
+
+	| figure palette chart bars |
+	palette := BpQualitativePalette set1.
+	chart := BpChart new.
+	bars := chart barX: #( 1 2 ) height: #( 3 4 ).
+	figure := BpFigure new.
+	figure uniquePalette: palette.
+	figure chartAtRow: 1 column: 1 put: chart.
+	self assert: bars patches first background paint color equals: (palette colorAt: 1)
 ]
 
 { #category : 'tests - saving' }
