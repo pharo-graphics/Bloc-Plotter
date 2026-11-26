@@ -14,6 +14,18 @@ Class {
 }
 
 { #category : 'private' }
+BpLiveInspectionTest >> figureWithALine [
+	"Answer a figure whose only chart shows one line."
+
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: BpLine instanceSine.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure
+]
+
+{ #category : 'private' }
 BpLiveInspectionTest >> livePaneOf: anObject [
 
 	^ anObject inspectionLive: SpPresenterBuilder new
@@ -91,7 +103,7 @@ BpLiveInspectionTest >> testLiveElementOfAMarkerIsAPatchDrawingIt [
 BpLiveInspectionTest >> testLiveElementOfAPatchIsItsFigure [
 
 	| figure |
-	figure := BpFigure instanceLinePlotType.
+	figure := self figureWithALine.
 	self assert: figure charts first artists first patches first liveElement identicalTo: figure
 ]
 
@@ -99,7 +111,7 @@ BpLiveInspectionTest >> testLiveElementOfAPatchIsItsFigure [
 BpLiveInspectionTest >> testLiveElementOfAnArtistIsItsFigure [
 
 	| figure |
-	figure := BpFigure instanceLinePlotType.
+	figure := self figureWithALine.
 	self assert: figure charts first artists first liveElement identicalTo: figure
 ]
 
@@ -159,7 +171,7 @@ BpLiveInspectionTest >> testLivePaneFollowsItsSizeInAMorph [
 BpLiveInspectionTest >> testLivePaneOfAPatchShowsItsFigure [
 
 	| figure pane |
-	figure := BpFigure instanceLinePlotType.
+	figure := self figureWithALine.
 	pane := self livePaneOf: figure charts first artists first patches first.
 	self assert: (pane blocElement children includes: figure)
 ]

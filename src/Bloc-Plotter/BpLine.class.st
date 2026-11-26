@@ -4,6 +4,7 @@ I am a line plot of a `BpChart` (`BpChart>>plotX:y:`): a line through points giv
 ## Examples
 
 ```
+BpLine exampleSine.
 BpLine examplePlotType.
 BpLine exampleFormats
 ```
@@ -17,7 +18,7 @@ BpLine exampleFormats
 
 ## Usage
 
-1. `BpChart>>plotX:y:` and `BpChart>>plotX:y:format:` create me and add me to the chart; see `BpArtist` for the rest of the life cycle. `BpErrorBar` adds error bars to my points.
+1. `BpLine class>>x:y:` creates me; `BpChart>>plotX:y:` and `BpChart>>plotX:y:format:` create me with it and add me to the chart, as `BpChart>>addArtist:` does for a line created apart; see `BpArtist` for the rest of the life cycle. `BpErrorBar` adds error bars to my points.
 2. My legend entry (`legendEntries`) is a short piece of my line with one marker in its middle.
 
 ## Invariants and Assumptions
@@ -70,7 +71,10 @@ BpLine class >> exampleFormats [
 	"Show three curves drawn with format strings (see `BpLine>>format:`) and their legend."
 
 	<example>
-	^ BpFigure instanceLineFormats show: 'plot format strings'
+	| figure |
+	figure := BpFigure new.
+	figure chartAtRow: 1 column: 1 put: BpChart instanceLineFormats.
+	^ figure show: 'plot format strings'
 ]
 
 { #category : 'examples' }
@@ -78,7 +82,23 @@ BpLine class >> examplePlotType [
 	"Show the figure of the plot type page: markers only, a line, and a line with markers."
 
 	<example>
-	^ BpFigure instanceLinePlotType show: 'plot'
+	| figure |
+	figure := BpFigure new.
+	figure chartAtRow: 1 column: 1 put: BpChart instanceLinePlotType.
+	^ figure show: 'plot'
+]
+
+{ #category : 'examples' }
+BpLine class >> exampleSine [
+	"Show one line: a sine with a circle at each point."
+
+	<example>
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceSine.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'sine'
 ]
 
 { #category : 'format' }

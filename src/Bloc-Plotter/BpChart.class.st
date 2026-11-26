@@ -6,7 +6,9 @@ I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), 
 ```
 BpChart instanceHistogram.
 BpChart instanceGroupedBars.
-BpChart instanceStackedBars
+BpChart instanceStackedBars.
+BpChart instanceLineFormats.
+BpChart instanceLinePlotType
 ```
 
 ## Design Rationale
@@ -104,6 +106,47 @@ BpChart class >> instanceHistogram [
 		         yourself.
 	(chart hist: ((1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ])) bins: 20.
 	chart title: 'normal samples'.
+	^ chart
+]
+
+{ #category : 'instances' }
+BpChart class >> instanceLineFormats [
+	"Three curves drawn with format strings ('--', 's', '^') in the colors of the palette set1, and a legend."
+
+	<sampleInstance>
+	| chart t |
+	t := (0 to: 24) collect: [ :index | index / 5 ].
+	chart := self new.
+	chart palette: BpQualitativePalette set1.
+	(chart plotX: t y: t format: '--') label: 'linear'.
+	(chart plotX: t y: (t collect: [ :each | each squared ]) format: 's') label: 'quadratic'.
+	(chart plotX: t y: (t collect: [ :each | each raisedTo: 3 ]) format: '^') label: 'cubic'.
+	chart
+		title: 'Format strings';
+		legend.
+	^ chart
+]
+
+{ #category : 'instances' }
+BpChart class >> instanceLinePlotType [
+	"Plot types: plot(x, y), markers only, a line, and a line with markers, with fixed limits and ticks."
+
+	<sampleInstance>
+	| chart x y x2 y2 |
+	x := (0 to: 99) collect: [ :index | index * 10 / 99.0 ].
+	y := x collect: [ :each | 4 + (2 * each) sin ].
+	x2 := (0 to: 24) collect: [ :index | index * 10 / 24.0 ].
+	y2 := x2 collect: [ :each | 4 + (2 * each) sin ].
+	chart := self new.
+	(chart plotX: x2 y: (y2 collect: [ :each | each + 2.5 ]) format: 'x') markerEdgeWidth: 2.
+	(chart plotX: x y: y) lineWidth: 2.
+	(chart plotX: x2 y: (y2 collect: [ :each | each - 2.5 ]) format: 'o-') lineWidth: 2.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7);
+		grid: true.
 	^ chart
 ]
 

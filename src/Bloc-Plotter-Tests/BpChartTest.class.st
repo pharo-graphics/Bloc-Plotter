@@ -241,6 +241,26 @@ BpChartTest >> testInstanceGroupedBarsHasABarPlotPerAttribute [
 ]
 
 { #category : 'tests - instances' }
+BpChartTest >> testInstanceLineFormatsDrawsThreeLinesInTheColorsOfSet1 [
+
+	| chart |
+	chart := BpChart instanceLineFormats.
+	self assert: chart palette name equals: 'set1'.
+	self
+		assert: ((chart artists flatCollect: [ :each | each legendEntries ]) collect: [ :each | each key ] as: Array)
+		equals: #( 'linear' 'quadratic' 'cubic' )
+]
+
+{ #category : 'tests - instances' }
+BpChartTest >> testInstanceLinePlotTypeDrawsThreeLinesInFixedLimits [
+
+	| chart |
+	chart := BpChart instanceLinePlotType.
+	self assert: chart artists size equals: 3.
+	self assert: chart xLimits equals: #( 0 8 )
+]
+
+{ #category : 'tests - instances' }
 BpChartTest >> testInstanceStackedBarsStartOnTheTopsOfThePreviousOnes [
 
 	| artists |
