@@ -22,7 +22,7 @@ BpBarPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>barX:height:` and `BpChart>>barhY:width:` create me with my data (`x:height:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette. I can also be created apart with `BpBarPlot class>>barX:height:` or `barhY:width:`, and added with `BpChart>>addArtist:`.
+1. `BpChart>>barX:height:` and `BpChart>>barhY:width:` create me with my data (`x:height:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette. `BpChart` creates me with `BpBarPlot class>>barX:height:` or `barhY:width:`, which also create me apart, to be added with `BpChart>>addArtist:`.
 2. My chart reads my `stickyValuesOn:` (the bottoms), `managedTicksOn:` (categories or tick labels) and `logAxes` (the value axis when `log:` is true).
 
 - `positions`, `dataValues` and `patches` are the results of my last computation.

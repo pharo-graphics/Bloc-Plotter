@@ -74,6 +74,15 @@ BpStemPlotTest >> testBottomMovesTheStemsAndTheBaseline [
 		(3 @ 1) }
 ]
 
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testChartStemAddsAStemPlotToTheChart [
+
+	| chart stems |
+	chart := BpChart new.
+	stems := chart stem: #( 4 -1 2 ).
+	self assert: chart artists asArray equals: { stems }
+]
+
 { #category : 'tests' }
 BpStemPlotTest >> testChartStemLocationsHeadsAddsAStemPlot [
 
@@ -161,6 +170,30 @@ BpStemPlotTest >> testHorizontalSwapsTheCoordinates [
 	self assert: stems baseLine dataVertices equals: {
 		(0 @ 1).
 		(0 @ 3) }
+]
+
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testInstanceExpSineHas41Stems [
+
+	self assert: BpStemPlot instanceExpSine stemLines size equals: 41
+]
+
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testInstanceExpSineStyledStandsOnABaselineAt1Point1 [
+
+	self assert: (BpStemPlot instanceExpSineStyled stemLines first dataVertices first y closeTo: 1.1)
+]
+
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testInstancePlotTypeHasEightStems [
+
+	self assert: BpStemPlot instancePlotType stemLines size equals: 8
+]
+
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testInstanceStemsHasFiveStems [
+
+	self assert: BpStemPlot instanceStems stemLines size equals: 5
 ]
 
 { #category : 'tests' }
@@ -268,6 +301,21 @@ BpStemPlotTest >> testStemGoesFromTheBottomToItsHead [
 	self assert: self stems stemLines second dataVertices equals: {
 		(2 @ 0).
 		(2 @ -1) }
+]
+
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testStemLocatesTheHeadsFromZero [
+
+	self assert: (BpStemPlot stem: #( 4 -1 2 )) locations asArray equals: #( 0 1 2 )
+]
+
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testStemLocationsHeadsAnswersAStemPlotWithoutChart [
+
+	| stems |
+	stems := BpStemPlot stemLocations: #( 1 2 3 ) heads: #( 4 -1 2 ).
+	self assert: stems heads equals: #( 4 -1 2 ).
+	self assert: stems markerLine size equals: 3
 ]
 
 { #category : 'tests' }

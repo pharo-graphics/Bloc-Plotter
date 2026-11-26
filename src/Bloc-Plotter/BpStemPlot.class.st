@@ -18,7 +18,7 @@ BpStemPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>stem:` (heads only, located from 0) and `BpChart>>stemLocations:heads:` create me with my data (`locations:heads:`) and add me to the chart (see `BpArtist`).
+1. `BpStemPlot class>>stem:` (heads only, located from 0) and `BpStemPlot class>>stemLocations:heads:` create me with my data (`locations:heads:`); `BpChart>>stem:` and `BpChart>>stemLocations:heads:` create me the same way and add me to the chart (see `BpArtist`), as `BpChart>>addArtist:` does for a stem plot created apart.
 2. My chart reads `isAboveGrid` (true) and my `legendEntries`: a stem with its marker on a piece of baseline.
 
 ## Implementation Notes
@@ -60,7 +60,23 @@ BpStemPlot class >> exampleInteraction [
 	"Interaction handlers on stems: hover a stem or a marker to paint it red, click a marker to see its location and head."
 
 	<example>
-	^ BpFigure instanceInteractiveStems show: 'Stem interaction'
+	| figure chart stems |
+	figure := BpFigure new.
+	chart := BpChart new.
+	stems := chart addArtist: self instanceStems.
+	chart title: 'Click a marker'.
+	stems
+		whenPatch: BlMouseEnterEvent do: [ :event :patch |
+			patch userData at: #border put: patch border.
+			patch border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 3) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch userData at: #border ifPresent: [ :border | patch border: border ] ];
+		whenPatch: BlClickEvent do: [ :event :patch |
+			(stems markerLine includes: patch) ifTrue: [
+				chart title: ('stem {1}: head {2}' format: {
+					 (stems locations at: patch index).
+					 ((stems heads at: patch index) printShowingDecimalPlaces: 2) }) ] ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Stem interaction'
 ]
 
 { #category : 'examples' }
@@ -68,26 +84,92 @@ BpStemPlot class >> examplePlotType [
 	"Reproduce the plot type stem(x, y)."
 
 	<example>
-	^ BpFigure instanceStemPlotType show: 'stem(x, y)'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instancePlotType.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7);
+		grid: true.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'stem(x, y)'
 ]
 
 { #category : 'examples' }
 BpStemPlot class >> exampleStemPlot [
-	"Reproduce the two figures of the gallery 'Stem plot': default stems, then grey stems with hollow diamonds on a baseline at 1.1."
+	"Reproduce the two figures of the gallery 'Stem plot' side by side: default stems, then grey stems with hollow diamonds on a baseline at 1.1."
 
 	<example>
-	BpFigure instanceStemPlot show: 'stem_plot'.
-	^ BpFigure instanceStemPlotStyled show: 'stem_plot styled'
+	| figure plain styled |
+	figure := BpFigure rows: 1 columns: 2.
+	plain := BpChart new.
+	plain addArtist: self instanceExpSine.
+	styled := BpChart new.
+	styled addArtist: self instanceExpSineStyled.
+	figure
+		chartAtRow: 1 column: 1 put: plain;
+		chartAtRow: 1 column: 2 put: styled.
+	^ figure show: 'stem_plot'
+]
+
+{ #category : 'instances' }
+BpStemPlot class >> instanceExpSine [
+	"Gallery: Stem plot (stem_plot), first figure: exp(sin(x)) at 41 locations between 0.1 and 2 pi."
+
+	<sampleInstance>
+	^ self stemLocations: self stemPlotLocations heads: (self stemPlotLocations collect: [ :each | each sin exp ])
+]
+
+{ #category : 'instances' }
+BpStemPlot class >> instanceExpSineStyled [
+	"Gallery: Stem plot (stem_plot), second figure: grey stems, white diamonds and the baseline at 1.1."
+
+	<sampleInstance>
+	| greys |
+	greys := BpSequentialPalette greys: 9.
+	^ self instanceExpSine
+		  lineColor: (greys colorAt: 6);
+		  markerFormat: 'D';
+		  bottom: 1.1;
+		  markerFaceColor: (greys colorAt: 1);
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStemPlot class >> instancePlotType [
+	"Plot types: stem(x, y), eight stems."
+
+	<sampleInstance>
+	^ self stemLocations: ((0 to: 7) collect: [ :each | each + 0.5 ]) heads: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 )
 ]
 
 { #category : 'instances' }
 BpStemPlot class >> instanceStems [
-	"Answer five stems going up and down from the baseline, in a new chart."
+	"Answer five stems going up and down from the baseline, located from 0."
 
 	<sampleInstance>
-	^ (BpChart new
-		   extent: 400 @ 300;
-		   yourself) stem: #( 3 -1 4 -1 5 )
+	^ self stem: #( 3 -1 4 -1 5 )
+]
+
+{ #category : 'instance creation' }
+BpStemPlot class >> stem: aCollection [
+	"Answer a stem plot of the heads aCollection, located at 0, 1, 2, ..., to be configured with lineFormat:, markerFormat:, baseFormat:, bottom:, orientation:, ... (see `BpStemPlot`)."
+
+	^ self new
+		  heads: aCollection;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+BpStemPlot class >> stemLocations: aCollection heads: anotherCollection [
+	"Answer a stem plot of the heads anotherCollection at the locations aCollection (see `stem:`)."
+
+	^ self new
+		  locations: aCollection heads: anotherCollection;
+		  yourself
 ]
 
 { #category : 'private - demo' }

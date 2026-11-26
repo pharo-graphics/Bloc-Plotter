@@ -315,10 +315,10 @@ BpFigure class >> exampleStairs [
 
 { #category : 'examples' }
 BpFigure class >> exampleStem [
-	"Show the figure of the gallery stem plot: exp(sin(x)) drawn as stems (see `BpStemPlot`)."
+	"Show the figures of the gallery stem plot: exp(sin(x)) drawn as stems, plain and styled (see `BpStemPlot`)."
 
 	<example>
-	^ self instanceStemPlot show: 'stem'
+	^ BpStemPlot exampleStemPlot
 ]
 
 { #category : 'examples' }
@@ -1206,29 +1206,6 @@ BpFigure class >> instanceInteractiveStairs [
 	^ figure
 ]
 
-{ #category : 'instances - stem plot' }
-BpFigure class >> instanceInteractiveStems [
-	"Stems with interaction handlers: hovering a stem or a marker paints it red, clicking a marker shows its location and head in the title."
-
-	<sampleInstance>
-	| figure chart stems |
-	figure := self new.
-	chart := figure charts first.
-	stems := chart stemLocations: (1 to: 10) heads: ((1 to: 10) collect: [ :each | (each / 2) sin * 5 ]).
-	chart title: 'Click a marker'.
-	stems
-		whenPatch: BlMouseEnterEvent do: [ :event :patch |
-			patch userData at: #border put: patch border.
-			patch border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 3) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch userData at: #border ifPresent: [ :border | patch border: border ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			(stems markerLine includes: patch) ifTrue: [
-				chart title: ('stem {1}: head {2}' format: {
-					 (stems locations at: patch index).
-					 ((stems heads at: patch index) printShowingDecimalPlaces: 2) }) ] ].
-	^ figure
-]
-
 { #category : 'instances - violin plot' }
 BpFigure class >> instanceInteractiveViolins [
 	"Three violins: hovering one makes it opaque, clicking it shows its median in the title."
@@ -1692,55 +1669,6 @@ BpFigure class >> instanceStairsPlotType [
 	figure := self new.
 	chart := figure charts first.
 	(chart stairs: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 )) lineWidth: 2.5.
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
-]
-
-{ #category : 'instances - stem plot' }
-BpFigure class >> instanceStemPlot [
-	"Gallery: Stem plot (stem_plot), first figure: exp(sin(x)) at 41 locations between 0.1 and 2 pi."
-
-	<sampleInstance>
-	| figure |
-	figure := self new.
-	figure charts first
-		stemLocations: BpStemPlot stemPlotLocations
-		heads: (BpStemPlot stemPlotLocations collect: [ :each | each sin exp ]).
-	^ figure
-]
-
-{ #category : 'instances - stem plot' }
-BpFigure class >> instanceStemPlotStyled [
-	"Gallery: Stem plot (stem_plot), second figure: grey stems, white diamonds and the baseline at 1.1."
-
-	<sampleInstance>
-	| figure greys |
-	greys := BpSequentialPalette greys: 9.
-	figure := self new.
-	(figure charts first
-		 stemLocations: BpStemPlot stemPlotLocations
-		 heads: (BpStemPlot stemPlotLocations collect: [ :each | each sin exp ]))
-		lineColor: (greys colorAt: 6);
-		markerFormat: 'D';
-		bottom: 1.1;
-		markerFaceColor: (greys colorAt: 1).
-	^ figure
-]
-
-{ #category : 'instances - stem plot' }
-BpFigure class >> instanceStemPlotType [
-	"Plot types: stem(x, y), eight stems with fixed limits and ticks."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	chart stemLocations: ((0 to: 7) collect: [ :each | each + 0.5 ]) heads: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ).
 	chart
 		xLimits: #( 0 8 );
 		xTicks: (1 to: 7);

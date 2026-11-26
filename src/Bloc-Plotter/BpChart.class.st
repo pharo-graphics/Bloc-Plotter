@@ -194,19 +194,14 @@ BpChart >> automaticLimitsOn: anAxis [
 BpChart >> barX: aCollectionOrValue height: aCollectionOrNumber [
 	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured with width:, bottom:, align:, color:, tickLabel:, ... (see `BpBarPlot`)."
 
-	^ self addArtist: (BpBarPlot new
-		   x: aCollectionOrValue height: aCollectionOrNumber;
-		   yourself)
+	^ self addArtist: (BpBarPlot barX: aCollectionOrValue height: aCollectionOrNumber)
 ]
 
 { #category : 'plotting' }
 BpChart >> barhY: aCollectionOrValue width: aCollectionOrNumber [
 	"Add horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, and answer them, the horizontal counterpart of `barX:height:`. They keep the vocabulary of `barX:height:`: their thickness is width:, their start is bottom:."
 
-	^ self addArtist: (BpBarPlot new
-		   orientation: #horizontal;
-		   x: aCollectionOrValue height: aCollectionOrNumber;
-		   yourself)
+	^ self addArtist: (BpBarPlot barhY: aCollectionOrValue width: aCollectionOrNumber)
 ]
 
 { #category : 'plotting' }
@@ -712,18 +707,14 @@ BpChart >> stairs: aCollection edges: aCollectionOrNil [
 BpChart >> stem: aCollection [
 	"Add a stem plot of the heads aCollection, located at 0, 1, 2, ..., and answer it, to be configured with lineFormat:, markerFormat:, baseFormat:, bottom:, orientation:, ... (see `BpStemPlot`)."
 
-	^ self addArtist: (BpStemPlot new
-		   heads: aCollection;
-		   yourself)
+	^ self addArtist: (BpStemPlot stem: aCollection)
 ]
 
 { #category : 'plotting' }
 BpChart >> stemLocations: aCollection heads: anotherCollection [
 	"Add a stem plot of the heads anotherCollection at the locations aCollection and answer it (see `stem:`)."
 
-	^ self addArtist: (BpStemPlot new
-		   locations: aCollection heads: anotherCollection;
-		   yourself)
+	^ self addArtist: (BpStemPlot stemLocations: aCollection heads: anotherCollection)
 ]
 
 { #category : 'private - building' }
