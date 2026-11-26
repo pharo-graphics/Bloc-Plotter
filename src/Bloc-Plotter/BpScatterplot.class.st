@@ -1,5 +1,5 @@
 "
-I am a scatter plot, added by `BpChart>>scatterX:y:`. I show one `BpMarkerPatch` per point, whose `BpMarker`, size and color may vary from point to point: the numbers of `c:` are mapped to colors through a color map.
+I am a scatter plot of a `BpChart`. I show one `BpMarkerPatch` per point, whose `BpMarker`, size and color may vary from point to point: the numbers of `c:` are mapped to colors through a color map.
 
 ## Examples
 
@@ -7,7 +7,8 @@ I am a scatter plot, added by `BpChart>>scatterX:y:`. I show one `BpMarkerPatch`
 BpScatterPlot exampleScatter.
 BpScatterPlot exampleScatterWithLegend.
 BpScatterPlot exampleMarkers.
-BpScatterPlot exampleInteraction
+BpScatterPlot exampleInteraction.
+BpScatterPlot exampleColoredPoints
 ```
 
 ## Design Rationale
@@ -18,7 +19,7 @@ BpScatterPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>scatterX:y:` creates me with `x:y:` and adds me to the chart (see `BpArtist`).
+1. `BpScatterPlot class>>x:y:` creates me, and `BpChart>>addArtist:` adds me to a chart, as `BpScatterPlot class>>exampleScatterWithLegend` does with three scatters (see `BpArtist`).
 2. `BpChart>>addColorBarFor:` tells the numbers of `c:` with a `BpColorBar`.
 3. My patches answer their `index`, `dataPoint`, `area` and `amount` (the number of `c:`), which interaction handlers given to `whenPatch:do:` use.
 
@@ -61,19 +62,60 @@ BpScatterPlot class >> defaultSize [
 ]
 
 { #category : 'examples' }
-BpScatterPlot class >> exampleInteraction [
-	"Interaction handlers on the markers of a scatter: hover a point to outline it, click it to see its coordinates and value."
+BpScatterPlot class >> exampleColoredPoints [
+	"Show points colored by a number through viridis (see `BpScatterPlot>>c:`), with a color bar telling which number each color shows."
 
 	<example>
-	^ BpFigure instanceInteractiveScatter show: 'Scatter interaction'
+	| figure chart scatter |
+	figure := BpFigure new.
+	chart := BpChart new.
+	scatter := chart addArtist: self instanceColoredPoints.
+	chart title: 'Colored by a number'.
+	chart addColorBarFor: scatter.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'scatter colored by a number'
+]
+
+{ #category : 'examples' }
+BpScatterPlot class >> exampleInteraction [
+	"Interaction handlers on the markers of a scatter: hover a point to outline it, click it to see its coordinates and value in the title."
+
+	<example>
+	| figure chart scatter |
+	figure := BpFigure new.
+	chart := BpChart new.
+	scatter := chart addArtist: self instanceClickablePoints.
+	chart title: 'Click a point'.
+	scatter
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :point | point border: (BlBorder paint: ((BpSequentialPalette greys: 9) colorAt: 9) width: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :point | point border: BlBorder empty ];
+		whenPatch: BlClickEvent do: [ :event :point |
+			chart title: ('point {1}: ({2}, {3}), c = {4}' format: {
+				 point index.
+				 (point dataPoint x printShowingDecimalPlaces: 2).
+				 (point dataPoint y printShowingDecimalPlaces: 2).
+				 (point amount printShowingDecimalPlaces: 2) }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Scatter interaction'
 ]
 
 { #category : 'examples' }
 BpScatterPlot class >> exampleMarkers [
-	"Reproduce the gallery 'Marker examples': six ways to give the marker of a scatter."
+	"Reproduce the gallery 'Marker examples': the same points with six ways to give the marker of a scatter (see `BpScatterPlot>>marker:`), one chart each."
 
 	<example>
-	^ BpFigure instanceScatterMarkers show: 'scatter_star_poly'
+	| figure |
+	figure := BpFigure rows: 2 columns: 3.
+	self markerDemoMarkers withIndexDo: [ :each :index |
+		| chart |
+		chart := BpChart new.
+		chart addArtist: (self instanceMarkerPoints
+			 marker: each key;
+			 yourself).
+		chart title: each value.
+		figure chartAtRow: index - 1 // 3 + 1 column: index - 1 \\ 3 + 1 put: chart ].
+	^ figure show: 'scatter_star_poly'
 ]
 
 { #category : 'examples' }
@@ -81,7 +123,12 @@ BpScatterPlot class >> exampleScatter [
 	"Reproduce the gallery 'Scatter plot': random points with random sizes and colors, half transparent."
 
 	<example>
-	^ BpFigure instanceScatter show: 'scatter'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceRandomPoints.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'scatter'
 ]
 
 { #category : 'examples' }
@@ -89,7 +136,42 @@ BpScatterPlot class >> exampleScatterWithLegend [
 	"Reproduce the gallery 'Scatter plot with a legend': three labeled scatters, a legend and a grid."
 
 	<example>
-	^ BpFigure instanceScatterWithLegend show: 'scatter_with_legend'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceBlueLabeled;
+		addArtist: self instanceOrangeLabeled;
+		addArtist: self instanceGreenLabeled.
+	chart
+		legend;
+		grid: true.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'scatter_with_legend'
+]
+
+{ #category : 'instances' }
+BpScatterPlot class >> instanceBlueLabeled [
+	"Gallery: Scatter plot with a legend (scatter_with_legend), first scatter, labeled blue."
+
+	<sampleInstance>
+	^ self legendScatterAt: 1 label: 'blue'
+]
+
+{ #category : 'instances' }
+BpScatterPlot class >> instanceClickablePoints [
+	"Answer 50 random points of random colors, large and without edges, so that a handler can outline them."
+
+	<sampleInstance>
+	| random x y |
+	random := self demoRandom.
+	x := self next: 50 from: random.
+	y := self next: 50 from: random.
+	^ (self x: x y: y)
+		  c: (self next: 50 from: random);
+		  s: 150;
+		  lineWidths: 0;
+		  yourself
 ]
 
 { #category : 'instances' }
@@ -97,12 +179,92 @@ BpScatterPlot class >> instanceColoredPoints [
 	"Answer a scatter of five points colored by a number through viridis, with growing sizes."
 
 	<sampleInstance>
-	^ ((BpChart new
-		    extent: 400 @ 300;
-		    yourself) scatterX: #( 1 2 3 4 5 ) y: #( 2 4 3 5 1 ))
+	^ (self x: #( 1 2 3 4 5 ) y: #( 2 4 3 5 1 ))
 		  c: #( 1 2 3 4 5 );
 		  s: #( 20 40 80 160 320 );
 		  yourself
+]
+
+{ #category : 'instances' }
+BpScatterPlot class >> instanceGreenLabeled [
+	"Gallery: Scatter plot with a legend (scatter_with_legend), third scatter, labeled green."
+
+	<sampleInstance>
+	^ self legendScatterAt: 3 label: 'green'
+]
+
+{ #category : 'instances' }
+BpScatterPlot class >> instanceMarkerPoints [
+	"Gallery: Marker examples (scatter_star_poly): 10 random points of 80 square points, colored by their distance to the origin, with the default marker."
+
+	<sampleInstance>
+	| random x y distances |
+	random := self demoRandom.
+	x := self next: 10 from: random.
+	y := self next: 10 from: random.
+	distances := x with: y collect: [ :eachX :eachY | (eachX squared + eachY squared) sqrt ].
+	^ (self x: x y: y)
+		  s: 80;
+		  c: distances;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpScatterPlot class >> instanceOrangeLabeled [
+	"Gallery: Scatter plot with a legend (scatter_with_legend), second scatter, labeled orange."
+
+	<sampleInstance>
+	^ self legendScatterAt: 2 label: 'orange'
+]
+
+{ #category : 'instances' }
+BpScatterPlot class >> instanceRandomPoints [
+	"Gallery: Scatter plot (scatter): 50 random points with random sizes (radii up to 15 points) and colors, half transparent."
+
+	<sampleInstance>
+	| random x y colors sizes |
+	random := self demoRandom.
+	x := self next: 50 from: random.
+	y := self next: 50 from: random.
+	colors := self next: 50 from: random.
+	sizes := (self next: 50 from: random) collect: [ :each | (30 * each) squared ].
+	^ (self x: x y: y)
+		  s: sizes;
+		  c: colors;
+		  alpha: 0.5;
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpScatterPlot class >> legendScatterAt: anIndex label: aString [
+	"Answer the scatter anIndex of the legend demo: 750 points of random sizes, labeled aString. The three scatters of the demo draw from one generator in turn, so the numbers of the scatters before anIndex are skipped."
+
+	| random count x y sizes |
+	random := self demoRandom.
+	count := 750.
+	self next: 3 * count * (anIndex - 1) from: random.
+	x := self next: count from: random.
+	y := self next: count from: random.
+	sizes := (self next: count from: random) collect: [ :each | 200.0 * each ].
+	^ (self x: x y: y)
+		  s: sizes;
+		  label: aString;
+		  alpha: 0.3;
+		  lineWidths: 0;
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpScatterPlot class >> markerDemoMarkers [
+	"Answer the markers of the marker demo, each with the title of its chart."
+
+	^ {
+		  ('>' -> 'marker=''>''').
+		  ('$\clubsuit$' -> 'marker=''$\clubsuit$''').
+		  (#( #( -1 -1 ) #( 1 -1 ) #( 1 1 ) #( -1 -1 ) ) -> 'marker=verts').
+		  (#( 5 0 ) -> 'marker=(5, 0)').
+		  (#( 5 1 ) -> 'marker=(5, 1)').
+		  (#( 5 2 ) -> 'marker=(5, 2)') }
 ]
 
 { #category : 'instance creation' }

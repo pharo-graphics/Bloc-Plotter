@@ -58,6 +58,13 @@ BpArtist class >> dashPatterns [
 		  yourself
 ]
 
+{ #category : 'private - demo' }
+BpArtist class >> demoRandom [
+	"Answer the generator of the random demos, seeded as in the gallery of the reference figures."
+
+	^ Random seed: 19680801
+]
+
 { #category : 'examples' }
 BpArtist class >> exampleArtistsInOneChart [
 	"Show two kinds of artists in the same chart: a histogram and a scatter plot of its counts (see `BpFigure class>>instanceArtistsInOneChart`)."
@@ -105,6 +112,13 @@ BpArtist class >> linspaceFrom: aNumber to: anotherNumber count: anInteger [
 
 	anInteger = 1 ifTrue: [ ^ { aNumber } ].
 	^ (0 to: anInteger - 1) collect: [ :index | aNumber + (index * (anotherNumber - aNumber) / (anInteger - 1)) ]
+]
+
+{ #category : 'private - demo' }
+BpArtist class >> next: aCount from: aRandom [
+	"Answer aCount numbers drawn from aRandom, between 0 and 1."
+
+	^ (1 to: aCount) collect: [ :each | aRandom next ]
 ]
 
 { #category : 'accessing' }

@@ -291,10 +291,10 @@ BpFigure class >> exampleRadarChart [
 
 { #category : 'examples' }
 BpFigure class >> exampleScatter [
-	"Show a figure of one chart with a scatter of random points of random sizes and colors (the gallery scatter)."
+	"Show a figure of one chart with a scatter of random points of random sizes and colors (see `BpScatterPlot`)."
 
 	<example>
-	^ self instanceScatter show: 'scatter'
+	^ BpScatterPlot exampleScatter
 ]
 
 { #category : 'examples' }
@@ -1129,34 +1129,6 @@ BpFigure class >> instanceInteractiveHistogram [
 	^ figure
 ]
 
-{ #category : 'instances - scatter plot' }
-BpFigure class >> instanceInteractiveScatter [
-	"A scatter with interaction handlers on its markers: hovering a marker outlines it, clicking it shows its point and value in the title."
-
-	<sampleInstance>
-	| random figure chart scatter |
-	random := Random seed: 19680801.
-	figure := self new.
-	chart := figure charts first.
-	scatter := chart scatterX: ((1 to: 50) collect: [ :each | random next ]) y: ((1 to: 50) collect: [ :each | random next ]).
-	scatter
-		c: ((1 to: 50) collect: [ :each | random next ]);
-		s: 150;
-		lineWidths: 0.
-	chart title: 'Click a point'.
-	scatter
-		whenPatch: BlMouseEnterEvent
-		do: [ :event :point | point border: (BlBorder paint: ((BpSequentialPalette greys: 9) colorAt: 9) width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :point | point border: BlBorder empty ];
-		whenPatch: BlClickEvent do: [ :event :point |
-			chart title: ('point {1}: ({2}, {3}), c = {4}' format: {
-				 point index.
-				 (point dataPoint x printShowingDecimalPlaces: 2).
-				 (point dataPoint y printShowingDecimalPlaces: 2).
-				 (point amount printShowingDecimalPlaces: 2) }) ].
-	^ figure
-]
-
 { #category : 'instances - stack plot' }
 BpFigure class >> instanceInteractiveStack [
 	"The world population by continent: hovering a layer outlines it, clicking it shows its continent and its last value in the title."
@@ -1377,81 +1349,6 @@ BpFigure class >> instanceRadarChart [
 		BpKiviat showFactors: profile value in: chart.
 		chart title: profile key ].
 	figure charts first legend.
-	^ figure
-]
-
-{ #category : 'instances - scatter plot' }
-BpFigure class >> instanceScatter [
-	"Gallery: Scatter plot (scatter): random points with random sizes and colors."
-
-	<sampleInstance>
-	| random n x y colors area figure |
-	random := Random seed: 19680801.
-	n := 50.
-	x := (1 to: n) collect: [ :each | random next ].
-	y := (1 to: n) collect: [ :each | random next ].
-	colors := (1 to: n) collect: [ :each | random next ].
-	"0 to 15 point radii"
-	area := (1 to: n) collect: [ :each | (30 * random next) squared ].
-	figure := self new.
-	(figure charts first scatterX: x y: y)
-		s: area;
-		c: colors;
-		alpha: 0.5.
-	^ figure
-]
-
-{ #category : 'instances - scatter plot' }
-BpFigure class >> instanceScatterMarkers [
-	"Gallery: Marker examples (scatter_star_poly): a marker symbol, a TeX symbol, a path, a pentagon, a star and an asterisk."
-
-	<sampleInstance>
-	| random x y z figure |
-	random := Random seed: 19680801.
-	x := (1 to: 10) collect: [ :each | random next ].
-	y := (1 to: 10) collect: [ :each | random next ].
-	z := x with: y collect: [ :eachX :eachY | (eachX squared + eachY squared) sqrt ].
-	figure := self rows: 2 columns: 3.
-	{
-		('>' -> 'marker=''>''').
-		('$\clubsuit$' -> 'marker=''$\clubsuit$''').
-		(#( #( -1 -1 ) #( 1 -1 ) #( 1 1 ) #( -1 -1 ) ) -> 'marker=verts').
-		(#( 5 0 ) -> 'marker=(5, 0)').
-		(#( 5 1 ) -> 'marker=(5, 1)').
-		(#( 5 2 ) -> 'marker=(5, 2)') } withIndexDo: [ :each :index |
-			| chart |
-			chart := figure charts at: index.
-			(chart scatterX: x y: y)
-				s: 80;
-				c: z;
-				marker: each key.
-			chart title: each value ].
-	^ figure
-]
-
-{ #category : 'instances - scatter plot' }
-BpFigure class >> instanceScatterWithLegend [
-	"Gallery: Scatter plot with a legend (scatter_with_legend), first figure: one scatter per color of the palette, each with a label."
-
-	<sampleInstance>
-	| random figure chart |
-	random := Random seed: 19680801.
-	figure := self new.
-	chart := figure charts first.
-	#( 'blue' 'orange' 'green' ) do: [ :colorName |
-		| n x y scale |
-		n := 750.
-		x := (1 to: n) collect: [ :each | random next ].
-		y := (1 to: n) collect: [ :each | random next ].
-		scale := (1 to: n) collect: [ :each | 200.0 * random next ].
-		(chart scatterX: x y: y)
-			s: scale;
-			label: colorName;
-			alpha: 0.3;
-			lineWidths: 0 ].
-	chart
-		legend;
-		grid: true.
 	^ figure
 ]
 

@@ -105,6 +105,45 @@ BpScatterPlotTest >> testEdgeHasTheFaceColorByDefault [
 	self assert: patch border paint color equals: Color red
 ]
 
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testInstanceClickablePointsHasFiftyPoints [
+
+	self assert: BpScatterPlot instanceClickablePoints patches size equals: 50
+]
+
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testInstanceColoredPointsShowsNumbersByColors [
+
+	| scatter |
+	scatter := BpScatterPlot instanceColoredPoints.
+	self assert: scatter offsets size equals: 5.
+	self assert: scatter showsNumbersByColors
+]
+
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testInstanceMarkerPointsAreTheSameEachTime [
+
+	self assert: BpScatterPlot instanceMarkerPoints offsets equals: BpScatterPlot instanceMarkerPoints offsets
+]
+
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testInstanceMarkerPointsHasTenPointsColoredByTheirDistance [
+
+	| scatter |
+	scatter := BpScatterPlot instanceMarkerPoints.
+	self assert: scatter offsets size equals: 10.
+	self assert: scatter showsNumbersByColors
+]
+
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testInstanceRandomPointsHasFiftyPointsColoredByNumbers [
+
+	| scatter |
+	scatter := BpScatterPlot instanceRandomPoints.
+	self assert: scatter offsets size equals: 50.
+	self assert: scatter showsNumbersByColors
+]
+
 { #category : 'tests' }
 BpScatterPlotTest >> testLabelGivesALegendEntry [
 
@@ -113,6 +152,34 @@ BpScatterPlotTest >> testLabelGivesALegendEntry [
 	  label: 'points';
 	  yourself) legendEntries collect: [ :each | each key ] as: Array)
 		equals: #( 'points' )
+]
+
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testLabeledInstanceHasSevenHundredFiftyPoints [
+
+	self assert: BpScatterPlot instanceGreenLabeled offsets size equals: 750
+]
+
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testLabeledInstancesDrawDifferentPoints [
+
+	| firstPoints |
+	firstPoints := {
+		               BpScatterPlot instanceBlueLabeled.
+		               BpScatterPlot instanceOrangeLabeled.
+		               BpScatterPlot instanceGreenLabeled } collect: [ :each | each offsets first ].
+	self assert: firstPoints asSet size equals: 3
+]
+
+{ #category : 'tests - instances' }
+BpScatterPlotTest >> testLabeledInstancesHaveTheirColorNameAsLabel [
+
+	self
+		assert: ({
+			 BpScatterPlot instanceBlueLabeled.
+			 BpScatterPlot instanceOrangeLabeled.
+			 BpScatterPlot instanceGreenLabeled } collect: [ :each | each legendEntries first key ])
+		equals: #( 'blue' 'orange' 'green' )
 ]
 
 { #category : 'tests' }
