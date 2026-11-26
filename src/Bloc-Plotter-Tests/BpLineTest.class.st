@@ -118,6 +118,17 @@ BpLineTest >> testFormatInAnyOrder [
 	self deny: line linePatch border style dashArray isEmpty
 ]
 
+{ #category : 'tests - instances' }
+BpLineTest >> testFormatInstancesAreLabeledLines [
+
+	self
+		assert: ({
+			 BpLine instanceLinearDashed.
+			 BpLine instanceQuadraticSquares.
+			 BpLine instanceCubicTriangles } collect: [ :each | each legendEntries first key ])
+		equals: #( 'linear' 'quadratic' 'cubic' )
+]
+
 { #category : 'tests - format' }
 BpLineTest >> testFormatKeepsTheColor [
 
@@ -171,6 +182,15 @@ BpLineTest >> testFormatWithMarkerAndLine [
 		        yourself.
 	self assert: line linePatch isNotNil.
 	self assert: line markerPatches size equals: 3
+]
+
+{ #category : 'tests - instances' }
+BpLineTest >> testInstanceQuadraticSquaresDrawsOnlySquares [
+
+	| line |
+	line := BpLine instanceQuadraticSquares.
+	self assert: line patches size equals: 25.
+	self assert: line patches asArray equals: line markerPatches asArray
 ]
 
 { #category : 'tests' }
@@ -295,6 +315,20 @@ BpLineTest >> testPatchesAreTheLineThenTheMarkers [
 		        marker: 'o';
 		        yourself.
 	self assert: line patches asArray equals: { line linePatch } , line markerPatches asArray
+]
+
+{ #category : 'tests - instances' }
+BpLineTest >> testPlotTypeInstancesAreOneLineEach [
+
+	self
+		assert: ({
+			 BpLine instancePlotTypeMarkers.
+			 BpLine instancePlotTypeLine.
+			 BpLine instancePlotTypeLineMarkers } collect: [ :each | each class ])
+		equals: {
+			BpLine.
+			BpLine.
+			BpLine }
 ]
 
 { #category : 'tests' }

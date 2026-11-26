@@ -69,24 +69,15 @@ Class {
 
 { #category : 'instances' }
 BpChart class >> instanceGroupedBars [
-	"Gallery: Grouped bar chart with labels (barchart), without the bar labels: three bar plots shifted by their width; the middle one labels the ticks with the species."
+	"Answer a chart of three groups of bars side by side (see `BpBarPlot`), the ticks labeled with the penguin species."
 
 	<sampleInstance>
-	| species means chart width |
-	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
-	means := {
-		         ('Bill Depth' -> #( 18.35 18.43 14.98 )).
-		         ('Bill Length' -> #( 38.79 48.83 47.50 )).
-		         ('Flipper Length' -> #( 189.95 195.82 217.19 )) }.
+	| chart |
 	chart := self new.
-	width := 0.25.
-	means withIndexDo: [ :each :index |
-		| offset |
-		offset := width * (index - 1).
-		(chart barX: ((0 to: 2) collect: [ :position | position + offset ]) height: each value)
-			width: width;
-			label: each key ].
-	chart artists second tickLabel: species.
+	chart
+		addArtist: BpBarPlot instanceBillDepths;
+		addArtist: BpBarPlot instanceBillLengths;
+		addArtist: BpBarPlot instanceFlipperLengths.
 	chart
 		title: 'Penguin attributes by species';
 		yLimits: #( 0 250 );
@@ -111,16 +102,16 @@ BpChart class >> instanceHistogram [
 
 { #category : 'instances' }
 BpChart class >> instanceLineFormats [
-	"Three curves drawn with format strings ('--', 's', '^') in the colors of the palette set1, and a legend."
+	"Answer a chart of three curves drawn with format strings (see `BpLine`) in the colors of the palette set1, with a legend."
 
 	<sampleInstance>
-	| chart t |
-	t := (0 to: 24) collect: [ :index | index / 5 ].
+	| chart |
 	chart := self new.
 	chart palette: BpQualitativePalette set1.
-	(chart plotX: t y: t format: '--') label: 'linear'.
-	(chart plotX: t y: (t collect: [ :each | each squared ]) format: 's') label: 'quadratic'.
-	(chart plotX: t y: (t collect: [ :each | each raisedTo: 3 ]) format: '^') label: 'cubic'.
+	chart
+		addArtist: BpLine instanceLinearDashed;
+		addArtist: BpLine instanceQuadraticSquares;
+		addArtist: BpLine instanceCubicTriangles.
 	chart
 		title: 'Format strings';
 		legend.
@@ -129,18 +120,15 @@ BpChart class >> instanceLineFormats [
 
 { #category : 'instances' }
 BpChart class >> instanceLinePlotType [
-	"Plot types: plot(x, y), markers only, a line, and a line with markers, with fixed limits and ticks."
+	"Answer the chart of the plot type of `BpLine`: markers only, a line, and a line with markers, with fixed limits and ticks."
 
 	<sampleInstance>
-	| chart x y x2 y2 |
-	x := (0 to: 99) collect: [ :index | index * 10 / 99.0 ].
-	y := x collect: [ :each | 4 + (2 * each) sin ].
-	x2 := (0 to: 24) collect: [ :index | index * 10 / 24.0 ].
-	y2 := x2 collect: [ :each | 4 + (2 * each) sin ].
+	| chart |
 	chart := self new.
-	(chart plotX: x2 y: (y2 collect: [ :each | each + 2.5 ]) format: 'x') markerEdgeWidth: 2.
-	(chart plotX: x y: y) lineWidth: 2.
-	(chart plotX: x2 y: (y2 collect: [ :each | each - 2.5 ]) format: 'o-') lineWidth: 2.
+	chart
+		addArtist: BpLine instancePlotTypeMarkers;
+		addArtist: BpLine instancePlotTypeLine;
+		addArtist: BpLine instancePlotTypeLineMarkers.
 	chart
 		xLimits: #( 0 8 );
 		xTicks: (1 to: 7);
@@ -152,22 +140,14 @@ BpChart class >> instanceLinePlotType [
 
 { #category : 'instances' }
 BpChart class >> instanceStackedBars [
-	"Gallery: Stacked bar chart (bar_stacked): each bar plot starts on the tops of the previous one (bottom:)."
+	"Answer a chart of two layers of bars, the second standing on the first (see `BpBarPlot`)."
 
 	<sampleInstance>
-	| species weightCounts chart bottom |
-	species := #( 'Adelie' 'Chinstrap' 'Gentoo' ).
-	weightCounts := {
-		                ('Below' -> #( 70 31 58 )).
-		                ('Above' -> #( 82 37 66 )) }.
+	| chart |
 	chart := self new.
-	bottom := #( 0 0 0 ).
-	weightCounts do: [ :each |
-		(chart barX: species height: each value)
-			width: 0.5;
-			label: each key;
-			bottom: bottom.
-		bottom := bottom with: each value collect: [ :base :count | base + count ] ].
+	chart
+		addArtist: BpBarPlot instanceBelowAverageMass;
+		addArtist: BpBarPlot instanceAboveAverageMass.
 	chart
 		title: 'Number of penguins with above average body mass';
 		legend.

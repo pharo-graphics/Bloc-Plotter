@@ -173,6 +173,17 @@ BpBarPlotTest >> testEdgeColorAndLineWidthOutlineTheBars [
 	self assert: (bar border width closeTo: 0.7 * self ppp)
 ]
 
+{ #category : 'tests - instances' }
+BpBarPlotTest >> testGroupedInstancesAreShiftedByTheirWidth [
+
+	self
+		assert: ({
+			 BpBarPlot instanceBillDepths.
+			 BpBarPlot instanceBillLengths.
+			 BpBarPlot instanceFlipperLengths } collect: [ :each | each positions first ])
+		equals: #( 0 0.25 0.5 )
+]
+
 { #category : 'tests' }
 BpBarPlotTest >> testHandlersAreKeptWhenTheBarsAreRebuilt [
 
@@ -221,6 +232,22 @@ BpBarPlotTest >> testHorizontalTicksAreOnTheYAxis [
 		        yourself.
 	self assert: (bars managedTicksOn: #x) isNil.
 	self assert: (bars managedTicksOn: #y) size equals: 3
+]
+
+{ #category : 'tests - instances' }
+BpBarPlotTest >> testInstanceAboveAverageMassStandsOnTheBelowOne [
+
+	self
+		assert: BpBarPlot instanceAboveAverageMass patches first dataBounds origin y
+		equals: BpBarPlot instanceBelowAverageMass patches first dataBounds corner y
+]
+
+{ #category : 'tests - instances' }
+BpBarPlotTest >> testInstanceBillLengthsLabelsTheTicksWithTheSpecies [
+
+	self
+		assert: ((BpBarPlot instanceBillLengths managedTicksOn: #x) collect: [ :each | each value ] as: Array)
+		equals: #( 'Adelie' 'Chinstrap' 'Gentoo' )
 ]
 
 { #category : 'tests - instances' }

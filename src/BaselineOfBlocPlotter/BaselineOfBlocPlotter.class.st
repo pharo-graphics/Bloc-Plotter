@@ -28,9 +28,12 @@ BaselineOfBlocPlotter >> baseline: spec [
 		spec baseline: 'Bloc' with: [ spec repository: 'github://pharo-graphics/Bloc:v3.1.0/src' ].
 		spec
 			package: 'Bloc-Plotter' with: [ spec requires: #( 'Bloc' ) ];
-			package: 'Bloc-Plotter-Tests' with: [ spec requires: #( 'Bloc-Plotter' ) ].
+			package: 'Bloc-Plotter-Tests' with: [ spec requires: #( 'Bloc-Plotter' ) ];
+			package: 'Bloc-Plotter-Rules' with: [ spec requires: #( 'Bloc-Plotter' ) ];
+			package: 'Bloc-Plotter-Rules-Tests' with: [ spec requires: #( 'Bloc-Plotter-Rules' ) ].
 		spec
 			group: 'Core' with: #( 'Bloc-Plotter' );
-			group: 'Tests' with: #( 'Bloc-Plotter-Tests' );
-			group: 'default' with: #( 'Core' 'Tests' ) ]
+			group: 'Rules' with: #( 'Bloc-Plotter-Rules' );
+			group: 'Tests' with: #( 'Bloc-Plotter-Tests' 'Bloc-Plotter-Rules-Tests' );
+			group: 'default' with: #( 'Core' 'Rules' 'Tests' ) ]
 ]

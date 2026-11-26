@@ -1,5 +1,5 @@
 "
-I am a line plot of a `BpChart` (`BpChart>>plotX:y:`): a line through points given by their x and y values, with an optional marker at each point. `format:` reads a format string such as 'o-' or '--'; the setters (`color:`, `lineStyle:`, `lineWidth:`, `marker:`, `markerSize:`, `markerFaceColor:`, `markerEdgeColor:`, `markerEdgeWidth:`) set one property each.
+I am a line plot of a `BpChart`: a line through points given by their x and y values, with an optional marker at each point. `format:` reads a format string such as 'o-' or '--'; the setters (`color:`, `lineStyle:`, `lineWidth:`, `marker:`, `markerSize:`, `markerFaceColor:`, `markerEdgeColor:`, `markerEdgeWidth:`) set one property each.
 
 ## Examples
 
@@ -18,7 +18,7 @@ BpLine exampleFormats
 
 ## Usage
 
-1. `BpLine class>>x:y:` creates me; `BpChart>>plotX:y:` and `BpChart>>plotX:y:format:` create me with it and add me to the chart, as `BpChart>>addArtist:` does for a line created apart; see `BpArtist` for the rest of the life cycle. `BpErrorBar` adds error bars to my points.
+1. `BpLine class>>x:y:` creates me, and `BpChart>>addArtist:` adds me to a chart, as `BpLine class>>exampleFormats` does with three lines; see `BpArtist` for the rest of the life cycle. `BpErrorBar` adds error bars to my points.
 2. My legend entry (`legendEntries`) is a short piece of my line with one marker in its middle.
 
 ## Invariants and Assumptions
@@ -68,12 +68,21 @@ BpLine class >> defaultMarkerSize [
 
 { #category : 'examples' }
 BpLine class >> exampleFormats [
-	"Show three curves drawn with format strings (see `BpLine>>format:`) and their legend."
+	"Show three curves drawn with format strings (see `BpLine>>format:`) in the colors of the palette set1, and their legend."
 
 	<example>
-	| figure |
+	| figure chart |
 	figure := BpFigure new.
-	figure chartAtRow: 1 column: 1 put: BpChart instanceLineFormats.
+	chart := BpChart new.
+	chart palette: BpQualitativePalette set1.
+	chart
+		addArtist: self instanceLinearDashed;
+		addArtist: self instanceQuadraticSquares;
+		addArtist: self instanceCubicTriangles.
+	chart
+		title: 'Format strings';
+		legend.
+	figure chartAtRow: 1 column: 1 put: chart.
 	^ figure show: 'plot format strings'
 ]
 
@@ -82,9 +91,20 @@ BpLine class >> examplePlotType [
 	"Show the figure of the plot type page: markers only, a line, and a line with markers."
 
 	<example>
-	| figure |
+	| figure chart |
 	figure := BpFigure new.
-	figure chartAtRow: 1 column: 1 put: BpChart instanceLinePlotType.
+	chart := BpChart new.
+	chart
+		addArtist: self instancePlotTypeMarkers;
+		addArtist: self instancePlotTypeLine;
+		addArtist: self instancePlotTypeLineMarkers.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7);
+		grid: true.
+	figure chartAtRow: 1 column: 1 put: chart.
 	^ figure show: 'plot'
 ]
 
@@ -112,6 +132,84 @@ BpLine class >> formatPartsOf: aString [
 	^ parts
 ]
 
+{ #category : 'private - demo' }
+BpLine class >> formatStringsX [
+	"Answer the 25 x values of the format strings demo, from 0 to 4.8."
+
+	^ (0 to: 24) collect: [ :index | index / 5 ]
+]
+
+{ #category : 'instances' }
+BpLine class >> instanceCubicTriangles [
+	"Answer triangles without line (format '^') along a cubic, labeled cubic."
+
+	<sampleInstance>
+	^ (self x: self formatStringsX y: (self formatStringsX collect: [ :each | each raisedTo: 3 ]))
+		  format: '^';
+		  label: 'cubic';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpLine class >> instanceLinearDashed [
+	"Answer a dashed straight line (format '--'), labeled linear."
+
+	<sampleInstance>
+	^ (self x: self formatStringsX y: self formatStringsX)
+		  format: '--';
+		  label: 'linear';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpLine class >> instancePlotTypeLine [
+	"Plot types: the sine as a line two points wide."
+
+	<sampleInstance>
+	| x |
+	x := self plotTypeX: 100.
+	^ (self x: x y: (self plotTypeSineOf: x))
+		  lineWidth: 2;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpLine class >> instancePlotTypeLineMarkers [
+	"Plot types: a line with circle markers (format 'o-'), 2.5 below the sine."
+
+	<sampleInstance>
+	| x |
+	x := self plotTypeX: 25.
+	^ (self x: x y: ((self plotTypeSineOf: x) collect: [ :each | each - 2.5 ]))
+		  format: 'o-';
+		  lineWidth: 2;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpLine class >> instancePlotTypeMarkers [
+	"Plot types: x markers only (format 'x'), 2.5 above the sine."
+
+	<sampleInstance>
+	| x |
+	x := self plotTypeX: 25.
+	^ (self x: x y: ((self plotTypeSineOf: x) collect: [ :each | each + 2.5 ]))
+		  format: 'x';
+		  markerEdgeWidth: 2;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpLine class >> instanceQuadraticSquares [
+	"Answer squares without line (format 's') along a parabola, labeled quadratic."
+
+	<sampleInstance>
+	^ (self x: self formatStringsX y: (self formatStringsX collect: [ :each | each squared ]))
+		  format: 's';
+		  label: 'quadratic';
+		  yourself
+]
+
 { #category : 'instances' }
 BpLine class >> instanceSine [
 	"Answer a sine line with circle markers."
@@ -122,6 +220,20 @@ BpLine class >> instanceSine [
 		   y: ((0 to: 24) collect: [ :index | 4 + (2 * index * 10 / 24.0) sin ]))
 		  format: 'o-';
 		  yourself
+]
+
+{ #category : 'private - demo' }
+BpLine class >> plotTypeSineOf: xValues [
+	"Answer the sine of the plot type demo at xValues, around 4."
+
+	^ xValues collect: [ :each | 4 + (2 * each) sin ]
+]
+
+{ #category : 'private - demo' }
+BpLine class >> plotTypeX: aCount [
+	"Answer aCount x values of the plot type demo, evenly spaced from 0 to 10."
+
+	^ (0 to: aCount - 1) collect: [ :index | index * 10 / (aCount - 1.0) ]
 ]
 
 { #category : 'format' }

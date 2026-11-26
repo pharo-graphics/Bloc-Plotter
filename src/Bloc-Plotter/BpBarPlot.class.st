@@ -104,9 +104,18 @@ BpBarPlot class >> exampleGrouped [
 	"Reproduce the gallery 'Grouped bar chart with labels', without the bar labels: three groups of three bars."
 
 	<example>
-	| figure |
+	| figure chart |
 	figure := BpFigure new.
-	figure chartAtRow: 1 column: 1 put: BpChart instanceGroupedBars.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceBillDepths;
+		addArtist: self instanceBillLengths;
+		addArtist: self instanceFlipperLengths.
+	chart
+		title: 'Penguin attributes by species';
+		yLimits: #( 0 250 );
+		legend.
+	figure chartAtRow: 1 column: 1 put: chart.
 	^ figure show: 'barchart'
 ]
 
@@ -168,10 +177,25 @@ BpBarPlot class >> exampleStacked [
 	"Reproduce the gallery 'Stacked bar chart': bars on top of each other with bottom:."
 
 	<example>
-	| figure |
+	| figure chart |
 	figure := BpFigure new.
-	figure chartAtRow: 1 column: 1 put: BpChart instanceStackedBars.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceBelowAverageMass;
+		addArtist: self instanceAboveAverageMass.
+	chart
+		title: 'Number of penguins with above average body mass';
+		legend.
+	figure chartAtRow: 1 column: 1 put: chart.
 	^ figure show: 'bar_stacked'
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instanceAboveAverageMass [
+	"Gallery: Stacked bar chart (bar_stacked), top layer: the penguins above the average body mass of their species, on the bottom layer."
+
+	<sampleInstance>
+	^ self penguinsLayer: #( 82 37 66 ) on: self penguinsBelowAverageMass label: 'Above'
 ]
 
 { #category : 'instances' }
@@ -187,6 +211,40 @@ BpBarPlot class >> instanceBarColors [
 		label: #( 'red' 'blue' '_red' 'orange' );
 		color: (#( 1 2 1 5 ) collect: [ :each | BpQualitativePalette set1 colorAt: each ]).
 	^ chartPlotter
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instanceBelowAverageMass [
+	"Gallery: Stacked bar chart (bar_stacked), bottom layer: the penguins below the average body mass of their species."
+
+	<sampleInstance>
+	^ self penguinsLayer: self penguinsBelowAverageMass on: #( 0 0 0 ) label: 'Below'
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instanceBillDepths [
+	"Gallery: Grouped bar chart with labels (barchart), first group: the mean bill depth of each penguin species."
+
+	<sampleInstance>
+	^ self penguinGroup: #( 18.35 18.43 14.98 ) at: 1 label: 'Bill Depth'
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instanceBillLengths [
+	"Gallery: Grouped bar chart with labels (barchart), middle group: the mean bill length of each penguin species, labeling the ticks with the species."
+
+	<sampleInstance>
+	^ (self penguinGroup: #( 38.79 48.83 47.50 ) at: 2 label: 'Bill Length')
+		  tickLabel: self penguinSpecies;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpBarPlot class >> instanceFlipperLengths [
+	"Gallery: Grouped bar chart with labels (barchart), last group: the mean flipper length of each penguin species."
+
+	<sampleInstance>
+	^ self penguinGroup: #( 189.95 195.82 217.19 ) at: 3 label: 'Flipper Length'
 ]
 
 { #category : 'instances' }
@@ -220,6 +278,44 @@ BpBarPlot class >> instanceThreeBars [
 
 	<sampleInstance>
 	^ self barX: #( 'apple' 'blueberry' 'cherry' ) height: #( 40 100 30 )
+]
+
+{ #category : 'private - demo' }
+BpBarPlot class >> penguinGroup: aCollectionOfMeans at: anIndex label: aString [
+	"Answer the bars of the grouped bar demo for one attribute: one bar per species, 0.25 wide, shifted by their width times anIndex - 1."
+
+	| width offset |
+	width := 0.25.
+	offset := width * (anIndex - 1).
+	^ (self barX: ((0 to: 2) collect: [ :position | position + offset ]) height: aCollectionOfMeans)
+		  width: width;
+		  label: aString;
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpBarPlot class >> penguinSpecies [
+	"Answer the three penguin species of the grouped and stacked bar demos."
+
+	^ #( 'Adelie' 'Chinstrap' 'Gentoo' )
+]
+
+{ #category : 'private - demo' }
+BpBarPlot class >> penguinsBelowAverageMass [
+	"Answer the number of penguins of each species below their average body mass."
+
+	^ #( 70 31 58 )
+]
+
+{ #category : 'private - demo' }
+BpBarPlot class >> penguinsLayer: aCollectionOfCounts on: aCollectionOfBottoms label: aString [
+	"Answer the bars of the stacked bar demo for one layer: one bar per species, 0.5 wide, starting on aCollectionOfBottoms."
+
+	^ (self barX: self penguinSpecies height: aCollectionOfCounts)
+		  width: 0.5;
+		  label: aString;
+		  bottom: aCollectionOfBottoms;
+		  yourself
 ]
 
 { #category : 'accessing - options' }
