@@ -103,18 +103,18 @@ BpPolarChart class >> showHistogramIn: aPolarChart random: aRandom [
 	(aPolarChart addArtist: (BpHistogram xValues: ((1 to: 300) collect: [ :each | Float pi + aRandom nextNormal ])))
 		bins: ((0 to: 16) collect: [ :each | each * Float pi / 8 ]);
 		edgeColor: ((BpSequentialPalette greys: 9) colorAt: 1).
-	aPolarChart title: 'hist:'
+	aPolarChart title: 'BpHistogram'
 ]
 
 { #category : 'private - demo' }
 BpPolarChart class >> showPointsIn: aPolarChart random: aRandom [
 
 	(aPolarChart addArtist: (BpScatterPlot
-	  x: ((1 to: 80) collect: [ :each | Float twoPi * aRandom next ])
-	  y: ((1 to: 80) collect: [ :each | 2 * aRandom next ])))
+		  x: ((1 to: 80) collect: [ :each | Float twoPi * aRandom next ])
+		  y: ((1 to: 80) collect: [ :each | 2 * aRandom next ])))
 		s: 40;
 		alpha: 0.7.
-	aPolarChart title: 'scatterX:y:'
+	aPolarChart title: 'BpScatterPlot'
 ]
 
 { #category : 'private - demo' }

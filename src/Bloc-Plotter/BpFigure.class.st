@@ -366,12 +366,12 @@ BpFigure class >> instancePolarArtists [
 	angles := (0 to: 360) collect: [ :each | each degreesToRadians ].
 	(figure chartAtRow: 1 column: 1)
 		addArtist: (BpLine x: angles y: (angles collect: [ :each | 1 + (4 * each) cos ]));
-		title: 'plotX:y:'.
+		title: 'BpLine'.
 	BpPolarChart showPointsIn: (figure chartAtRow: 1 column: 2) random: random.
 	BpPolarChart showHistogramIn: (figure chartAtRow: 2 column: 1) random: random.
 	((figure chartAtRow: 2 column: 2) addArtist: (BpFillBetween x: angles y1: (angles collect: [ :each | 2 + (3 * each) sin ])))
 		alpha: 0.5.
-	(figure chartAtRow: 2 column: 2) title: 'fillBetweenX:y1:'.
+	(figure chartAtRow: 2 column: 2) title: 'BpFillBetween'.
 	^ figure
 ]
 

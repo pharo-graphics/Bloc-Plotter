@@ -4,6 +4,8 @@ I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), 
 ## Examples
 
 ```
+BpChart exampleArtistsInOneChart.
+BpChart instanceArtistsInOneChart.
 BpChart instanceHistogram.
 BpChart instanceGroupedBars.
 BpChart instanceStackedBars.
@@ -23,7 +25,7 @@ BpChart instanceLinePlotType
 ## Usage
 
 1. `BpFigure>>rows:columns:chartClass:` creates me, or I am built apart and placed with `BpFigure>>chartAtRow:column:put:`; I can also be shown alone.
-2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpFillBetween class>>x:y1:y2:`, `BpHeatmap class>>matrix:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barXValues:heightValues:` and `barhYValues:widthValues:` create a bar plot and add it the same way. `palette:` changes the palette and recolors the artists already added.
+2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpFillBetween class>>x:y1:y2:`, `BpHeatmap class>>matrix:`…), gives it the next colors of my palette (`nextColors:`) and answers it; several artists of different kinds can share me (`BpChart class>>instanceArtistsInOneChart`). `barXValues:heightValues:` and `barhYValues:widthValues:` create a bar plot and add it the same way. `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`), color bars (`BpColorBar`, added by `addColorBarFor:`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpChartLayout` computes my plot bounds from the size of my tick labels, title and color bars, which gives its extent to my data transform.
 
@@ -66,6 +68,42 @@ Class {
 	#package : 'Bloc-Plotter',
 	#tag : 'Chart'
 }
+
+{ #category : 'examples' }
+BpChart class >> exampleArtistsInOneChart [
+	"Show two kinds of artists in the same chart: a histogram and a scatter plot of its counts (see `BpChart class>>instanceArtistsInOneChart`)."
+
+	<example>
+	| figure |
+	figure := BpFigure new.
+	figure chartAtRow: 1 column: 1 put: self instanceArtistsInOneChart.
+	^ figure show: 'Artists'
+]
+
+{ #category : 'instances' }
+BpChart class >> instanceArtistsInOneChart [
+	"Answer a chart holding two kinds of artists: a histogram of normal samples and, above it, a scatter plot of its counts. Each takes the next color of the palette and the chart scales to cover both."
+
+	<sampleInstance>
+	| random chart histogram edges |
+	random := Random seed: 19680801.
+	chart := self new.
+	histogram := chart addArtist: ((BpHistogram xValues: ((1 to: 500) collect: [ :each | random nextNormal ]))
+		              bins: 15;
+		              yourself).
+	edges := histogram binEdges.
+	chart addArtist:
+		((BpScatterPlot x: ((1 to: 15) collect: [ :index | (edges at: index) + (edges at: index + 1) / 2 ]) y: histogram counts)
+			 marker: 'D';
+			 s: 50;
+			 label: 'counts';
+			 yourself).
+	^ chart
+		  title: 'BpHistogram and BpScatterPlot';
+		  legend;
+		  grid: true;
+		  yourself
+]
 
 { #category : 'instances' }
 BpChart class >> instanceGroupedBars [

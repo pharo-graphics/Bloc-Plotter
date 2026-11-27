@@ -3,8 +3,10 @@ I am an artist of a `BpChart`: something drawn from data, such as a histogram (`
 
 ## Examples
 
+Each subclass has its own examples. Two kinds of artists in one chart:
+
 ```
-BpArtist exampleArtistsInOneChart
+BpChart exampleArtistsInOneChart
 ```
 
 ## Design Rationale
@@ -13,6 +15,7 @@ BpArtist exampleArtistsInOneChart
 - Each change recomputes everything (`refresh`): subclasses define `compute` and `newPatches`, and new patches replace the previous ones. Handlers given to `whenPatch:do:` are kept and given to each new patch.
 - Style settings take one value or one per dataset or point (`setting:at:`).
 - My Live inspector pane (`TBpLiveInspection`) shows the figure of my chart, or a new figure holding me when I have no chart yet.
+- I am abstract and have no `instance…` methods: they would be inherited by every subclass, whose sample instances would then answer artists of another kind.
 
 ## Usage
 
@@ -65,47 +68,6 @@ BpArtist class >> demoRandom [
 	^ Random seed: 19680801
 ]
 
-{ #category : 'examples' }
-BpArtist class >> exampleArtistsInOneChart [
-	"Show two kinds of artists in the same chart: a histogram and a scatter plot of its counts; each takes the next color of the palette and the chart scales to cover both."
-
-	<example>
-	| figure chart |
-	figure := BpFigure new.
-	chart := BpChart new.
-	chart
-		addArtist: self instanceHistogram;
-		addArtist: self instanceCountMarkers;
-		title: 'BpHistogram and BpScatterPlot';
-		legend;
-		grid: true.
-	figure chartAtRow: 1 column: 1 put: chart.
-	^ figure show: 'Artists'
-]
-
-{ #category : 'instances' }
-BpArtist class >> instanceCountMarkers [
-	"Answer a scatter plot of the counts of `BpArtist class>>instanceHistogram`, a diamond at the center of each bin: an artist computed from another one."
-
-	<sampleInstance>
-	| histogram edges |
-	histogram := self normalHistogram.
-	edges := histogram binEdges.
-	^ (BpScatterPlot x: ((1 to: 15) collect: [ :index | (edges at: index) + (edges at: index + 1) / 2 ]) y: histogram counts)
-		  marker: 'D';
-		  s: 50;
-		  label: 'counts';
-		  yourself
-]
-
-{ #category : 'instances' }
-BpArtist class >> instanceHistogram [
-	"Answer a histogram of 500 normal samples in 15 bins, a kind of artist."
-
-	<sampleInstance>
-	^ self normalHistogram
-]
-
 { #category : 'constants' }
 BpArtist class >> lineStyleNames [
 	"Answer the line style of each line style string."
@@ -152,17 +114,6 @@ BpArtist class >> next: aCount from: aRandom [
 	"Answer aCount numbers drawn from aRandom, between 0 and 1."
 
 	^ (1 to: aCount) collect: [ :each | aRandom next ]
-]
-
-{ #category : 'private - demo' }
-BpArtist class >> normalHistogram [
-	"Answer a histogram of 500 normal samples in 15 bins."
-
-	| random |
-	random := Random seed: 19680801.
-	^ (BpHistogram xValues: ((1 to: 500) collect: [ :each | random nextNormal ]))
-		  bins: 15;
-		  yourself
 ]
 
 { #category : 'accessing' }
