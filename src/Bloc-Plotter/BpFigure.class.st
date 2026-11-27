@@ -81,10 +81,10 @@ BpFigure class >> addColorBarsFirstRowTo: aFigure [
 	"Add to the first row of aFigure a hexbin on a log scale and a transparent scatter plot, with their color bars."
 
 	| hexbin scatter |
-	hexbin := BpHexbin show: (BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3) in: aFigure charts first.
-	hexbin
-		gridSize: 20;
-		bins: #log.
+	hexbin := aFigure charts first addArtist: ((BpHexbin ofPoints: BpHexbin optionPoints)
+		           gridSize: 20;
+		           bins: #log;
+		           yourself).
 	(aFigure charts first addColorBarFor: hexbin) label: 'points'.
 	aFigure charts first title: 'log scale, label:'.
 	scatter := aFigure charts second addArtist: (BpScatterPlot x: (1 to: 60) y: ((1 to: 60) collect: [ :each | each * 17 \\ 61 ])).
@@ -101,16 +101,17 @@ BpFigure class >> addColorBarsSecondRowTo: aFigure [
 	"Add to the second row of aFigure a hexbin colored in steps and a heatmap under points, with their color bars."
 
 	| hexbin heatmap scatter |
-	hexbin := BpHexbin show: (BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3) in: aFigure charts third.
-	hexbin
-		gridSize: 20;
-		bins: 4.
+	hexbin := aFigure charts third addArtist: ((BpHexbin ofPoints: BpHexbin optionPoints)
+		           gridSize: 20;
+		           bins: 4;
+		           yourself).
 	(aFigure charts third addColorBarFor: hexbin)
 		tickCount: 3;
 		tickFormatter: [ :step | 'step ' , step printString ].
 	aFigure charts third title: 'bins: 4, tickFormatter:'.
-	heatmap := aFigure charts fourth heatmap: #( #( 1 2 3 ) #( 4 5 6 ) #( 7 8 9 ) ).
-	heatmap colorMap: (BpInterpolatedPalette name: 'Greys' anchors: (BpSequentialPalette greys: 9) colors).
+	heatmap := aFigure charts fourth addArtist: ((BpHeatmap matrix: #( #( 1 2 3 ) #( 4 5 6 ) #( 7 8 9 ) ))
+		            colorMap: (BpInterpolatedPalette name: 'Greys' anchors: (BpSequentialPalette greys: 9) colors);
+		            yourself).
 	scatter := aFigure charts fourth addArtist: (BpScatterPlot x: #( 1 2 3 ) y: #( 1 2 3 )).
 	scatter
 		c: #( 10 50 100 );
@@ -174,7 +175,7 @@ BpFigure class >> exampleHeatmap [
 	"Show the figure of the gallery annotated heatmap (see `BpHeatmap`)."
 
 	<example>
-	^ self instanceHeatmap show: 'heatmap'
+	^ BpHeatmap exampleAnnotated
 ]
 
 { #category : 'examples' }
@@ -182,7 +183,7 @@ BpFigure class >> exampleHexbin [
 	"Show the figure of the gallery hexagonal binned plot: 100000 points counted in hexagons (see `BpHexbin`)."
 
 	<example>
-	^ self instanceHexbinDemo show: 'hexbin'
+	^ BpHexbin exampleHexbinDemo
 ]
 
 { #category : 'examples' }
@@ -254,7 +255,7 @@ BpFigure class >> exampleStackPlot [
 	"Show the figure of the gallery stackplot demo: the world population stacked by continent (see `BpStackPlot`)."
 
 	<example>
-	^ self instanceStackPlotWorldPopulation show: 'stackplot'
+	^ BpStackPlot exampleWorldPopulation
 ]
 
 { #category : 'examples' }
@@ -286,7 +287,7 @@ BpFigure class >> exampleViolinPlot [
 	"Show the figure of the gallery violin plot basics: points, widths, means, medians, bandwidths and quantiles (see `BpViolinPlot`)."
 
 	<example>
-	^ self instanceViolinPlotBasics show: 'violinplot'
+	^ BpViolinPlot exampleViolinPlotBasics
 ]
 
 { #category : 'instances - artists' }
@@ -311,32 +312,6 @@ BpFigure class >> instanceAllMarkers [
 	^ figure
 ]
 
-{ #category : 'instances - artists' }
-BpFigure class >> instanceArtistsInOneChart [
-	"Two kinds of artists in the same chart: a histogram of normal samples and, above it, a scatter plot of their counts; each takes the next color of the cycle and the chart scales to cover both."
-
-	<sampleInstance>
-	| random samples chart figure histogram |
-	random := Random seed: 19680801.
-	samples := (1 to: 500) collect: [ :each | random nextNormal ].
-	figure := self new.
-	chart := figure charts first.
-	histogram := (chart addArtist: (BpHistogram xValues: samples))
-		             bins: 15;
-		             yourself.
-	(chart addArtist: (BpScatterPlot
-	  x: ((1 to: 15) collect: [ :index | (histogram binEdges at: index) + (histogram binEdges at: index + 1) / 2 ])
-	  y: histogram counts))
-		marker: 'D';
-		s: 50;
-		label: 'counts'.
-	chart
-		title: 'BpHistogram and BpScatterPlot';
-		legend;
-		grid: true.
-	^ figure
-]
-
 { #category : 'instances - color bar' }
 BpFigure class >> instanceColorBars [
 	"Color bars of a hexbin on a log scale, a transparent scatter plot, a hexbin in steps, and two artists of the same chart."
@@ -347,121 +322,6 @@ BpFigure class >> instanceColorBars [
 	figure extent: 900 @ 800.
 	self addColorBarsFirstRowTo: figure.
 	self addColorBarsSecondRowTo: figure.
-	^ figure
-]
-
-{ #category : 'instances - heatmap' }
-BpFigure class >> instanceHeatmap [
-	"The gallery annotated heatmap: the harvest of vegetables by farmers, with its numbers and a color bar."
-
-	<sampleInstance>
-	| figure chart heatmap |
-	figure := self new.
-	figure extent: 820 @ 520.
-	chart := figure charts first.
-	heatmap := BpHeatmap harvestIn: chart.
-	heatmap showAmounts: true.
-	chart title: 'Harvest of local farmers (in tonnes/year)'.
-	chart addColorBarFor: heatmap.
-	^ figure
-]
-
-{ #category : 'instances - heatmap' }
-BpFigure class >> instanceHeatmapOptions [
-	"Heatmaps with edges, a diverging color map, missing numbers, and a log scale with many cells."
-
-	<sampleInstance>
-	| figure heatmap |
-	figure := self rows: 2 columns: 2.
-	figure extent: 900 @ 800.
-	heatmap := figure charts first heatmap: #( #( 12 4 9 ) #( 7 16 1 ) #( 3 8 14 ) ).
-	heatmap
-		showAmounts: true;
-		colorMap: (BpInterpolatedPalette name: 'Blues' anchors: (BpSequentialPalette blues: 9) colors);
-		edgeColors: ((BpSequentialPalette greys: 9) colorAt: 1);
-		lineWidths: 3.
-	figure charts first title: 'edgeColors:, lineWidths: 3'.
-	heatmap := figure charts second heatmap: #( #( 1 0.8 -0.3 -0.7 ) #( 0.8 1 -0.1 -0.5 ) #( -0.3 -0.1 1 0.4 ) #( -0.7 -0.5 0.4 1 ) ).
-	heatmap
-		showAmounts: true;
-		colorMap: BpHeatmap divergingMap;
-		vMin: -1;
-		vMax: 1.
-	figure charts second title: 'vMin: -1, vMax: 1'.
-	figure charts second addColorBarFor: heatmap.
-	heatmap := figure charts third heatmap: #( #( 5 nil 2 ) #( nil 8 6 ) #( 1 3 nil ) ).
-	heatmap
-		showAmounts: true;
-		amountFormatter: [ :amount | amount printString , ' kg' ].
-	figure charts third title: 'nil cells, amountFormatter:'.
-	heatmap := BpHeatmap wavesIn: figure charts fourth.
-	heatmap
-		colorMap: BpInterpolatedPalette inferno;
-		scale: #log.
-	figure charts fourth title: 'scale: #log'.
-	figure charts fourth addColorBarFor: heatmap.
-	^ figure
-]
-
-{ #category : 'instances - hexbin' }
-BpFigure class >> instanceHexbinDemo [
-	"Gallery: Hexagonal binned plot (hexbin_demo): 100000 points, on a linear and on a logarithmic color scale."
-
-	<sampleInstance>
-	| figure points |
-	points := (BpHexbin correlatedPoints: 100000 slope: 3 deviation: 4) collect: [ :each | each + (0 @ 2) ].
-	figure := self rows: 1 columns: 2.
-	figure extent: 900 @ 400.
-	figure charts with: #( 'Hexagon binning' 'With a log color scale' ) do: [ :chart :title |
-		(BpHexbin show: points in: chart)
-			gridSize: 50;
-			colorMap: BpInterpolatedPalette inferno.
-		chart title: title ].
-	figure charts last artists first bins: #log.
-	^ figure
-]
-
-{ #category : 'instances - hexbin' }
-BpFigure class >> instanceHexbinOptions [
-	"Hexbins with few points hidden, colors in steps, the average of a third variable, and a log axis."
-
-	<sampleInstance>
-	| figure points |
-	points := BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3.
-	figure := self rows: 2 columns: 2.
-	figure extent: 900 @ 800.
-	(BpHexbin show: points in: figure charts first)
-		gridSize: 25;
-		minCount: 5.
-	figure charts first title: 'minCount: 5'.
-	(BpHexbin show: points in: figure charts second)
-		gridSize: 25;
-		bins: 4;
-		edgeColors: ((BpSequentialPalette greys: 9) colorAt: 1).
-	figure charts second title: 'bins: 4'.
-	(BpHexbin show: points in: figure charts third)
-		gridSize: 25;
-		c: (points collect: [ :each | each x sin ]).
-	figure charts third title: 'c: sin(x)'.
-	(BpHexbin show: (points collect: [ :each | (10 raisedTo: each x) @ each y ]) in: figure charts fourth)
-		gridSize: 25;
-		xScale: #log.
-	figure charts fourth title: 'xScale: #log'.
-	^ figure
-]
-
-{ #category : 'instances - hexbin' }
-BpFigure class >> instanceHexbinPlotType [
-	"Plot types: hexbin(x, y, C), five thousand points around a line."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	(BpHexbin show: (BpHexbin correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3) in: chart) gridSize: 20.
-	chart
-		xLimits: #( -2 2 );
-		yLimits: #( -3 3 ).
 	^ figure
 ]
 
@@ -491,107 +351,6 @@ BpFigure class >> instanceHistTypes [
 			 addArtist: BpHistogram instanceUnequalBins;
 			 title: 'bar, unequal bins';
 			 yourself).
-	^ figure
-]
-
-{ #category : 'instances - heatmap' }
-BpFigure class >> instanceInteractiveHeatmap [
-	"A heatmap with interaction handlers on its cells: hovering a cell outlines it, clicking it shows its names and number in the title."
-
-	<sampleInstance>
-	| figure chart heatmap |
-	figure := self new.
-	figure extent: 820 @ 520.
-	chart := figure charts first.
-	heatmap := BpHeatmap harvestIn: chart.
-	chart title: 'Click a cell'.
-	heatmap
-		whenPatch: BlMouseEnterEvent
-		do: [ :event :cell | cell border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :cell | cell border: (BlBorder paint: cell background paint width: 1) ];
-		whenPatch: BlClickEvent do: [ :event :cell |
-			chart title: ('{1}, {2}: {3}' format: {
-				 (heatmap rowNameAt: cell row).
-				 (heatmap columnNameAt: cell column).
-				 cell amount }) ].
-	^ figure
-]
-
-{ #category : 'instances - hexbin' }
-BpFigure class >> instanceInteractiveHexbin [
-	"A hexbin with interaction handlers on its hexagons: hovering a hexagon outlines it, clicking it shows its center and number of points in the title."
-
-	<sampleInstance>
-	| figure chart hexbin |
-	figure := self new.
-	chart := figure charts first.
-	hexbin := BpHexbin show: (BpHexbin correlatedPoints: 2000 slope: 1.2 deviation: 0.5) in: chart.
-	hexbin
-		gridSize: 20;
-		minCount: 1.
-	chart title: 'Click a hexagon'.
-	hexbin
-		whenPatch: BlMouseEnterEvent
-		do: [ :event :hexagon | hexagon border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :hexagon | hexagon border: (BlBorder paint: hexagon background paint width: 1) ];
-		whenPatch: BlClickEvent do: [ :event :hexagon |
-			chart title: ('{1} points around ({2}, {3})' format: {
-				 hexagon count.
-				 (hexagon center x printShowingDecimalPlaces: 2).
-				 (hexagon center y printShowingDecimalPlaces: 2) }) ].
-	^ figure
-]
-
-{ #category : 'instances - stack plot' }
-BpFigure class >> instanceInteractiveStack [
-	"The world population by continent: hovering a layer outlines it, clicking it shows its continent and its last value in the title."
-
-	<sampleInstance>
-	| figure chart stack |
-	figure := self instanceStackPlotWorldPopulation.
-	chart := figure charts first.
-	chart title: 'Click a continent'.
-	stack := chart artists first.
-	stack
-		whenPatch: BlMouseEnterEvent do: [ :event :polygon | polygon border: (BlBorder paint: ((BpSequentialPalette greys: 9) colorAt: 9) width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :polygon | polygon border: BlBorder empty ];
-		whenPatch: BlClickEvent do: [ :event :polygon |
-			chart title: ('{1}: {2} billion people in 2018' format: {
-				 (stack labelAt: polygon dataset).
-				 ((stack stacks at: polygon dataset) last - (polygon dataset = 1
-					   ifTrue: [ stack baselineValues last ]
-					   ifFalse: [ (stack stacks at: polygon dataset - 1) last ]) printShowingDecimalPlaces: 3) }) ].
-	^ figure
-]
-
-{ #category : 'instances - violin plot' }
-BpFigure class >> instanceInteractiveViolins [
-	"Three violins: hovering one makes it opaque, clicking it shows its median in the title."
-
-	<sampleInstance>
-	| random figure chart violins isBody |
-	random := Random seed: 3.
-	figure := self new.
-	chart := figure charts first.
-	chart title: 'Click a violin'.
-	violins := (chart violinPlot: ((1 to: 3) collect: [ :each |
-		             BpViolinPlot
-			             normalSamples: 200
-			             mean: each
-			             deviation: each / 2
-			             random: random ]))
-		           showMedians: true;
-		           yourself.
-	isBody := [ :patch | (violins parts at: #bodies) includes: patch ].
-	violins
-		whenPatch: BlMouseEnterEvent
-		do: [ :event :patch | (isBody value: patch) ifTrue: [ patch background: (patch background paint color alpha: 0.8) ] ];
-		whenPatch: BlMouseLeaveEvent
-		do: [ :event :patch | (isBody value: patch) ifTrue: [ violins paintBody: patch dataset: patch dataset ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			chart title: ('violin {1}: median {2}' format: {
-				 patch dataset.
-				 ((violins statistics at: patch dataset) median printShowingDecimalPlaces: 2) }) ].
 	^ figure
 ]
 
@@ -648,114 +407,6 @@ BpFigure class >> instanceRadarChart [
 	^ figure
 ]
 
-{ #category : 'instances - violin plot' }
-BpFigure class >> instanceSplitViolins [
-	"Two groups compared on each side of the same positions: the low halves on the left, the high halves on the right."
-
-	<sampleInstance>
-	| random figure chart |
-	random := Random seed: 7.
-	figure := self new.
-	chart := figure charts first.
-	(chart violinPlot: ((1 to: 4) collect: [ :each |
-		  BpViolinPlot
-			  normalSamples: 150
-			  mean: each
-			  deviation: 1
-			  random: random ]))
-		side: #low;
-		showExtrema: false;
-		showMedians: true;
-		label: 'before'.
-	(chart violinPlot: ((1 to: 4) collect: [ :each |
-		  BpViolinPlot
-			  normalSamples: 150
-			  mean: each + 1
-			  deviation: 0.6
-			  random: random ]))
-		side: #high;
-		showExtrema: false;
-		showMedians: true;
-		label: 'after'.
-	chart
-		title: 'Split violins';
-		legend.
-	^ figure
-]
-
-{ #category : 'instances - stack plot' }
-BpFigure class >> instanceStackPlotBaselines [
-	"The same three layers stacked on each baseline: #zero, #sym, #wiggle and #weightedWiggle."
-
-	<sampleInstance>
-	| random x layers figure |
-	random := Random seed: 19680801.
-	x := BpStackPlot linspaceFrom: 0 to: 100 count: 101.
-	layers := (1 to: 3) collect: [ :each | BpStackPlot gaussianMixtureOver: x random: random ].
-	figure := self rows: 2 columns: 2.
-	#( #zero #sym #wiggle #weightedWiggle ) withIndexDo: [ :each :index |
-		| chart |
-		chart := figure charts at: index.
-		(chart stackPlotX: x ys: layers) baseline: each.
-		chart title: 'baseline: #' , each ].
-	^ figure
-]
-
-{ #category : 'instances - stack plot' }
-BpFigure class >> instanceStackPlotStreamGraph [
-	"Gallery: Stackplots and streamgraphs (stackplot_demo), second figure: three random mixtures of gaussians stacked on the #wiggle baseline."
-
-	<sampleInstance>
-	| random x figure |
-	random := Random seed: 19680801.
-	x := BpStackPlot linspaceFrom: 0 to: 100 count: 101.
-	figure := self new.
-	(figure charts first stackPlotX: x ys: ((1 to: 3) collect: [ :each | BpStackPlot gaussianMixtureOver: x random: random ]))
-		baseline: #wiggle.
-	^ figure
-]
-
-{ #category : 'instances - stack plot' }
-BpFigure class >> instanceStackPlotType [
-	"Plot types: stackplot(x, y), three layers over x = 0, 2, 4, 6, 8 with fixed limits and ticks."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	chart stackPlotX: (BpStackPlot arangeFrom: 0 to: 10 by: 2) ys: #( #( 1 1.25 2 2.75 3 ) #( 1 1 1 1 1 ) #( 2 1 2 1 2 ) ).
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
-]
-
-{ #category : 'instances - stack plot' }
-BpFigure class >> instanceStackPlotWorldPopulation [
-	"Gallery: Stackplots and streamgraphs (stackplot_demo), first figure: the population of each continent from 1950 to 2018, in billions, one labeled layer per continent."
-
-	<sampleInstance>
-	| population figure chart |
-	population := {
-		              ('Africa' -> #( 0.228 0.284 0.365 0.477 0.631 0.814 1.044 1.275 )).
-		              ('the Americas' -> #( 0.340 0.425 0.519 0.619 0.727 0.840 0.943 1.006 )).
-		              ('Asia' -> #( 1.394 1.686 2.120 2.625 3.202 3.714 4.169 4.560 )).
-		              ('Europe' -> #( 0.220 0.253 0.276 0.295 0.310 0.303 0.294 0.293 )).
-		              ('Oceania' -> #( 0.012 0.015 0.019 0.022 0.026 0.031 0.036 0.039 )) }.
-	figure := self new.
-	chart := figure charts first.
-	(chart stackPlotX: #( 1950 1960 1970 1980 1990 2000 2010 2018 ) ys: (population collect: [ :each | each value ]))
-		label: (population collect: [ :each | each key ]);
-		alpha: 0.8.
-	chart
-		legend;
-		title: 'World population'.
-	^ figure
-]
-
 { #category : 'instances' }
 BpFigure class >> instanceTwoByTwo [
 	"Answer a figure of two rows of two charts, each with a title, ready to receive plots."
@@ -764,67 +415,6 @@ BpFigure class >> instanceTwoByTwo [
 	| figure |
 	figure := self rows: 2 columns: 2.
 	figure charts withIndexDo: [ :chart :index | chart title: 'chart ' , index printString ].
-	^ figure
-]
-
-{ #category : 'instances - violin plot' }
-BpFigure class >> instanceViolinPlotBasics [
-	"Gallery: Violin plot basics (violinplot), custom violins 1, 2 and 4, vertical then horizontal: fewer or more points, widths, means and medians, the Silverman bandwidth, a bandwidth factor and quantiles."
-
-	<sampleInstance>
-	| data figure |
-	data := BpViolinPlot basicsData.
-	figure := self rows: 2 columns: 3.
-	figure extent: 1000 @ 600.
-	#( 1 2 4 ) withIndexDo: [ :number :column |
-		BpViolinPlot
-			customViolinsIn: (figure chartAtRow: 1 column: column)
-			data: data
-			number: number
-			horizontal: false.
-		BpViolinPlot
-			customViolinsIn: (figure chartAtRow: 2 column: column)
-			data: data
-			number: number
-			horizontal: true ].
-	^ figure
-]
-
-{ #category : 'instances - violin plot' }
-BpFigure class >> instanceViolinPlotType [
-	"Plot types: violinplot(D), three violins 2 wide at 2, 4 and 6, without lines, nearly opaque, with fixed limits and ticks."
-
-	<sampleInstance>
-	| random figure chart |
-	random := Random seed: 10.
-	figure := self new.
-	chart := figure charts first.
-	(chart
-		 violinPlot: {
-			 (BpViolinPlot
-				  normalSamples: 200
-				  mean: 3
-				  deviation: 0.75
-				  random: random).
-			 (BpViolinPlot
-				  normalSamples: 200
-				  mean: 5
-				  deviation: 1
-				  random: random).
-			 (BpViolinPlot
-				  normalSamples: 200
-				  mean: 4
-				  deviation: 0.75
-				  random: random) }
-		 positions: #( 2 4 6 ))
-		widths: 2;
-		showExtrema: false;
-		alpha: 0.9.
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7).
 	^ figure
 ]
 

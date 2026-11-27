@@ -1,5 +1,5 @@
 "
-I check `BpViolinPlot`, as `BpChart>>violinPlot:` and `BpChart>>violinPlot:positions:` create it: the bodies (shape, positions, widths, sides, orientation, resolution), the lines at the extrema, means, medians and quantiles, colors, line widths and alpha, the drawing order, the legend entry and handlers.
+I check `BpViolinPlot`, as `BpViolinPlot class>>x:` and `BpViolinPlot class>>x:positions:` create it: the bodies (shape, positions, widths, sides, orientation, resolution), the lines at the extrema, means, medians and quantiles, colors, line widths and alpha, the drawing order, the legend entry and handlers, and the sample instances.
 
 ## Implementation Notes
 
@@ -11,6 +11,16 @@ Class {
 	#category : 'Bloc-Plotter-Tests',
 	#package : 'Bloc-Plotter-Tests'
 }
+
+{ #category : 'tests' }
+BpViolinPlotTest >> testAddArtistAddsTheViolinsAtTheirPositions [
+
+	| chart violins |
+	chart := BpChart new.
+	violins := chart addArtist: (BpViolinPlot x: #( #( 1 2 3 ) #( 2 4 4 6 ) ) positions: #( 2 4 )).
+	self assert: chart artists last identicalTo: violins.
+	self assert: violins positions equals: #( 2 4 )
+]
 
 { #category : 'tests' }
 BpViolinPlotTest >> testAlphaSetsTheOpacityOfTheBodies [
@@ -55,14 +65,11 @@ BpViolinPlotTest >> testBodyIsHalfTheWidthWideAtTheHighestDensity [
 	self assert: xs min equals: (xs at: 3)
 ]
 
-{ #category : 'tests' }
-BpViolinPlotTest >> testChartViolinPlotPositionsAddsTheViolins [
+{ #category : 'tests - instances' }
+BpViolinPlotTest >> testCustomInstancesHaveSixViolins [
 
-	| chart violins |
-	chart := BpChart new.
-	violins := chart violinPlot: #( #( 1 2 3 ) #( 2 4 4 6 ) ) positions: #( 2 4 ).
-	self assert: chart artists last identicalTo: violins.
-	self assert: violins positions equals: #( 2 4 )
+	self assert: BpViolinPlot instanceCustomFour statistics size equals: 6.
+	self assert: BpViolinPlot instanceHorizontalCustomFour statistics size equals: 6
 ]
 
 { #category : 'tests' }
@@ -102,6 +109,13 @@ BpViolinPlotTest >> testFaceColorCanBeGivenPerViolin [
 			Color green }
 ]
 
+{ #category : 'tests - instances' }
+BpViolinPlotTest >> testHalvesInstancesAreOnBothSides [
+
+	self assert: BpViolinPlot instanceLowHalves statistics size equals: 4.
+	self assert: BpViolinPlot instanceHighHalves statistics size equals: 4
+]
+
 { #category : 'tests' }
 BpViolinPlotTest >> testHandlersAreKeptWhenTheViolinsAreRebuilt [
 
@@ -129,6 +143,12 @@ BpViolinPlotTest >> testHorizontalSwapsTheCoordinates [
 	| body |
 	body := ((self violinsWith: [ :violins | violins orientation: #horizontal ]) parts at: #bodies) first.
 	self assert: (self xsOf: body) equals: #( 1 1.5 2 2.5 3 3 2.5 2 1.5 1 )
+]
+
+{ #category : 'tests - instances' }
+BpViolinPlotTest >> testInstanceWideViolinsIsAtItsPositions [
+
+	self assert: BpViolinPlot instanceWideViolins positions equals: #( 2 4 6 )
 ]
 
 { #category : 'tests' }
@@ -295,7 +315,7 @@ BpViolinPlotTest >> testViolinsTakeTheNextColorOfTheCycle [
 	| chart |
 	chart := BpChart new.
 	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
-	self assert: ((chart violinPlot: #( 1 2 3 )) parts at: #bars) first border paint color equals: (BpPalette default colorAt: 2)
+	self assert: ((chart addArtist: (BpViolinPlot x: #( 1 2 3 ))) parts at: #bars) first border paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests - errors' }
@@ -311,6 +331,12 @@ BpViolinPlotTest >> testWidthsSetTheWidthOfEachViolin [
 	bodies := (self violinsWith: [ :violins | violins widths: #( 2 1 ) ]) parts at: #bodies.
 	self assert: ((self xsOf: bodies first) max closeTo: 2).
 	self assert: ((self xsOf: bodies second) max closeTo: 2.5)
+]
+
+{ #category : 'tests - instances' }
+BpViolinPlotTest >> testXCreatesOneViolinForNumbers [
+
+	self assert: (BpViolinPlot x: #( 1 2 3 )) statistics size equals: 1
 ]
 
 { #category : 'tests' }

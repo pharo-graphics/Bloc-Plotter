@@ -1,5 +1,5 @@
 "
-I check `BpFillBetween`, as `BpChart>>fillBetweenX:y1:y2:` and `BpChart>>fillBetweenY:x1:x2:` create it: the vertices of the polygons (including the regions selected by where, the interpolated crossings and the three step styles), the broadcasting of single values, horizontal fills, colors and outlines, the legend entry and the colors of the palette.
+I check `BpFillBetween`, as `BpFillBetween class>>x:y1:y2:` and `BpFillBetween class>>y:x1:x2:` create it: the vertices of the polygons (including the regions selected by where, the interpolated crossings and the three step styles), the broadcasting of single values, horizontal fills, colors and outlines, the legend entry, the colors of the palette, and the sample instances.
 
 ## Implementation Notes
 

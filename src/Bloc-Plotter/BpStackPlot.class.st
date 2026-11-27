@@ -1,11 +1,12 @@
 "
-I am a stack plot, added by `BpChart>>stackPlotX:ys:`: layers drawn on top of each other over the same x values, each one filled from the top of the previous layer to its own top. The running sums of the layers are my `stacks`; the curve the first layer starts from is my `baselineValues`, set by `baseline:`. I draw one closed `BpPolygonPatch` per layer, its `dataset` being the index of the layer.
+I am a stack plot of a `BpChart`: layers drawn on top of each other over the same x values, each one filled from the top of the previous layer to its own top. The running sums of the layers are my `stacks`; the curve the first layer starts from is my `baselineValues`, set by `baseline:`. I draw one closed `BpPolygonPatch` per layer, its `dataset` being the index of the layer.
 
 ## Examples
 
 ```
 BpStackPlot examplePlotType.
-BpStackPlot exampleStackPlotDemo.
+BpStackPlot exampleWorldPopulation.
+BpStackPlot exampleStreamGraph.
 BpStackPlot exampleBaselines.
 BpStackPlot exampleInteraction
 ```
@@ -20,7 +21,7 @@ BpStackPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>stackPlotX:ys:` creates me with my data (`x:ys:`) and adds me to the chart (see `BpArtist`), which gives me one color of its palette per layer.
+1. `BpStackPlot class>>x:ys:` creates me with my data, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`), which gives me one color of its palette per layer.
 2. My chart reads my polygons (`patches`) for autoscaling and my `legendEntries` (one filled rectangle per labeled layer).
 
 ## Implementation Notes
@@ -52,35 +53,93 @@ Class {
 
 { #category : 'examples' }
 BpStackPlot class >> exampleBaselines [
-	"Show the four baselines of a stack plot on the same layers."
+	"Show the same three layers stacked on each baseline: #zero, #sym, #wiggle and #weightedWiggle."
 
 	<example>
-	^ BpFigure instanceStackPlotBaselines show: 'stackplot baselines'
+	| figure |
+	figure := BpFigure rows: 2 columns: 2.
+	{
+		(#zero -> self instanceZeroBaseline).
+		(#sym -> self instanceSymmetricBaseline).
+		(#wiggle -> self instanceStreamGraph).
+		(#weightedWiggle -> self instanceWeightedWiggleBaseline) } withIndexDo: [ :each :index |
+			figure chartAtRow: index - 1 // 2 + 1 column: index - 1 \\ 2 + 1 put: (BpChart new
+				 addArtist: each value;
+				 title: 'baseline: #' , each key;
+				 yourself) ].
+	^ figure show: 'stackplot baselines'
 ]
 
 { #category : 'examples' }
 BpStackPlot class >> exampleInteraction [
-	"Interaction handlers on the layers of a stack plot: hover a continent to outline it, click it to see its population."
+	"Interaction handlers on the layers of a stack plot: hover a continent to outline it, click it to see its population in 2018."
 
 	<example>
-	^ BpFigure instanceInteractiveStack show: 'Stack interaction'
+	| figure chart stack |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart title: 'Click a continent'.
+	stack := chart addArtist: self instanceWorldPopulation.
+	chart legend.
+	stack
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :polygon | polygon border: (BlBorder paint: ((BpSequentialPalette greys: 9) colorAt: 9) width: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :polygon | polygon border: BlBorder empty ];
+		whenPatch: BlClickEvent do: [ :event :polygon |
+			chart title: ('{1}: {2} billion people in 2018' format: {
+				 (stack labelAt: polygon dataset).
+				 ((stack stacks at: polygon dataset) last - (polygon dataset = 1
+					   ifTrue: [ stack baselineValues last ]
+					   ifFalse: [ (stack stacks at: polygon dataset - 1) last ]) printShowingDecimalPlaces: 3) }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Stack interaction'
 ]
 
 { #category : 'examples' }
 BpStackPlot class >> examplePlotType [
-	"Reproduce the plot type stackplot(x, y)."
+	"Reproduce the plot type stackplot(x, y): three layers in a chart of fixed limits and ticks, with a grid."
 
 	<example>
-	^ BpFigure instanceStackPlotType show: 'stackplot(x, y)'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceThreeLayers.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7);
+		grid: true.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'stackplot(x, y)'
 ]
 
 { #category : 'examples' }
-BpStackPlot class >> exampleStackPlotDemo [
-	"Reproduce the two figures of the gallery 'Stackplots and streamgraphs': the world population by continent, then a streamgraph."
+BpStackPlot class >> exampleStreamGraph [
+	"Reproduce the second figure of the gallery 'Stackplots and streamgraphs': a streamgraph."
 
 	<example>
-	BpFigure instanceStackPlotWorldPopulation show: 'stackplot_demo'.
-	^ BpFigure instanceStackPlotStreamGraph show: 'stackplot_demo streamgraph'
+	| figure |
+	figure := BpFigure new.
+	figure chartAtRow: 1 column: 1 put: (BpChart new
+		 addArtist: self instanceStreamGraph;
+		 yourself).
+	^ figure show: 'stackplot_demo streamgraph'
+]
+
+{ #category : 'examples' }
+BpStackPlot class >> exampleWorldPopulation [
+	"Reproduce the first figure of the gallery 'Stackplots and streamgraphs': the world population by continent."
+
+	<example>
+	| figure |
+	figure := BpFigure new.
+	figure chartAtRow: 1 column: 1 put: (BpChart new
+		 addArtist: self instanceWorldPopulation;
+		 legend;
+		 title: 'World population';
+		 yourself).
+	^ figure show: 'stackplot_demo'
 ]
 
 { #category : 'private - demo' }
@@ -101,18 +160,109 @@ BpStackPlot class >> gaussianMixtureOver: someXs random: aRandom [
 
 { #category : 'instances' }
 BpStackPlot class >> instanceLayers [
-	"Answer three labeled layers stacked on zero, in a new chart with a legend."
+	"Answer three labeled layers stacked on zero."
 
 	<sampleInstance>
-	| chart stack |
-	chart := BpChart new
-		         extent: 400 @ 300;
-		         yourself.
-	stack := (chart stackPlotX: (1 to: 6) ys: #( #( 1 2 3 2 3 4 ) #( 2 2 1 2 3 2 ) #( 1 1 2 2 1 1 ) ))
-		         label: #( 'first' 'second' 'third' );
-		         yourself.
-	chart legend.
-	^ stack
+	^ (self x: (1 to: 6) ys: #( #( 1 2 3 2 3 4 ) #( 2 2 1 2 3 2 ) #( 1 1 2 2 1 1 ) ))
+		  label: #( 'first' 'second' 'third' );
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStackPlot class >> instanceStreamGraph [
+	"Gallery: Stackplots and streamgraphs (stackplot_demo), second figure: three random mixtures of gaussians stacked on the #wiggle baseline (see `BpStackPlot>>baseline:`)."
+
+	<sampleInstance>
+	^ self streamOnBaseline: #wiggle
+]
+
+{ #category : 'instances' }
+BpStackPlot class >> instanceSymmetricBaseline [
+	"Answer the streamgraph layers stacked symmetrically around zero (#sym)."
+
+	<sampleInstance>
+	^ self streamOnBaseline: #sym
+]
+
+{ #category : 'instances' }
+BpStackPlot class >> instanceThreeLayers [
+	"Plot types: stackplot(x, y), three layers over x = 0, 2, 4, 6, 8."
+
+	<sampleInstance>
+	^ self x: (self arangeFrom: 0 to: 10 by: 2) ys: #( #( 1 1.25 2 2.75 3 ) #( 1 1 1 1 1 ) #( 2 1 2 1 2 ) )
+]
+
+{ #category : 'instances' }
+BpStackPlot class >> instanceWeightedWiggleBaseline [
+	"Answer the streamgraph layers on the #weightedWiggle baseline, which minimizes the slope of the layers weighted by their size."
+
+	<sampleInstance>
+	^ self streamOnBaseline: #weightedWiggle
+]
+
+{ #category : 'instances' }
+BpStackPlot class >> instanceWorldPopulation [
+	"Gallery: Stackplots and streamgraphs (stackplot_demo), first figure: the population of each continent from 1950 to 2018, in billions, one labeled layer per continent."
+
+	<sampleInstance>
+	^ (self x: #( 1950 1960 1970 1980 1990 2000 2010 2018 ) ys: (self worldPopulation collect: [ :each | each value ]))
+		  label: (self worldPopulation collect: [ :each | each key ]);
+		  alpha: 0.8;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStackPlot class >> instanceZeroBaseline [
+	"Answer the streamgraph layers stacked on zero, the default baseline."
+
+	<sampleInstance>
+	^ self streamOnBaseline: #zero
+]
+
+{ #category : 'private - demo' }
+BpStackPlot class >> streamLayers [
+	"Answer the three layers of the streamgraph demos, random mixtures of gaussians over `streamX`."
+
+	| random |
+	random := Random seed: 19680801.
+	^ (1 to: 3) collect: [ :each | self gaussianMixtureOver: self streamX random: random ]
+]
+
+{ #category : 'private - demo' }
+BpStackPlot class >> streamOnBaseline: aSymbol [
+	"Answer the layers of the streamgraph demos stacked on the baseline aSymbol."
+
+	^ (self x: self streamX ys: self streamLayers)
+		  baseline: aSymbol;
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpStackPlot class >> streamX [
+	"Answer the x of the streamgraph demos: 0 to 100."
+
+	^ self linspaceFrom: 0 to: 100 count: 101
+]
+
+{ #category : 'private - demo' }
+BpStackPlot class >> worldPopulation [
+	"Answer the population of each continent from 1950 to 2018, in billions, as associations from the continent to its values."
+
+	^ {
+		  ('Africa' -> #( 0.228 0.284 0.365 0.477 0.631 0.814 1.044 1.275 )).
+		  ('the Americas' -> #( 0.340 0.425 0.519 0.619 0.727 0.840 0.943 1.006 )).
+		  ('Asia' -> #( 1.394 1.686 2.120 2.625 3.202 3.714 4.169 4.560 )).
+		  ('Europe' -> #( 0.220 0.253 0.276 0.295 0.310 0.303 0.294 0.293 )).
+		  ('Oceania' -> #( 0.012 0.015 0.019 0.022 0.026 0.031 0.036 0.039 )) }
+]
+
+{ #category : 'instance creation' }
+BpStackPlot class >> x: aCollection ys: aCollectionOfCollections [
+	"Answer the layers aCollectionOfCollections (one value per x each) stacked over aCollection."
+
+	^ self new
+		  x: aCollection ys: aCollectionOfCollections;
+		  yourself
 ]
 
 { #category : 'accessing' }

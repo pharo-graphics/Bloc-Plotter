@@ -40,7 +40,7 @@ BpHeatmapTest >> newChart [
 BpHeatmapTest >> newHeatmap [
 	"Answer a heatmap of two rows and three columns."
 
-	^ self newChart heatmap: #( #( 1 2 3 ) #( 4 5 6 ) )
+	^ self newChart addArtist: (BpHeatmap matrix: #( #( 1 2 3 ) #( 4 5 6 ) ))
 ]
 
 { #category : 'tests' }
@@ -67,10 +67,10 @@ BpHeatmapTest >> testAmountFormatterGivesTheLabels [
 BpHeatmapTest >> testAmountsHaveTheDecimalsTheyNeedUpToTwo [
 
 	| heatmap |
-	heatmap := self newChart heatmap: #( #( 0.5 2 ) ).
+	heatmap := self newChart addArtist: (BpHeatmap matrix: #( #( 0.5 2 ) )).
 	heatmap showAmounts: true.
 	self assert: (heatmap patches collect: [ :each | each label text asString ] as: Array) equals: #( '0.5' '2.0' ).
-	heatmap := self newChart heatmap: #( #( 0.12345 2 ) ).
+	heatmap := self newChart addArtist: (BpHeatmap matrix: #( #( 0.12345 2 ) )).
 	heatmap showAmounts: true.
 	self assert: (heatmap patches collect: [ :each | each label text asString ] as: Array) equals: #( '0.12' '2.00' )
 ]
@@ -189,6 +189,24 @@ BpHeatmapTest >> testFirstRowIsAtTheTop [
 	self assert: (chart dataTransform pointFor: 1 @ 1) y < (chart dataTransform pointFor: 1 @ 2) y
 ]
 
+{ #category : 'tests - instances' }
+BpHeatmapTest >> testInstanceAnnotatedHarvestWritesItsNumbers [
+
+	self assert: BpHeatmap instanceAnnotatedHarvest patches first label text asString equals: '0.8'
+]
+
+{ #category : 'tests - instances' }
+BpHeatmapTest >> testInstanceHarvestHasOneCellPerVegetableAndFarmer [
+
+	self assert: BpHeatmap instanceHarvest patches size equals: 49
+]
+
+{ #category : 'tests - instances' }
+BpHeatmapTest >> testInstanceMissingNumbersHasNoCellForThem [
+
+	self assert: BpHeatmap instanceMissingNumbers patches size equals: 6
+]
+
 { #category : 'tests' }
 BpHeatmapTest >> testLabelContrastsWithItsCell [
 
@@ -230,7 +248,7 @@ BpHeatmapTest >> testLabelIsCenteredInItsCell [
 BpHeatmapTest >> testLabelLargerThanItsCellIsHidden [
 
 	| heatmap |
-	heatmap := self newChart heatmap: { (1 to: 100) }.
+	heatmap := self newChart addArtist: (BpHeatmap matrix: { (1 to: 100) }).
 	heatmap showAmounts: true.
 	heatmap chart asForm.
 	self deny: heatmap patches first label isVisible
@@ -258,7 +276,7 @@ BpHeatmapTest >> testLimitsAreTheSidesOfTheCells [
 BpHeatmapTest >> testLogScaleColorsTheOrdersOfMagnitude [
 
 	| heatmap |
-	heatmap := self newChart heatmap: #( #( 1 10 100 ) ).
+	heatmap := self newChart addArtist: (BpHeatmap matrix: #( #( 1 10 100 ) )).
 	heatmap
 		colorMap: [ :fraction | Color gray: fraction ];
 		scale: #log.
@@ -269,14 +287,14 @@ BpHeatmapTest >> testLogScaleColorsTheOrdersOfMagnitude [
 BpHeatmapTest >> testManyColumnsHaveTicksApart [
 
 	| heatmap |
-	heatmap := self newChart heatmap: { (1 to: 60) }.
+	heatmap := self newChart addArtist: (BpHeatmap matrix: { (1 to: 60) }).
 	self assert: (self labelsOn: #x of: heatmap) equals: #( '10' '20' '30' '40' '50' '60' )
 ]
 
 { #category : 'tests' }
 BpHeatmapTest >> testMissingNumberHasNoCell [
 
-	self assert: (self newChart heatmap: #( #( 1 nil ) #( 3 4 ) )) patches size equals: 3
+	self assert: (self newChart addArtist: (BpHeatmap matrix: #( #( 1 nil ) #( 3 4 ) ))) patches size equals: 3
 ]
 
 { #category : 'tests' }
@@ -291,7 +309,7 @@ BpHeatmapTest >> testNoSeamBetweenCellsOfTheSameColor [
 	| chart color form area heatmap |
 	color := BpQualitativePalette set1 colorAt: 2.
 	chart := self newChart.
-	heatmap := chart heatmap: ((1 to: 9) collect: [ :row | 1 to: 13 ]).
+	heatmap := chart addArtist: (BpHeatmap matrix: ((1 to: 9) collect: [ :row | 1 to: 13 ])).
 	heatmap colorMap: [ :fraction | color ].
 	form := chart asForm.
 	area := (chart plotBounds insetBy: 3) rounded.

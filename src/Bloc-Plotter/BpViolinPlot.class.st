@@ -1,5 +1,5 @@
 "
-I am a violin plot, added by `BpChart>>violinPlot:` and `BpChart>>violinPlot:positions:`: for each dataset, a body showing the estimated density of its values on both sides of its position, with lines at its extrema and, on demand, at its mean, median and quantiles. Where a `BpBoxPlot` summarizes a dataset by its quartiles, I show the shape of its distribution, such as two groups of values. A `BpViolinStatistics` per dataset computes what I draw; I draw it with `BpPolygonPatch`es that `parts` gives by role.
+I am a violin plot of a `BpChart`: for each dataset, a body showing the estimated density of its values on both sides of its position, with lines at its extrema and, on demand, at its mean, median and quantiles. Where a `BpBoxPlot` summarizes a dataset by its quartiles, I show the shape of its distribution, such as two groups of values. A `BpViolinStatistics` per dataset computes what I draw; I draw it with `BpPolygonPatch`es that `parts` gives by role.
 
 ## Examples
 
@@ -20,7 +20,7 @@ BpViolinPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>violinPlot:` and `BpChart>>violinPlot:positions:` create me with my data (`x:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette.
+1. `BpViolinPlot class>>x:` (positions 1, 2, 3, ...) and `BpViolinPlot class>>x:positions:` create me with my data, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`), which gives me one color of its palette.
 2. Each setter recomputes my statistics and rebuilds my patches.
 3. My chart reads my patches for autoscaling and my `legendEntries` (a rectangle filled as my bodies).
 
@@ -76,11 +76,11 @@ BpViolinPlot class >> basicsData [
 ]
 
 { #category : 'private - demo' }
-BpViolinPlot class >> customViolinsIn: aChart data: someDatasets number: anInteger horizontal: aBoolean [
-	"Configure in aChart the violins anInteger (1, 2 or 4) of the gallery violin plot basics, vertical or horizontal."
+BpViolinPlot class >> customViolins: anInteger horizontal: aBoolean [
+	"Answer the violins anInteger (1, 2 or 4) of the gallery violin plot basics, vertical or horizontal."
 
 	| violins |
-	violins := aChart violinPlot: someDatasets positions: #( 1 2 4 5 7 8 ).
+	violins := self x: self basicsData positions: #( 1 2 4 5 7 8 ).
 	aBoolean ifTrue: [ violins orientation: #horizontal ].
 	anInteger = 1 ifTrue: [
 		violins
@@ -103,23 +103,49 @@ BpViolinPlot class >> customViolinsIn: aChart data: someDatasets number: anInteg
 			showMedians: true;
 			quantiles: #( #( 0.1 ) #(  ) #(  ) #( 0.175 0.954 ) #( 0.75 ) #( 0.25 ) );
 			bandwidth: 0.5 ].
-	aChart title: ('Custom violin {1}' format: { anInteger })
+	^ violins
 ]
 
 { #category : 'examples' }
 BpViolinPlot class >> exampleInteraction [
-	"Interaction handlers on violins: hover one to make it opaque, click it to see its median."
+	"Interaction handlers on violins: hover one to make it opaque, click it to see its median in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveViolins show: 'Violin interaction'
+	| figure chart violins isBody |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart title: 'Click a violin'.
+	violins := chart addArtist: self instanceThreeViolins.
+	isBody := [ :patch | (violins parts at: #bodies) includes: patch ].
+	violins
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :patch | (isBody value: patch) ifTrue: [ patch background: (patch background paint color alpha: 0.8) ] ];
+		whenPatch: BlMouseLeaveEvent
+		do: [ :event :patch | (isBody value: patch) ifTrue: [ violins paintBody: patch dataset: patch dataset ] ];
+		whenPatch: BlClickEvent do: [ :event :patch |
+			chart title: ('violin {1}: median {2}' format: {
+				 patch dataset.
+				 ((violins statistics at: patch dataset) median printShowingDecimalPlaces: 2) }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Violin interaction'
 ]
 
 { #category : 'examples' }
 BpViolinPlot class >> examplePlotType [
-	"Reproduce the plot type violinplot(D)."
+	"Reproduce the plot type violinplot(D): three wide violins in a chart of fixed limits and ticks."
 
 	<example>
-	^ BpFigure instanceViolinPlotType show: 'violinplot(D)'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceWideViolins.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7).
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'violinplot(D)'
 ]
 
 { #category : 'examples' }
@@ -127,7 +153,16 @@ BpViolinPlot class >> exampleSplitViolins [
 	"Compare two groups with half violins on each side of the same positions."
 
 	<example>
-	^ BpFigure instanceSplitViolins show: 'Split violins'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceLowHalves;
+		addArtist: self instanceHighHalves;
+		title: 'Split violins';
+		legend.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Split violins'
 ]
 
 { #category : 'examples' }
@@ -135,30 +170,179 @@ BpViolinPlot class >> exampleViolinPlotBasics [
 	"Reproduce the gallery 'Violin plot basics': points, widths, means, medians, bandwidths and quantiles, vertical and horizontal."
 
 	<example>
-	^ BpFigure instanceViolinPlotBasics show: 'violinplot'
+	| figure |
+	figure := BpFigure rows: 2 columns: 3.
+	figure extent: 1000 @ 600.
+	{
+		{
+			1.
+			self instanceCustomOne.
+			self instanceHorizontalCustomOne }.
+		{
+			2.
+			self instanceCustomTwo.
+			self instanceHorizontalCustomTwo }.
+		{
+			4.
+			self instanceCustomFour.
+			self instanceHorizontalCustomFour } } withIndexDo: [ :each :column |
+			| title |
+			title := 'Custom violin {1}' format: { each first }.
+			figure
+				chartAtRow: 1 column: column put: (BpChart new
+					 addArtist: each second;
+					 title: title;
+					 yourself);
+				chartAtRow: 2 column: column put: (BpChart new
+					 addArtist: each third;
+					 title: title;
+					 yourself) ].
+	^ figure show: 'violinplot'
+]
+
+{ #category : 'private - demo' }
+BpViolinPlot class >> halvesOf: someDatasets side: aSymbol label: aString [
+	"Answer the half violins of someDatasets on the side aSymbol, with their medians and without extrema."
+
+	^ (self x: someDatasets)
+		  side: aSymbol;
+		  showExtrema: false;
+		  showMedians: true;
+		  label: aString;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceCustomFour [
+	"Gallery: Violin plot basics (violinplot), custom violin 4: 60 points, 0.7 wide, a bandwidth factor of 0.5 and quantiles (see `BpViolinPlot>>quantiles:`)."
+
+	<sampleInstance>
+	^ self customViolins: 4 horizontal: false
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceCustomOne [
+	"Gallery: Violin plot basics (violinplot), custom violin 1: 20 points, 0.3 wide, with means and medians."
+
+	<sampleInstance>
+	^ self customViolins: 1 horizontal: false
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceCustomTwo [
+	"Gallery: Violin plot basics (violinplot), custom violin 2: 40 points, 0.5 wide, the Silverman bandwidth."
+
+	<sampleInstance>
+	^ self customViolins: 2 horizontal: false
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceHighHalves [
+	"Answer four half violins on the high side of their positions, the group after of the split violins demo."
+
+	<sampleInstance>
+	^ self halvesOf: self splitGroups last side: #high label: 'after'
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceHorizontalCustomFour [
+	"Gallery: Violin plot basics (violinplot), custom violin 4 drawn horizontally."
+
+	<sampleInstance>
+	^ self customViolins: 4 horizontal: true
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceHorizontalCustomOne [
+	"Gallery: Violin plot basics (violinplot), custom violin 1 drawn horizontally."
+
+	<sampleInstance>
+	^ self customViolins: 1 horizontal: true
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceHorizontalCustomTwo [
+	"Gallery: Violin plot basics (violinplot), custom violin 2 drawn horizontally."
+
+	<sampleInstance>
+	^ self customViolins: 2 horizontal: true
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceLowHalves [
+	"Answer four half violins on the low side of their positions, the group before of the split violins demo (see `BpViolinPlot>>side:`)."
+
+	<sampleInstance>
+	^ self halvesOf: self splitGroups first side: #low label: 'before'
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceThreeViolins [
+	"Answer three violins of growing spread, with their medians."
+
+	<sampleInstance>
+	| random |
+	random := Random seed: 3.
+	^ (self x: ((1 to: 3) collect: [ :each |
+		    self
+			    normalSamples: 200
+			    mean: each
+			    deviation: each / 2
+			    random: random ]))
+		  showMedians: true;
+		  yourself
 ]
 
 { #category : 'instances' }
 BpViolinPlot class >> instanceViolins [
-	"Answer two violins, with their medians, in a new chart."
+	"Answer two violins, with their medians."
 
 	<sampleInstance>
 	| random |
 	random := Random seed: 42.
-	^ ((BpChart new
-		    extent: 400 @ 300;
-		    yourself) violinPlot: {
+	^ (self x: {
+		   (self
+			    normalSamples: 200
+			    mean: 0
+			    deviation: 1
+			    random: random).
+		   (self
+			    normalSamples: 200
+			    mean: 2
+			    deviation: 2
+			    random: random) })
+		  showMedians: true;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpViolinPlot class >> instanceWideViolins [
+	"Plot types: violinplot(D), three violins 2 wide at 2, 4 and 6, without lines, nearly opaque."
+
+	<sampleInstance>
+	| random |
+	random := Random seed: 10.
+	^ (self
+		   x: {
 			   (self
 				    normalSamples: 200
-				    mean: 0
+				    mean: 3
+				    deviation: 0.75
+				    random: random).
+			   (self
+				    normalSamples: 200
+				    mean: 5
 				    deviation: 1
 				    random: random).
 			   (self
 				    normalSamples: 200
-				    mean: 2
-				    deviation: 2
-				    random: random) })
-		  showMedians: true;
+				    mean: 4
+				    deviation: 0.75
+				    random: random) }
+		   positions: #( 2 4 6 ))
+		  widths: 2;
+		  showExtrema: false;
+		  alpha: 0.9;
 		  yourself
 ]
 
@@ -167,6 +351,47 @@ BpViolinPlot class >> normalSamples: anInteger mean: aMean deviation: aDeviation
 	"Answer anInteger samples of a normal distribution drawn from aRandom."
 
 	^ (1 to: anInteger) collect: [ :each | aRandom nextNormalMean: aMean deviation: aDeviation ]
+]
+
+{ #category : 'private - demo' }
+BpViolinPlot class >> splitGroups [
+	"Answer the data of the split violins demo: the four datasets before, then the four datasets after, drawn from the same generator."
+
+	| random before after |
+	random := Random seed: 7.
+	before := (1 to: 4) collect: [ :each |
+		          self
+			          normalSamples: 150
+			          mean: each
+			          deviation: 1
+			          random: random ].
+	after := (1 to: 4) collect: [ :each |
+		         self
+			         normalSamples: 150
+			         mean: each + 1
+			         deviation: 0.6
+			         random: random ].
+	^ {
+		  before.
+		  after }
+]
+
+{ #category : 'instance creation' }
+BpViolinPlot class >> x: aCollection [
+	"Answer violins of the data aCollection (a collection of numbers for one violin, or one collection per violin) at the positions 1, 2, 3, ..."
+
+	^ self new
+		  x: aCollection;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+BpViolinPlot class >> x: aCollection positions: someNumbers [
+	"Answer violins of the data aCollection (a collection of numbers for one violin, or one collection per violin) at the positions someNumbers, one per violin."
+
+	^ (self x: aCollection)
+		  positions: someNumbers;
+		  yourself
 ]
 
 { #category : 'private - computing' }

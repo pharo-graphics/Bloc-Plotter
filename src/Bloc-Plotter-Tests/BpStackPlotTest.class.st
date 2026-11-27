@@ -1,5 +1,5 @@
 "
-I check `BpStackPlot`, as `BpChart>>stackPlotX:ys:` creates it: the stacks and the vertices of each layer, the four baselines, the colors of the cycle and given colors, outlines, transparency, legend entries and handlers.
+I check `BpStackPlot`, as `BpStackPlot class>>x:ys:` creates it: the stacks and the vertices of each layer, the four baselines, the colors of the cycle and given colors, outlines, transparency, legend entries and handlers, and the sample instances.
 
 ## Implementation Notes
 
@@ -31,11 +31,27 @@ BpStackPlotTest >> stackWithBaseline: aSymbol [
 ]
 
 { #category : 'tests' }
+BpStackPlotTest >> testAddArtistAddsTheStack [
+
+	| chart stack |
+	chart := BpChart new.
+	stack := chart addArtist: (BpStackPlot x: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) )).
+	self assert: chart artists last identicalTo: stack.
+	self assert: stack stacks equals: #( #( 1 2 3 ) #( 3 4 5 ) )
+]
+
+{ #category : 'tests' }
 BpStackPlotTest >> testAlphaMakesTheLayersTransparent [
 
 	self assert: ((self stack
 		  alpha: 0.3;
 		  yourself) patches second background paint color alpha closeTo: 0.3 precision: 0.01)
+]
+
+{ #category : 'tests - instances' }
+BpStackPlotTest >> testBaselineInstancesShareTheirLayers [
+
+	self assert: BpStackPlot instanceZeroBaseline stacks first equals: BpStackPlot streamLayers first
 ]
 
 { #category : 'tests' }
@@ -45,16 +61,6 @@ BpStackPlotTest >> testBaselineShiftsTheStacks [
 		(-1 / 4).
 		0.
 		(1 / 4) }
-]
-
-{ #category : 'tests' }
-BpStackPlotTest >> testChartStackPlotAddsTheStack [
-
-	| chart stack |
-	chart := BpChart new.
-	stack := chart stackPlotX: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) ).
-	self assert: chart artists last identicalTo: stack.
-	self assert: stack stacks equals: #( #( 1 2 3 ) #( 3 4 5 ) )
 ]
 
 { #category : 'tests' }
@@ -100,7 +106,7 @@ BpStackPlotTest >> testEachLayerTakesTheNextColorOfTheCycle [
 
 	| chart stack |
 	chart := BpChart new.
-	stack := chart stackPlotX: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) ).
+	stack := chart addArtist: (BpStackPlot x: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) )).
 	self assert: (stack patches collect: [ :each | each background paint color ] as: Array) equals: (BpPalette default colors first: 2).
 	self assert: (chart addArtist: (BpLine x: #( 1 2 ) y: #( 1 2 ))) linePatch border paint color equals: (BpPalette default colorAt: 3)
 ]
@@ -140,6 +146,12 @@ BpStackPlotTest >> testHandlersAreKeptWhenTheStackIsRebuilt [
 	stack baseline: #sym.
 	BlEvent fireEvent: BlClickEvent new target: stack patches second.
 	self assert: clicked identicalTo: stack patches second
+]
+
+{ #category : 'tests - instances' }
+BpStackPlotTest >> testInstanceWorldPopulationHasOneLayerPerContinent [
+
+	self assert: BpStackPlot instanceWorldPopulation stacks size equals: 5
 ]
 
 { #category : 'tests' }
@@ -239,6 +251,12 @@ BpStackPlotTest >> testWiggleBaselineWeighsTheLowerLayersMore [
 		(-5 / 4).
 		-2.
 		(-11 / 4) }
+]
+
+{ #category : 'tests - instances' }
+BpStackPlotTest >> testXYsCreatesTheStack [
+
+	self assert: (BpStackPlot x: #( 1 2 ) ys: #( #( 1 1 ) #( 2 3 ) )) stacks equals: #( #( 1 1 ) #( 3 4 ) )
 ]
 
 { #category : 'tests' }

@@ -20,7 +20,8 @@ BpHexbinTest >> hexbinOf: aCollectionOfPoints [
 
 	^ (BpChart new
 		   extent: 400 @ 400;
-		   hexbinX: (aCollectionOfPoints collect: [ :each | each x ]) y: (aCollectionOfPoints collect: [ :each | each y ]))
+		   addArtist:
+			   (BpHexbin x: (aCollectionOfPoints collect: [ :each | each x ]) y: (aCollectionOfPoints collect: [ :each | each y ])))
 		  region: (0 @ 0 corner: 4 @ 2);
 		  gridSize: 4 @ 2;
 		  yourself
@@ -244,8 +245,18 @@ BpHexbinTest >> testHexbinTakesNoColorOfThePalette [
 
 	| chart |
 	chart := BpChart new.
-	chart hexbinX: #( 1 2 ) y: #( 1 2 ).
+	chart addArtist: (BpHexbin x: #( 1 2 ) y: #( 1 2 )).
 	self assert: (chart addArtist: (BpLine x: #( 1 2 ) y: #( 1 2 ))) linePatch border paint color equals: (BpPalette default colorAt: 1)
+]
+
+{ #category : 'tests - instances' }
+BpHexbinTest >> testInstanceMinCountHasFewerHexagons [
+
+	| all |
+	all := (BpHexbin ofPoints: BpHexbin optionPoints)
+		       gridSize: 25;
+		       yourself.
+	self assert: BpHexbin instanceMinCount patches size < all patches size
 ]
 
 { #category : 'tests' }
@@ -263,7 +274,7 @@ BpHexbinTest >> testLimitsOfRandomDataAreTheRegion [
 	| random hexbin region chart |
 	random := Random seed: 7.
 	chart := BpChart new.
-	hexbin := chart hexbinX: ((1 to: 50) collect: [ :each | random next ]) y: ((1 to: 50) collect: [ :each | random next ]).
+	hexbin := chart addArtist: (BpHexbin x: ((1 to: 50) collect: [ :each | random next ]) y: ((1 to: 50) collect: [ :each | random next ])).
 	region := hexbin grid region.
 	self assert: chart xLimits first equals: region left.
 	self assert: chart xLimits last closeTo: region right.
@@ -321,7 +332,7 @@ BpHexbinTest >> testLogScalePutsTheChartOnALogScale [
 
 	| chart hexbin |
 	chart := BpChart new.
-	hexbin := chart hexbinX: #( 1 10 100 ) y: #( 1 2 3 ).
+	hexbin := chart addArtist: (BpHexbin x: #( 1 10 100 ) y: #( 1 2 3 )).
 	hexbin xScale: #log.
 	self assert: chart xScale equals: #log.
 	self assert: chart yScale equals: #linear
@@ -370,7 +381,7 @@ BpHexbinTest >> testNoSeamBetweenHexagonsOfTheSameColor [
 	chart := BpChart new
 		         extent: 400 @ 400;
 		         yourself.
-	hexbin := chart hexbinX: #( 0 4 ) y: #( 0 2 ).
+	hexbin := chart addArtist: (BpHexbin x: #( 0 4 ) y: #( 0 2 )).
 	hexbin
 		gridSize: 7 @ 3;
 		colorMap: [ :fraction | color ].
@@ -378,6 +389,17 @@ BpHexbinTest >> testNoSeamBetweenHexagonsOfTheSameColor [
 	area := (chart plotBounds insetBy: 3) rounded.
 	self assert: ((area left to: area right) allSatisfy: [ :eachX |
 		 (area top to: area bottom) allSatisfy: [ :eachY | self is: (form colorAt: eachX @ eachY) within: 3 of: color ] ])
+]
+
+{ #category : 'tests - instances' }
+BpHexbinTest >> testOfPointsCountsEveryPoint [
+
+	self
+		assert: ((BpHexbin ofPoints: {
+			  (0 @ 0).
+			  (0 @ 0).
+			  (1 @ 1) }) patches inject: 0 into: [ :sum :each | sum + each count ])
+		equals: 3
 ]
 
 { #category : 'tests' }

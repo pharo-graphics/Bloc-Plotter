@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram`, a `BpScatterPlot`, a `BpLine`, a `BpBoxPlot`, a `BpStemPlot`, a `BpDensityPlot`, a `BpErrorBar`, a `BpStairs` or a `BpFillBetween` added by `addArtist:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpHexbin` added by `hexbinX:y:`, or a `BpHeatmap` added by `heatmap:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram`, a `BpScatterPlot`, a `BpLine`, a `BpBoxPlot`, a `BpStemPlot`, a `BpDensityPlot`, a `BpErrorBar`, a `BpStairs`, a `BpFillBetween`, a `BpStackPlot`, a `BpViolinPlot`, a `BpHexbin` or a `BpHeatmap` added by `addArtist:`, or a `BpBarPlot` added by `barXValues:heightValues:` or `barhYValues:widthValues:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -23,7 +23,7 @@ BpChart instanceLinePlotType
 ## Usage
 
 1. `BpFigure>>rows:columns:chartClass:` creates me, or I am built apart and placed with `BpFigure>>chartAtRow:column:put:`; I can also be shown alone.
-2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpStemPlot class>>stem:`, `BpDensityPlot class>>of:`, `BpStairs class>>values:edges:`, `BpFillBetween class>>x:y1:y2:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barX:height:`, `barhY:width:`, `stackPlotX:ys:`, `violinPlot:`, `violinPlot:positions:`, `hexbinX:y:` and `heatmap:` create an artist and add it the same way. `palette:` changes the palette and recolors the artists already added.
+2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpFillBetween class>>x:y1:y2:`, `BpHeatmap class>>matrix:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barXValues:heightValues:` and `barhYValues:widthValues:` create a bar plot and add it the same way. `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`), color bars (`BpColorBar`, added by `addColorBarFor:`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpChartLayout` computes my plot bounds from the size of my tick labels, title and color bars, which gives its extent to my data transform.
 
@@ -301,20 +301,6 @@ BpChart >> grid: aBoolean [
 
 	showGrid := aBoolean.
 	self rebuild
-]
-
-{ #category : 'plotting' }
-BpChart >> heatmap: aCollectionOfRows [
-	"Add a heatmap of aCollectionOfRows, the rows of a matrix, whose numbers are shown by the colors of cells, and answer it, to be configured with rowNames:, columnNames:, showAmounts:, colorMap:, ... (see `BpHeatmap`)."
-
-	^ self addArtist: (BpHeatmap matrix: aCollectionOfRows)
-]
-
-{ #category : 'plotting' }
-BpChart >> hexbinX: xValues y: yValues [
-	"Add a hexbin of the points (xValues at: i) @ (yValues at: i), which shows how many there are in each hexagon of a grid, and answer it, to be configured with gridSize:, bins:, c:, colorMap:, ... (see `BpHexbin`)."
-
-	^ self addArtist: (BpHexbin x: xValues y: yValues)
 ]
 
 { #category : 'initialization' }
@@ -597,15 +583,6 @@ BpChart >> showLegend: aLegendOrNil [
 	plotArea legend: aLegendOrNil
 ]
 
-{ #category : 'plotting' }
-BpChart >> stackPlotX: aCollection ys: aCollectionOfCollections [
-	"Stack the layers aCollectionOfCollections (one value per x each) over aCollection and answer the stack, to be configured with baseline:, colors:, label:, alpha:, ... (see `BpStackPlot`)."
-
-	^ self addArtist: (BpStackPlot new
-		   x: aCollection ys: aCollectionOfCollections;
-		   yourself)
-]
-
 { #category : 'private - building' }
 BpChart >> tickCountOn: anAxis [
 
@@ -669,23 +646,6 @@ BpChart >> updateScales [
 			axis = #x
 				ifTrue: [ xScale := #log ]
 				ifFalse: [ yScale := #log ] ] ]
-]
-
-{ #category : 'plotting' }
-BpChart >> violinPlot: aCollection [
-	"Draw violins of the data aCollection (a collection of numbers for one violin, or one collection per violin) at the positions 1, 2, 3, ... and answer them (see `violinPlot:positions:`)."
-
-	^ self violinPlot: aCollection positions: nil
-]
-
-{ #category : 'plotting' }
-BpChart >> violinPlot: aCollection positions: aCollectionOrNil [
-	"Draw violins of the data aCollection (a collection of numbers for one violin, or one collection per violin) at the positions aCollectionOrNil (nil for 1, 2, 3, ...) and answer them, to be configured with widths:, showMeans:, showMedians:, quantiles:, side:, ... (see `BpViolinPlot`)."
-
-	^ self addArtist: (BpViolinPlot new
-		   x: aCollection;
-		   positions: aCollectionOrNil;
-		   yourself)
 ]
 
 { #category : 'accessing' }

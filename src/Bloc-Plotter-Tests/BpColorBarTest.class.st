@@ -34,7 +34,7 @@ BpColorBarTest >> newChart [
 BpColorBarTest >> newHeatmap [
 	"Answer a heatmap of numbers from 0 to 50, in shades of grey."
 
-	^ (self newChart heatmap: #( #( 0 10 ) #( 20 50 ) ))
+	^ (self newChart addArtist: (BpHeatmap matrix: #( #( 0 10 ) #( 20 50 ) )))
 		  colorMap: [ :fraction | Color gray: fraction ];
 		  yourself
 ]
@@ -125,7 +125,7 @@ BpColorBarTest >> testHexbinHasAColorBar [
 
 	| chart hexbin |
 	chart := self newChart.
-	hexbin := chart hexbinX: #( 1 1 2 ) y: #( 1 1 2 ).
+	hexbin := chart addArtist: (BpHexbin x: #( 1 1 2 ) y: #( 1 1 2 )).
 	hexbin gridSize: 2.
 	self assert: (chart addColorBarFor: hexbin) ticks last location equals: 2
 ]
@@ -205,7 +205,7 @@ BpColorBarTest >> testOneNumberHasOneTick [
 
 	| chart heatmap |
 	chart := self newChart.
-	heatmap := chart heatmap: #( #( 5 5 ) ).
+	heatmap := chart addArtist: (BpHeatmap matrix: #( #( 5 5 ) )).
 	self assert: (self labelsOf: (chart addColorBarFor: heatmap)) equals: #( '5' )
 ]
 

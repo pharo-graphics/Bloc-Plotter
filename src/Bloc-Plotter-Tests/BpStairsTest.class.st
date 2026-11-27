@@ -1,5 +1,5 @@
 "
-I check `BpStairs`, as `BpChart>>stairs:` and `BpChart>>stairs:edges:` create it: the vertices of the outline for each kind of baseline and for horizontal steps, the default edges, filled and unfilled styles, colors, line widths and styles, sticky baselines, the legend entry and handlers.
+I check `BpStairs`, as `BpStairs class>>values:` and `BpStairs class>>values:edges:` create it: the vertices of the outline for each kind of baseline and for horizontal steps, the default edges, filled and unfilled styles, colors, line widths and styles, sticky baselines, the legend entry and handlers, and the sample instances.
 
 ## Implementation Notes
 

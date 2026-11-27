@@ -1,5 +1,5 @@
 "
-I check `BpErrorBar`, as `BpChart>>errorBarX:y:yErr:` and `BpChart>>errorBarX:y:xErr:yErr:` create it: the bars for each way of giving errors, caps, limits and their arrows, `errorEvery:`, colors and widths, the drawing order, the format, the legend swatch and handlers.
+I check `BpErrorBar`, as `BpLine class>>x:y:` creates it and `xErr:` and `yErr:` give its errors: the bars for each way of giving errors, caps, limits and their arrows, `errorEvery:`, colors and widths, the drawing order, the format, the legend swatch and handlers, and the sample instances.
 
 ## Implementation Notes
 

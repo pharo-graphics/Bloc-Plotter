@@ -1,5 +1,5 @@
 "
-I am a heatmap, added by `BpChart>>heatmap:`: I show the numbers of a matrix by the colors of cells (`BpHeatmapCell`). `rowNames:` and `columnNames:` name the rows and columns, and `showAmounts:` writes the numbers in the cells.
+I am a heatmap of a `BpChart`: I show the numbers of a matrix by the colors of cells (`BpHeatmapCell`). `rowNames:` and `columnNames:` name the rows and columns, and `showAmounts:` writes the numbers in the cells.
 
 ## Examples
 
@@ -19,7 +19,7 @@ BpHeatmap exampleInteraction
 
 ## Usage
 
-1. `BpChart>>heatmap:` creates me with `matrix:` and adds me to the chart (see `BpArtist`).
+1. `BpHeatmap class>>matrix:` creates me with the rows of my matrix, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`).
 2. `BpChart>>addColorBarFor:` tells my numbers with a `BpColorBar`.
 3. My patches answer their `row`, `column` and `amount`, which interaction handlers given to `whenPatch:do:` use, with `rowNameAt:` and `columnNameAt:`.
 
@@ -61,15 +61,38 @@ BpHeatmap class >> exampleAnnotated [
 	"Show the figure of the gallery annotated heatmap: the numbers are written in the cells and the rows and columns are named."
 
 	<example>
-	^ BpFigure instanceHeatmap show: 'Annotated heatmap'
+	| figure chart |
+	figure := BpFigure new.
+	figure extent: 820 @ 520.
+	chart := BpChart new.
+	chart addColorBarFor: (chart addArtist: self instanceAnnotatedHarvest).
+	chart title: 'Harvest of local farmers (in tonnes/year)'.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Annotated heatmap'
 ]
 
 { #category : 'examples' }
 BpHeatmap class >> exampleInteraction [
-	"Interaction handlers on the cells: hover a cell to outline it, click it to see its vegetable, farmer and number."
+	"Interaction handlers on the cells: hover a cell to outline it, click it to see its vegetable, farmer and number in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveHeatmap show: 'Heatmap interaction'
+	| figure chart heatmap |
+	figure := BpFigure new.
+	figure extent: 820 @ 520.
+	chart := BpChart new.
+	chart title: 'Click a cell'.
+	heatmap := chart addArtist: self instanceHarvest.
+	heatmap
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :cell | cell border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :cell | cell border: (BlBorder paint: cell background paint width: 1) ];
+		whenPatch: BlClickEvent do: [ :event :cell |
+			chart title: ('{1}, {2}: {3}' format: {
+				 (heatmap rowNameAt: cell row).
+				 (heatmap columnNameAt: cell column).
+				 cell amount }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Heatmap interaction'
 ]
 
 { #category : 'examples' }
@@ -77,14 +100,34 @@ BpHeatmap class >> exampleOptions [
 	"Show heatmaps with edges, a diverging color map, missing numbers, and a log scale with many cells."
 
 	<example>
-	^ BpFigure instanceHeatmapOptions show: 'Heatmap options'
+	| figure correlations waves |
+	figure := BpFigure rows: 2 columns: 2.
+	figure extent: 900 @ 800.
+	correlations := BpChart new.
+	correlations addColorBarFor: (correlations addArtist: self instanceCorrelations).
+	correlations title: 'vMin: -1, vMax: 1'.
+	waves := BpChart new.
+	waves addColorBarFor: (waves addArtist: self instanceLogWaves).
+	waves title: 'scale: #log'.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceEdges;
+			 title: 'edgeColors:, lineWidths: 3';
+			 yourself);
+		chartAtRow: 1 column: 2 put: correlations;
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceMissingNumbers;
+			 title: 'nil cells, amountFormatter:';
+			 yourself);
+		chartAtRow: 2 column: 2 put: waves.
+	^ figure show: 'Heatmap options'
 ]
 
 { #category : 'private - demo' }
-BpHeatmap class >> harvestIn: aChart [
-	"Add to aChart the heatmap of the gallery annotated heatmap, and answer it."
+BpHeatmap class >> harvest [
+	"Answer the heatmap of the gallery annotated heatmap: the harvest of seven vegetables by seven farmers, in tonnes per year."
 
-	^ (aChart heatmap: #( #( 0.8 2.4 2.5 3.9 0.0 4.0 0.0 ) #( 2.4 0.0 4.0 1.0 2.7 0.0 0.0 ) #( 1.1 2.4 0.8 4.3 1.9 4.4 0.0 )
+	^ (self matrix: #( #( 0.8 2.4 2.5 3.9 0.0 4.0 0.0 ) #( 2.4 0.0 4.0 1.0 2.7 0.0 0.0 ) #( 1.1 2.4 0.8 4.3 1.9 4.4 0.0 )
 		      #( 0.6 0.0 0.3 0.0 3.1 0.0 0.0 ) #( 0.7 1.7 0.6 2.6 2.2 6.2 0.0 ) #( 1.3 1.2 0.0 0.0 0.0 3.2 5.1 )
 		      #( 0.1 2.0 0.0 1.4 0.0 1.9 6.3 ) ))
 		  rowNames: #( 'cucumber' 'tomato' 'lettuce' 'asparagus' 'potato' 'wheat' 'barley' );
@@ -93,13 +136,69 @@ BpHeatmap class >> harvestIn: aChart [
 ]
 
 { #category : 'instances' }
+BpHeatmap class >> instanceAnnotatedHarvest [
+	"Gallery: Creating annotated heatmaps (image_annotated_heatmap): the harvest with its numbers written in the cells (see `BpHeatmap>>showAmounts:`)."
+
+	<sampleInstance>
+	^ self harvest
+		  showAmounts: true;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHeatmap class >> instanceCorrelations [
+	"Answer a correlation matrix colored from red to blue, between the fixed limits -1 and 1 (see `BpHeatmap>>vMin:`)."
+
+	<sampleInstance>
+	^ (self matrix: #( #( 1 0.8 -0.3 -0.7 ) #( 0.8 1 -0.1 -0.5 ) #( -0.3 -0.1 1 0.4 ) #( -0.7 -0.5 0.4 1 ) ))
+		  showAmounts: true;
+		  colorMap: self divergingMap;
+		  vMin: -1;
+		  vMax: 1;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHeatmap class >> instanceEdges [
+	"Answer a heatmap of three by three cells in blues, with its numbers and thick dark edges."
+
+	<sampleInstance>
+	^ (self matrix: #( #( 12 4 9 ) #( 7 16 1 ) #( 3 8 14 ) ))
+		  showAmounts: true;
+		  colorMap: (BpInterpolatedPalette name: 'Blues' anchors: (BpSequentialPalette blues: 9) colors);
+		  edgeColors: ((BpSequentialPalette greys: 9) colorAt: 1);
+		  lineWidths: 3;
+		  yourself
+]
+
+{ #category : 'instances' }
 BpHeatmap class >> instanceHarvest [
 	"Answer a heatmap of seven vegetables and seven farmers."
 
 	<sampleInstance>
-	^ self harvestIn: (BpChart new
-		   extent: 640 @ 480;
-		   yourself)
+	^ self harvest
+]
+
+{ #category : 'instances' }
+BpHeatmap class >> instanceLogWaves [
+	"Answer a heatmap of 40 by 60 cells colored on a log scale, its numbers going through three orders of magnitude (see `BpHeatmap>>scale:`)."
+
+	<sampleInstance>
+	^ self waves
+		  colorMap: BpInterpolatedPalette inferno;
+		  scale: #log;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHeatmap class >> instanceMissingNumbers [
+	"Answer a heatmap with missing numbers, which have no cell, and its numbers written in kilograms (see `BpHeatmap>>amountFormatter:`)."
+
+	<sampleInstance>
+	^ (self matrix: #( #( 5 nil 2 ) #( nil 8 6 ) #( 1 3 nil ) ))
+		  showAmounts: true;
+		  amountFormatter: [ :amount | amount printString , ' kg' ];
+		  yourself
 ]
 
 { #category : 'instance creation' }
@@ -112,10 +211,10 @@ BpHeatmap class >> matrix: aCollectionOfRows [
 ]
 
 { #category : 'private - demo' }
-BpHeatmap class >> wavesIn: aChart [
-	"Add to aChart a heatmap of 40 rows and 60 columns, whose positive numbers go through three orders of magnitude, and answer it."
+BpHeatmap class >> waves [
+	"Answer a heatmap of 40 rows and 60 columns, whose positive numbers go through three orders of magnitude."
 
-	^ aChart heatmap:
+	^ self matrix:
 		  ((1 to: 40) collect: [ :row | (1 to: 60) collect: [ :column | 10 raisedTo: (row / 8) sin + (column / 10) cos * 0.75 ] ])
 ]
 

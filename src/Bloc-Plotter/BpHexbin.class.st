@@ -1,5 +1,5 @@
 "
-I am a hexbin, added by `BpChart>>hexbinX:y:`: I cover the points with a grid of hexagons (`BpHexagonGrid`) and color each `BpHexagonPatch` by the number of points it holds. It shows the density of points too many to be seen apart in a scatter plot. Given a third number per point (`c:`), a hexagon shows these numbers reduced to one, their average by default.
+I am a hexbin of a `BpChart`: I cover the points with a grid of hexagons (`BpHexagonGrid`) and color each `BpHexagonPatch` by the number of points it holds. It shows the density of points too many to be seen apart in a scatter plot. Given a third number per point (`c:`), a hexagon shows these numbers reduced to one, their average by default.
 
 ## Examples
 
@@ -20,7 +20,7 @@ BpHexbin exampleInteraction
 
 ## Usage
 
-1. `BpChart>>hexbinX:y:` creates me with `x:y:` and adds me to the chart (see `BpArtist`).
+1. `BpHexbin class>>x:y:` creates me with my points, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`).
 2. `BpChart>>addColorBarFor:` tells my counts with a `BpColorBar`.
 3. My patches answer their `center`, `count` and `amount`, which interaction handlers given to `whenPatch:do:` use. `counts` and `amounts` hold the ones of the whole grid.
 
@@ -72,20 +72,54 @@ BpHexbin class >> correlatedPoints: anInteger slope: aSlope deviation: aNumber [
 		  x @ (aSlope * x + (random nextNormalMean: 0 deviation: aNumber)) ]
 ]
 
+{ #category : 'private - demo' }
+BpHexbin class >> demoPoints [
+	"Answer the 100000 points of the gallery hexbin demo, around a line of slope 3 shifted up by 2."
+
+	^ (self correlatedPoints: 100000 slope: 3 deviation: 4) collect: [ :each | each + (0 @ 2) ]
+]
+
 { #category : 'examples' }
 BpHexbin class >> exampleHexbinDemo [
 	"Reproduce the gallery 'Hexagonal binned plot': 100000 points, on a linear and on a logarithmic color scale."
 
 	<example>
-	^ BpFigure instanceHexbinDemo show: 'hexbin_demo'
+	| figure |
+	figure := BpFigure rows: 1 columns: 2.
+	figure extent: 900 @ 400.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceLinearColors;
+			 title: 'Hexagon binning';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceLogColors;
+			 title: 'With a log color scale';
+			 yourself).
+	^ figure show: 'hexbin_demo'
 ]
 
 { #category : 'examples' }
 BpHexbin class >> exampleInteraction [
-	"Interaction handlers on the hexagons: hover a hexagon to outline it, click it to see its number of points."
+	"Interaction handlers on the hexagons: hover a hexagon to outline it, click it to see its center and number of points in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveHexbin show: 'Hexbin interaction'
+	| figure chart hexbin |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart title: 'Click a hexagon'.
+	hexbin := chart addArtist: self instanceClickable.
+	hexbin
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :hexagon | hexagon border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :hexagon | hexagon border: (BlBorder paint: hexagon background paint width: 1) ];
+		whenPatch: BlClickEvent do: [ :event :hexagon |
+			chart title: ('{1} points around ({2}, {3})' format: {
+				 hexagon count.
+				 (hexagon center x printShowingDecimalPlaces: 2).
+				 (hexagon center y printShowingDecimalPlaces: 2) }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Hexbin interaction'
 ]
 
 { #category : 'examples' }
@@ -93,15 +127,77 @@ BpHexbin class >> exampleOptions [
 	"Show hexbins with few points hidden, colors in steps, the average of a third variable, and a log axis."
 
 	<example>
-	^ BpFigure instanceHexbinOptions show: 'Hexbin options'
+	| figure |
+	figure := BpFigure rows: 2 columns: 2.
+	figure extent: 900 @ 800.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceMinCount;
+			 title: 'minCount: 5';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceFourBins;
+			 title: 'bins: 4';
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceAverageOfSine;
+			 title: 'c: sin(x)';
+			 yourself);
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: self instanceLogXAxis;
+			 title: 'xScale: #log';
+			 yourself).
+	^ figure show: 'Hexbin options'
 ]
 
 { #category : 'examples' }
 BpHexbin class >> examplePlotType [
-	"Reproduce the plot type hexbin(x, y, C)."
+	"Reproduce the plot type hexbin(x, y, C): five thousand points in a chart of fixed limits."
 
 	<example>
-	^ BpFigure instanceHexbinPlotType show: 'hexbin(x, y, C)'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceFiveThousandPoints;
+		xLimits: #( -2 2 );
+		yLimits: #( -3 3 ).
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'hexbin(x, y, C)'
+]
+
+{ #category : 'private - demo' }
+BpHexbin class >> infernoOf: aCollectionOfPoints [
+	"Answer a hexbin of aCollectionOfPoints of 50 hexagons across, colored by the inferno map."
+
+	^ (self ofPoints: aCollectionOfPoints)
+		  gridSize: 50;
+		  colorMap: BpInterpolatedPalette inferno;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHexbin class >> instanceAverageOfSine [
+	"Answer a hexbin colored by the average of sin(x) over the points of each hexagon (see `BpHexbin>>c:`)."
+
+	<sampleInstance>
+	| points |
+	points := self optionPoints.
+	^ (self ofPoints: points)
+		  gridSize: 25;
+		  c: (points collect: [ :each | each x sin ]);
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHexbin class >> instanceClickable [
+	"Answer a hexbin of two thousand points, 20 hexagons across, hiding the empty ones."
+
+	<sampleInstance>
+	^ (self ofPoints: (self correlatedPoints: 2000 slope: 1.2 deviation: 0.5))
+		  gridSize: 20;
+		  minCount: 1;
+		  yourself
 ]
 
 { #category : 'instances' }
@@ -109,18 +205,85 @@ BpHexbin class >> instanceCorrelatedPoints [
 	"Answer a hexbin of five hundred points around a line."
 
 	<sampleInstance>
-	^ (self show: (self correlatedPoints: 500 slope: 1.2 deviation: 0.5) in: (BpChart new
-		    extent: 400 @ 300;
-		    yourself))
+	^ (self ofPoints: (self correlatedPoints: 500 slope: 1.2 deviation: 0.5))
 		  gridSize: 15;
 		  yourself
 ]
 
-{ #category : 'private - demo' }
-BpHexbin class >> show: aCollectionOfPoints in: aChart [
-	"Add a hexbin of aCollectionOfPoints to aChart and answer it."
+{ #category : 'instances' }
+BpHexbin class >> instanceFiveThousandPoints [
+	"Plot types: hexbin(x, y, C), five thousand points around a line, 20 hexagons across."
 
-	^ aChart hexbinX: (aCollectionOfPoints collect: [ :each | each x ]) y: (aCollectionOfPoints collect: [ :each | each y ])
+	<sampleInstance>
+	^ (self ofPoints: self optionPoints)
+		  gridSize: 20;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHexbin class >> instanceFourBins [
+	"Answer a hexbin whose colors go in four steps, with dark outlines (see `BpHexbin>>bins:`)."
+
+	<sampleInstance>
+	^ (self ofPoints: self optionPoints)
+		  gridSize: 25;
+		  bins: 4;
+		  edgeColors: ((BpSequentialPalette greys: 9) colorAt: 1);
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHexbin class >> instanceLinearColors [
+	"Gallery: Hexagonal binned plot (hexbin_demo), first chart: 100000 points in hexagons colored on a linear scale."
+
+	<sampleInstance>
+	^ self infernoOf: self demoPoints
+]
+
+{ #category : 'instances' }
+BpHexbin class >> instanceLogColors [
+	"Gallery: Hexagonal binned plot (hexbin_demo), second chart: the same points colored on a logarithmic scale (bins: #log, see `BpHexbin>>bins:`)."
+
+	<sampleInstance>
+	^ (self infernoOf: self demoPoints)
+		  bins: #log;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHexbin class >> instanceLogXAxis [
+	"Answer a hexbin whose hexagons are regular on a log x axis."
+
+	<sampleInstance>
+	^ (self ofPoints: (self optionPoints collect: [ :each | (10 raisedTo: each x) @ each y ]))
+		  gridSize: 25;
+		  xScale: #log;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpHexbin class >> instanceMinCount [
+	"Answer a hexbin hiding the hexagons of fewer than five points (see `BpHexbin>>minCount:`)."
+
+	<sampleInstance>
+	^ (self ofPoints: self optionPoints)
+		  gridSize: 25;
+		  minCount: 5;
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpHexbin class >> ofPoints: aCollectionOfPoints [
+	"Answer a hexbin of aCollectionOfPoints."
+
+	^ self x: (aCollectionOfPoints collect: [ :each | each x ]) y: (aCollectionOfPoints collect: [ :each | each y ])
+]
+
+{ #category : 'private - demo' }
+BpHexbin class >> optionPoints [
+	"Answer the 5000 points of the hexbin option demos, around a line of slope 1.2."
+
+	^ self correlatedPoints: 5000 slope: 1.2 deviation: 1 / 3
 ]
 
 { #category : 'instance creation' }
