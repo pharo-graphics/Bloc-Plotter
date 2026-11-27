@@ -31,7 +31,17 @@ BpDensityPlotTest >> newChart [
 { #category : 'tests' }
 BpDensityPlotTest >> newPlot [
 
-	^ self newChart densityPlot: #( 0 1 2 3 10 )
+	^ self newChart addArtist: (BpDensityPlot of: #( 0 1 2 3 10 ))
+]
+
+{ #category : 'tests' }
+BpDensityPlotTest >> testAddArtistAddsADensityPlotToTheChart [
+
+	| chart plot |
+	chart := self newChart.
+	plot := chart addArtist: (BpDensityPlot of: #( 1 2 3 )).
+	self assert: plot class equals: BpDensityPlot.
+	self assert: chart artists asArray equals: { plot }
 ]
 
 { #category : 'tests' }
@@ -80,6 +90,17 @@ BpDensityPlotTest >> testBandwidthChangesTheEstimate [
 	plot := self newPlot.
 	plot bandwidth: 0.5.
 	self assert: plot estimates first factor equals: 0.5
+]
+
+{ #category : 'tests - instances' }
+BpDensityPlotTest >> testBandwidthInstancesAreLabeledWithTheirBandwidth [
+
+	self
+		assert: ({
+			 BpDensityPlot instanceNarrowBandwidth.
+			 BpDensityPlot instanceScottBandwidth.
+			 BpDensityPlot instanceWideBandwidth } collect: [ :each | each legendEntries first key ])
+		equals: #( '0.1' '#scott' '1' )
 ]
 
 { #category : 'tests' }
@@ -148,21 +169,11 @@ BpDensityPlotTest >> testDatasetsTakeTheColorsOfThePalette [
 		(BpPalette default colorAt: 2) }
 ]
 
-{ #category : 'tests' }
-BpDensityPlotTest >> testDensityPlotAddsADensityPlot [
-
-	| chart plot |
-	chart := self newChart.
-	plot := chart densityPlot: #( 1 2 3 ).
-	self assert: plot class equals: BpDensityPlot.
-	self assert: chart artists asArray equals: { plot }
-]
-
 { #category : 'tests - errors' }
 BpDensityPlotTest >> testEqualValuesRaiseError [
 
 	self
-		should: [ self newChart densityPlot: #( 2 2 ) ]
+		should: [ self newChart addArtist: (BpDensityPlot of: #( 2 2 )) ]
 		raise: Error
 		whoseDescriptionIncludes: 'two different values'
 		description: 'equal values have no deviation'
@@ -186,6 +197,22 @@ BpDensityPlotTest >> testHorizontalSwapsTheAxes [
 	vertical := (self curvesOf: plot) first dataVertices.
 	plot orientation: #horizontal.
 	self assert: (self curvesOf: plot) first dataVertices equals: (vertical collect: [ :each | each y @ each x ])
+]
+
+{ #category : 'tests - instances' }
+BpDensityPlotTest >> testInstanceThreeSamplesHasThreeLabeledCurves [
+
+	| plot |
+	plot := BpDensityPlot instanceThreeSamples.
+	self assert: plot estimates size equals: 3.
+	self assert: (plot legendEntries collect: [ :each | each key ] as: Array) equals: #( 'first' 'second' 'third' )
+]
+
+{ #category : 'tests - instances' }
+BpDensityPlotTest >> testInstanceWideBandwidthIsWiderThanTheNarrowOne [
+
+	self assert:
+		BpDensityPlot instanceWideBandwidth estimates first bandwidth > BpDensityPlot instanceNarrowBandwidth estimates first bandwidth
 ]
 
 { #category : 'tests' }
@@ -220,10 +247,10 @@ BpDensityPlotTest >> testLineWidthAndStyle [
 BpDensityPlotTest >> testMoreDatasetsThanColors [
 
 	| plot |
-	plot := self newChart densityPlot: ((1 to: 12) collect: [ :each |
-		         {
-			         each.
-			         (each + 1) } ]).
+	plot := self newChart addArtist: (BpDensityPlot of: ((1 to: 12) collect: [ :each |
+	  {
+		  each.
+		  (each + 1) } ])).
 	self assert: (self curvesOf: plot) last border paint color equals: (BpPalette default colorAt: 12)
 ]
 
@@ -292,5 +319,5 @@ BpDensityPlotTest >> testWhenPatchDoReceivesTheClickedArea [
 { #category : 'tests' }
 BpDensityPlotTest >> twoPlots [
 
-	^ self newChart densityPlot: #( #( 0 1 2 ) #( 5 6 9 ) )
+	^ self newChart addArtist: (BpDensityPlot of: #( #( 0 1 2 ) #( 5 6 9 ) ))
 ]

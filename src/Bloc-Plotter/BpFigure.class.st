@@ -150,7 +150,7 @@ BpFigure class >> exampleDensityPlot [
 	"Show the densities of three samples (see `BpDensityPlot`)."
 
 	<example>
-	^ self instanceDensityPlot show: 'density plot'
+	^ BpDensityPlot exampleThreeSamples
 ]
 
 { #category : 'examples' }
@@ -347,57 +347,6 @@ BpFigure class >> instanceColorBars [
 	figure extent: 900 @ 800.
 	self addColorBarsFirstRowTo: figure.
 	self addColorBarsSecondRowTo: figure.
-	^ figure
-]
-
-{ #category : 'instances - density' }
-BpFigure class >> instanceDensityPlot [
-	"The densities of three samples, with a legend."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	(chart densityPlot: BpDensityPlot threeSamples) label: #( 'first' 'second' 'third' ).
-	chart legend.
-	^ figure
-]
-
-{ #category : 'instances - density' }
-BpFigure class >> instanceDensityPlotOptions [
-	"Density plots of several bandwidths, stopped at the values, horizontal, and over a histogram."
-
-	<sampleInstance>
-	| figure values plot |
-	values := BpDensityPlot twoGroups.
-	figure := self rows: 2 columns: 2.
-	figure extent: 900 @ 700.
-	#( 0.1 #scott 1 ) do: [ :each |
-		plot := figure charts first densityPlot: values.
-		plot
-			bandwidth: each;
-			fill: false;
-			label: each printString ].
-	figure charts first
-		title: 'bandwidth:';
-		legend.
-	(figure charts second densityPlot: values)
-		cut: 0;
-		lineStyle: '--'.
-	figure charts second title: 'cut: 0, lineStyle: ''--'''.
-	(figure charts third densityPlot: BpDensityPlot threeSamples)
-		orientation: #horizontal;
-		alpha: 0.5.
-	figure charts third title: 'orientation: #horizontal, alpha: 0.5'.
-	(figure charts fourth addArtist: (BpHistogram xValues: values))
-		bins: 25;
-		density: true;
-		color: ((BpSequentialPalette greys: 9) colorAt: 4).
-	(figure charts fourth densityPlot: values)
-		fill: false;
-		lineWidth: 3;
-		color: (BpQualitativePalette set1 colorAt: 1).
-	figure charts fourth title: 'over a histogram'.
 	^ figure
 ]
 
@@ -741,26 +690,6 @@ BpFigure class >> instanceHistTypes [
 			 addArtist: BpHistogram instanceUnequalBins;
 			 title: 'bar, unequal bins';
 			 yourself).
-	^ figure
-]
-
-{ #category : 'instances - density' }
-BpFigure class >> instanceInteractiveDensity [
-	"A density plot with interaction handlers on its areas: hovering an area darkens it, clicking it shows its sample in the title."
-
-	<sampleInstance>
-	| figure chart plot |
-	figure := self new.
-	chart := figure charts first.
-	plot := chart densityPlot: BpDensityPlot threeSamples.
-	chart title: 'Click an area'.
-	plot
-		whenPatch: BlMouseEnterEvent do: [ :event :patch | patch opacity: 0.6 ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch opacity: 1 ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			chart title: ('Sample {1}, bandwidth {2}' format: {
-				 patch dataset.
-				 ((plot estimates at: patch dataset) bandwidth printShowingDecimalPlaces: 2) }) ].
 	^ figure
 ]
 

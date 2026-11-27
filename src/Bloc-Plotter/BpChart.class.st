@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram`, a `BpScatterPlot`, a `BpLine`, a `BpBoxPlot` or a `BpStemPlot` added by `addArtist:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, a `BpHexbin` added by `hexbinX:y:`, a `BpHeatmap` added by `heatmap:`, or a `BpDensityPlot` added by `densityPlot:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram`, a `BpScatterPlot`, a `BpLine`, a `BpBoxPlot`, a `BpStemPlot` or a `BpDensityPlot` added by `addArtist:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, a `BpHexbin` added by `hexbinX:y:`, or a `BpHeatmap` added by `heatmap:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -23,7 +23,7 @@ BpChart instanceLinePlotType
 ## Usage
 
 1. `BpFigure>>rows:columns:chartClass:` creates me, or I am built apart and placed with `BpFigure>>chartAtRow:column:put:`; I can also be shown alone.
-2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpStemPlot class>>stem:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barX:height:`, `barhY:width:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:` and `densityPlot:` create an artist and add it the same way. `palette:` changes the palette and recolors the artists already added.
+2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpStemPlot class>>stem:`, `BpDensityPlot class>>of:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barX:height:`, `barhY:width:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:` and `heatmap:` create an artist and add it the same way. `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`), color bars (`BpColorBar`, added by `addColorBarFor:`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpChartLayout` computes my plot bounds from the size of my tick labels, title and color bars, which gives its extent to my data transform.
 
@@ -287,13 +287,6 @@ BpChart >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 	^ (self scaleOf: anAxis) = #log
 		  ifTrue: [ BpTickLocator logLabelsFor: aCollectionOfLocations ]
 		  ifFalse: [ BpTickLocator labelsFor: aCollectionOfLocations ]
-]
-
-{ #category : 'plotting' }
-BpChart >> densityPlot: aCollection [
-	"Draw the estimated density of aCollection (numbers for one curve, or one collection of numbers per curve) and answer it, to be configured with bandwidth:, cut:, fill:, color:, orientation:, ... (see `BpDensityPlot`)."
-
-	^ self addArtist: (BpDensityPlot of: aCollection)
 ]
 
 { #category : 'plotting' }

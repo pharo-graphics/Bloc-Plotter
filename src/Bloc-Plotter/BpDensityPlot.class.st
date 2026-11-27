@@ -1,5 +1,5 @@
 "
-I am a density plot, added by `BpChart>>densityPlot:`: I draw the estimated density of one or several datasets (`BpKernelDensity`) as curves over filled areas. Unlike a histogram, I have no bins to choose, but a `bandwidth:`.
+I am a density plot of a `BpChart`: I draw the estimated density of one or several datasets (`BpKernelDensity`) as curves over filled areas. Unlike a histogram, I have no bins to choose, but a `bandwidth:`.
 
 ## Examples
 
@@ -17,7 +17,7 @@ BpDensityPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>densityPlot:` creates me with `of:` and adds me to the chart (see `BpArtist`).
+1. `BpDensityPlot class>>of:` creates me with my datasets, and `BpChart>>addArtist:` adds me to a chart, as `BpDensityPlot class>>exampleOptions` does with three curves of different bandwidths (see `BpArtist`).
 2. My patches answer their `dataset`, which interaction handlers given to `whenPatch:do:` use. `estimates` and `curves` answer my results.
 
 ## Invariants and Assumptions
@@ -47,10 +47,23 @@ Class {
 
 { #category : 'examples' }
 BpDensityPlot class >> exampleInteraction [
-	"Interaction handlers on the areas: hover an area to darken it, click it to see its sample."
+	"Interaction handlers on the areas: hover an area to darken it, click it to see its sample and its bandwidth in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveDensity show: 'Density plot interaction'
+	| figure chart plot |
+	figure := BpFigure new.
+	chart := BpChart new.
+	plot := chart addArtist: self instanceThreeSamples.
+	chart title: 'Click an area'.
+	plot
+		whenPatch: BlMouseEnterEvent do: [ :event :patch | patch opacity: 0.6 ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch opacity: 1 ];
+		whenPatch: BlClickEvent do: [ :event :patch |
+			chart title: ('Sample {1}, bandwidth {2}' format: {
+				 patch dataset.
+				 ((plot estimates at: patch dataset) bandwidth printShowingDecimalPlaces: 2) }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Density plot interaction'
 ]
 
 { #category : 'examples' }
@@ -58,7 +71,35 @@ BpDensityPlot class >> exampleOptions [
 	"Show density plots of several bandwidths, stopped at the values, horizontal, and over a histogram."
 
 	<example>
-	^ BpFigure instanceDensityPlotOptions show: 'Density plot options'
+	| figure |
+	figure := BpFigure rows: 2 columns: 2.
+	figure extent: 900 @ 700.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceNarrowBandwidth;
+			 addArtist: self instanceScottBandwidth;
+			 addArtist: self instanceWideBandwidth;
+			 title: 'bandwidth:';
+			 legend;
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceCutAtTheValues;
+			 title: 'cut: 0, lineStyle: ''--''';
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceHorizontal;
+			 title: 'orientation: #horizontal, alpha: 0.5';
+			 yourself);
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: ((BpHistogram xValues: self twoGroups)
+				  bins: 25;
+				  density: true;
+				  color: ((BpSequentialPalette greys: 9) colorAt: 4);
+				  yourself);
+			 addArtist: self instanceOverAHistogram;
+			 title: 'over a histogram';
+			 yourself).
+	^ figure show: 'Density plot options'
 ]
 
 { #category : 'examples' }
@@ -66,7 +107,74 @@ BpDensityPlot class >> exampleThreeSamples [
 	"Show the densities of three samples in one chart, with a legend."
 
 	<example>
-	^ BpFigure instanceDensityPlot show: 'Density plot'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceThreeSamples;
+		legend.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Density plot'
+]
+
+{ #category : 'instances' }
+BpDensityPlot class >> instanceCutAtTheValues [
+	"Answer the density of the two groups stopped at the extreme values (cut: 0) and drawn with a dashed line (see `BpDensityPlot>>cut:`)."
+
+	<sampleInstance>
+	^ (self of: self twoGroups)
+		  cut: 0;
+		  lineStyle: '--';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpDensityPlot class >> instanceHorizontal [
+	"Answer the densities of three samples along the y axis, half transparent (see `BpDensityPlot>>orientation:`)."
+
+	<sampleInstance>
+	^ (self of: self threeSamples)
+		  orientation: #horizontal;
+		  alpha: 0.5;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpDensityPlot class >> instanceNarrowBandwidth [
+	"Answer the unfilled density of the two groups with a narrow bandwidth (0.1), which follows the values closely (see `BpDensityPlot>>bandwidth:`)."
+
+	<sampleInstance>
+	^ self twoGroupsCurveWithBandwidth: 0.1
+]
+
+{ #category : 'instances' }
+BpDensityPlot class >> instanceOverAHistogram [
+	"Answer the density of the two groups as a thick unfilled curve of the first color of set1, to be drawn over a histogram of the same values."
+
+	<sampleInstance>
+	^ (self of: self twoGroups)
+		  fill: false;
+		  lineWidth: 3;
+		  color: (BpQualitativePalette set1 colorAt: 1);
+		  yourself
+]
+
+{ #category : 'instances' }
+BpDensityPlot class >> instanceScottBandwidth [
+	"Answer the unfilled density of the two groups with the bandwidth of Scott's rule, the default one."
+
+	<sampleInstance>
+	^ self twoGroupsCurveWithBandwidth: #scott
+]
+
+{ #category : 'instances' }
+BpDensityPlot class >> instanceThreeSamples [
+	"Answer the densities of three samples of different means and deviations, labeled first, second and third."
+
+	<sampleInstance>
+	^ (self of: self threeSamples)
+		  label: #( 'first' 'second' 'third' );
+		  yourself
 ]
 
 { #category : 'instances' }
@@ -75,6 +183,14 @@ BpDensityPlot class >> instanceTwoGroups [
 
 	<sampleInstance>
 	^ self of: self twoGroups
+]
+
+{ #category : 'instances' }
+BpDensityPlot class >> instanceWideBandwidth [
+	"Answer the unfilled density of the two groups with a wide bandwidth (1), which merges the groups."
+
+	<sampleInstance>
+	^ self twoGroupsCurveWithBandwidth: 1
 ]
 
 { #category : 'private - demo' }
@@ -130,6 +246,17 @@ BpDensityPlot class >> twoGroups [
 		   mean: 4
 		   deviation: 0.8
 		   seed: 2)
+]
+
+{ #category : 'private - demo' }
+BpDensityPlot class >> twoGroupsCurveWithBandwidth: aNumberOrSymbol [
+	"Answer the unfilled density of the two groups with the bandwidth aNumberOrSymbol, labeled with it."
+
+	^ (self of: self twoGroups)
+		  bandwidth: aNumberOrSymbol;
+		  fill: false;
+		  label: aNumberOrSymbol printString;
+		  yourself
 ]
 
 { #category : 'private - style' }
