@@ -158,7 +158,7 @@ BpFigure class >> exampleErrorBar [
 	"Show the figure of the gallery error bar limits: upper and lower limits on all or some points (see `BpErrorBar`)."
 
 	<example>
-	^ self instanceErrorBarLimits show: 'errorbar'
+	^ BpErrorBar exampleLimits
 ]
 
 { #category : 'examples' }
@@ -262,7 +262,7 @@ BpFigure class >> exampleStairs [
 	"Show the figure of the gallery stairs demo: step histograms, filled and horizontal steps (see `BpStairs`)."
 
 	<example>
-	^ self instanceStairsDemo show: 'stairs'
+	^ BpStairs exampleStairsDemo
 ]
 
 { #category : 'examples' }
@@ -347,96 +347,6 @@ BpFigure class >> instanceColorBars [
 	figure extent: 900 @ 800.
 	self addColorBarsFirstRowTo: figure.
 	self addColorBarsSecondRowTo: figure.
-	^ figure
-]
-
-{ #category : 'instances - error bar' }
-BpFigure class >> instanceErrorBarFeatures [
-	"Gallery: Different ways of specifying error bars (errorbar_features): symmetric errors varying with x, then asymmetric x errors on a log scale."
-
-	<sampleInstance>
-	| figure x y error symmetric asymmetric |
-	figure := self rows: 2 columns: 1.
-	figure extent: 640 @ 640.
-	x := BpErrorBar arangeFrom: 0.1 to: 4 by: 0.5.
-	y := x collect: [ :each | each negated exp ].
-	error := x collect: [ :each | 0.2 * each + 0.1 ].
-	symmetric := figure chartAtRow: 1 column: 1.
-	(symmetric errorBarX: x y: y yErr: error) format: '-o'.
-	symmetric title: 'variable, symmetric error'.
-	asymmetric := figure chartAtRow: 2 column: 1.
-	(asymmetric
-		 errorBarX: x
-		 y: y
-		 xErr: {
-			 (error collect: [ :each | each * 0.4 ]).
-			 error }
-		 yErr: nil) format: 'o'.
-	asymmetric
-		title: 'variable, asymmetric error';
-		yScale: #log.
-	^ figure
-]
-
-{ #category : 'instances - error bar' }
-BpFigure class >> instanceErrorBarFunction [
-	"Gallery: Errorbar function (errorbar), the same error on every point: 0.2 in x and 0.4 in y."
-
-	<sampleInstance>
-	| figure chart x |
-	figure := self new.
-	chart := figure charts first.
-	x := BpErrorBar arangeFrom: 0.1 to: 4 by: 0.5.
-	chart
-		errorBarX: x
-		y: (x collect: [ :each | each negated exp ])
-		xErr: 0.2
-		yErr: 0.4.
-	chart title: 'Simplest errorbars, 0.2 in x, 0.4 in y'.
-	^ figure
-]
-
-{ #category : 'instances - error bar' }
-BpFigure class >> instanceErrorBarLimits [
-	"Gallery: Including upper and lower limits in error bars (errorbar_limits_simple), first figure: limits on all points, on both sides, or on some points only."
-
-	<sampleInstance>
-	| figure |
-	figure := self new.
-	BpErrorBar addLimitSeriesTo: figure charts first.
-	figure charts first legend.
-	^ figure
-]
-
-{ #category : 'instances - error bar' }
-BpFigure class >> instanceErrorBarPlotType [
-	"Plot types: errorbar(x, y, yerr, xerr), three circles with 2 point wide error bars and caps, with fixed limits and ticks."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	(chart errorBarX: #( 2 4 6 ) y: #( 3.6 5 4.2 ) yErr: #( 0.9 1.2 0.5 ))
-		format: 'o';
-		lineWidth: 2;
-		capSize: 6.
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7).
-	^ figure
-]
-
-{ #category : 'instances - error bar' }
-BpFigure class >> instanceErrorBarSubsample [
-	"Gallery: Errorbar subsampling (errorbar_subsample): all error bars, one in six, then the second series shifted by three points."
-
-	<sampleInstance>
-	| figure |
-	figure := self rows: 1 columns: 3.
-	figure extent: 1000 @ 360.
-	1 to: 3 do: [ :column | BpErrorBar subsampleIn: (figure chartAtRow: 1 column: column) column: column ].
 	^ figure
 ]
 
@@ -693,37 +603,6 @@ BpFigure class >> instanceHistTypes [
 	^ figure
 ]
 
-{ #category : 'instances - error bar' }
-BpFigure class >> instanceInteractiveErrorBars [
-	"Measures with error bars: hovering a bar thickens it, clicking it shows the measure in the title."
-
-	<sampleInstance>
-	| figure chart measures errors errorBar |
-	figure := self new.
-	chart := figure charts first.
-	chart title: 'Click an error bar'.
-	measures := #( 2.1 3.4 3.0 4.6 5.2 ).
-	errors := #( 0.3 0.5 0.4 0.6 0.3 ).
-	errorBar := (chart errorBarX: (1 to: 5) y: measures yErr: errors)
-		            format: 'o';
-		            capSize: 5;
-		            yourself.
-	errorBar
-		whenPatch: BlMouseEnterEvent
-		do: [ :event :patch |
-			(errorBar barPatches includes: patch) ifTrue: [ patch border: (BlBorder paint: patch border paint width: 5) ] ];
-		whenPatch: BlMouseLeaveEvent
-		do: [ :event :patch |
-			(errorBar barPatches includes: patch) ifTrue: [ patch border: (BlBorder paint: patch border paint width: 2) ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			(errorBar barPatches includes: patch) ifTrue: [
-				chart title: ('measure {1}: {2} ± {3}' format: {
-					 patch dataset.
-					 (measures at: patch dataset).
-					 (errors at: patch dataset) }) ] ].
-	^ figure
-]
-
 { #category : 'instances - fill between' }
 BpFigure class >> instanceInteractiveFill [
 	"A sine filled in the first color of the palette where it is positive and in the second where it is negative, one polygon per hump: hovering a polygon outlines it, clicking it shows its x range in the title."
@@ -825,33 +704,6 @@ BpFigure class >> instanceInteractiveStack [
 				 ((stack stacks at: polygon dataset) last - (polygon dataset = 1
 					   ifTrue: [ stack baselineValues last ]
 					   ifFalse: [ (stack stacks at: polygon dataset - 1) last ]) printShowingDecimalPlaces: 3) }) ].
-	^ figure
-]
-
-{ #category : 'instances - stairs' }
-BpFigure class >> instanceInteractiveStairs [
-	"Three step curves: hovering one thickens it, clicking it shows its name in the title."
-
-	<sampleInstance>
-	| figure chart edges |
-	figure := self new.
-	chart := figure charts first.
-	chart title: 'Click a step curve'.
-	edges := 0 to: 12.
-	{
-		('sin' -> [ :each | (each / 2) sin ]).
-		('cos' -> [ :each | (each / 2) cos ]).
-		('half sin' -> [ :each | (each / 2) sin / 2 ]) } do: [ :each |
-			| stairs |
-			stairs := (chart stairs: ((0 to: 11) collect: [ :index | each value value: index + (1 / 2) ]) edges: edges)
-				          baseline: nil;
-				          label: each key;
-				          yourself.
-			stairs
-				whenPatch: BlMouseEnterEvent do: [ :event :polygon | polygon border: (BlBorder paint: polygon border paint width: 4) ];
-				whenPatch: BlMouseLeaveEvent do: [ :event :polygon | stairs paint: polygon ];
-				whenPatch: BlClickEvent do: [ :event :polygon | chart title: ('clicked: {1}' format: { each key }) ] ].
-	chart legend.
 	^ figure
 ]
 
@@ -1077,47 +929,6 @@ BpFigure class >> instanceStackPlotWorldPopulation [
 	chart
 		legend;
 		title: 'World population'.
-	^ figure
-]
-
-{ #category : 'instances - stairs' }
-BpFigure class >> instanceStairsDemo [
-	"Gallery: Stairs Demo (stairs_demo), first figure: step histograms with a modified baseline or none, filled and horizontal steps, and stairs added to their chart as an artist."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self rows: 3 columns: 1.
-	figure extent: 600 @ 900.
-	BpStairs stepHistogramsIn: (figure chartAtRow: 1 column: 1).
-	BpStairs filledStepsIn: (figure chartAtRow: 2 column: 1).
-	chart := figure chartAtRow: 3 column: 1.
-	chart addArtist: (BpStairs new
-		 values: #( 1 2 3 2 1 ) edges: (1 to: 6);
-		 label: 'Artist added to the chart';
-		 yourself).
-	chart
-		xLimits: #( 0 7 );
-		yLimits: #( -1 5 );
-		title: 'BpStairs artist'.
-	figure charts do: [ :each | each legend ].
-	^ figure
-]
-
-{ #category : 'instances - stairs' }
-BpFigure class >> instanceStairsPlotType [
-	"Plot types: stairs(values), eight steps 2.5 points wide with fixed limits and ticks."
-
-	<sampleInstance>
-	| figure chart |
-	figure := self new.
-	chart := figure charts first.
-	(chart stairs: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 )) lineWidth: 2.5.
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
 	^ figure
 ]
 

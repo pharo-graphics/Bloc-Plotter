@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram`, a `BpScatterPlot`, a `BpLine`, a `BpBoxPlot`, a `BpStemPlot` or a `BpDensityPlot` added by `addArtist:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, a `BpHexbin` added by `hexbinX:y:`, or a `BpHeatmap` added by `heatmap:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram`, a `BpScatterPlot`, a `BpLine`, a `BpBoxPlot`, a `BpStemPlot`, a `BpDensityPlot`, a `BpErrorBar` or a `BpStairs` added by `addArtist:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpHexbin` added by `hexbinX:y:`, or a `BpHeatmap` added by `heatmap:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -23,7 +23,7 @@ BpChart instanceLinePlotType
 ## Usage
 
 1. `BpFigure>>rows:columns:chartClass:` creates me, or I am built apart and placed with `BpFigure>>chartAtRow:column:put:`; I can also be shown alone.
-2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpStemPlot class>>stem:`, `BpDensityPlot class>>of:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barX:height:`, `barhY:width:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:` and `heatmap:` create an artist and add it the same way. `palette:` changes the palette and recolors the artists already added.
+2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpStemPlot class>>stem:`, `BpDensityPlot class>>of:`, `BpStairs class>>values:edges:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barX:height:`, `barhY:width:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `violinPlot:`, `violinPlot:positions:`, `hexbinX:y:` and `heatmap:` create an artist and add it the same way. `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`), color bars (`BpColorBar`, added by `addColorBarFor:`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpChartLayout` computes my plot bounds from the size of my tick labels, title and color bars, which gives its extent to my data transform.
 
@@ -287,27 +287,6 @@ BpChart >> defaultLabelsFor: aCollectionOfLocations on: anAxis [
 	^ (self scaleOf: anAxis) = #log
 		  ifTrue: [ BpTickLocator logLabelsFor: aCollectionOfLocations ]
 		  ifFalse: [ BpTickLocator labelsFor: aCollectionOfLocations ]
-]
-
-{ #category : 'plotting' }
-BpChart >> errorBarX: xValues y: yValues xErr: anXErrorOrNil yErr: aYErrorOrNil [
-	"Draw the points of xValues and yValues joined by a line, with error bars on x and y (a number for every point, one number per point, or the lower then the upper errors; nil for none), and answer them, to be configured with format:, capSize:, errorColor:, upperLimits:, ... (see `BpErrorBar`)."
-
-	^ self addArtist: ((BpErrorBar x: xValues y: yValues)
-		   xErr: anXErrorOrNil;
-		   yErr: aYErrorOrNil;
-		   yourself)
-]
-
-{ #category : 'plotting' }
-BpChart >> errorBarX: xValues y: yValues yErr: anErrorOrNil [
-	"Draw the points of xValues and yValues joined by a line, with error bars of anErrorOrNil on y, and answer them (see `errorBarX:y:xErr:yErr:`)."
-
-	^ self
-		  errorBarX: xValues
-		  y: yValues
-		  xErr: nil
-		  yErr: anErrorOrNil
 ]
 
 { #category : 'plotting' }
@@ -657,22 +636,6 @@ BpChart >> stackPlotX: aCollection ys: aCollectionOfCollections [
 
 	^ self addArtist: (BpStackPlot new
 		   x: aCollection ys: aCollectionOfCollections;
-		   yourself)
-]
-
-{ #category : 'plotting' }
-BpChart >> stairs: aCollection [
-	"Draw steps of the heights aCollection between the edges 0, 1, 2, ... and answer them (see `stairs:edges:`)."
-
-	^ self stairs: aCollection edges: nil
-]
-
-{ #category : 'plotting' }
-BpChart >> stairs: aCollection edges: aCollectionOrNil [
-	"Draw steps of the heights aCollection between the edges aCollectionOrNil (one more than the heights, nil for 0, 1, 2, ...) and answer them, to be configured with baseline:, fill:, orientation:, color:, ... (see `BpStairs`)."
-
-	^ self addArtist: (BpStairs new
-		   values: aCollection edges: aCollectionOrNil;
 		   yourself)
 ]
 

@@ -42,6 +42,19 @@ BpErrorBarTest >> errorBarWith: aBlock [
 ]
 
 { #category : 'tests' }
+BpErrorBarTest >> testAddArtistGivesTheNextColorToAnErrorBar [
+
+	| chart errorBar |
+	chart := BpChart new.
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
+	errorBar := chart addArtist: ((BpErrorBar x: #( 1 2 ) y: #( 3 4 ))
+		             yErr: 0.5;
+		             yourself).
+	self assert: chart artists last identicalTo: errorBar.
+	self assert: errorBar barPatches first border paint color equals: (BpPalette default colorAt: 2)
+]
+
+{ #category : 'tests' }
 BpErrorBarTest >> testAsymmetricErrorsGiveTheLowerThenTheUpperErrors [
 
 	self assert: (self barsOf: (self errorBarWith: [ :bars | bars yErr: #( #( 1 1 1 ) #( 4 5 6 ) ) ])) first equals: {
@@ -118,30 +131,6 @@ BpErrorBarTest >> testCaretsHaveTheirBaseOnThePoint [
 ]
 
 { #category : 'tests' }
-BpErrorBarTest >> testChartErrorBarAddsItWithTheNextColor [
-
-	| chart errorBar |
-	chart := BpChart new.
-	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
-	errorBar := chart errorBarX: #( 1 2 ) y: #( 3 4 ) yErr: 0.5.
-	self assert: chart artists last identicalTo: errorBar.
-	self assert: errorBar barPatches first border paint color equals: (BpPalette default colorAt: 2)
-]
-
-{ #category : 'tests' }
-BpErrorBarTest >> testChartErrorBarXErrYErr [
-
-	| errorBar |
-	errorBar := BpChart new
-		            errorBarX: #( 1 2 )
-		            y: #( 3 4 )
-		            xErr: 0.1
-		            yErr: nil.
-	self assert: errorBar barPatches size equals: 2.
-	self assert: (self barsOf: errorBar) first first y equals: 3
-]
-
-{ #category : 'tests' }
 BpErrorBarTest >> testDataLineJoinsThePoints [
 
 	self assert: self errorBar linePatch dataVertices asArray equals: {
@@ -212,6 +201,12 @@ BpErrorBarTest >> testErrorsOfAnotherSizeRaiseError [
 	self should: [ self errorBar yErr: #( 1 2 ) ] raise: Error
 ]
 
+{ #category : 'tests - instances' }
+BpErrorBarTest >> testEverySixthInstanceHasFewerBars [
+
+	self assert: BpErrorBar instanceFastDecayEverySixth barPatches size < BpErrorBar instanceFastDecay barPatches size
+]
+
 { #category : 'tests' }
 BpErrorBarTest >> testFormatMarkerDrawsMarkersWithoutLine [
 
@@ -243,6 +238,18 @@ BpErrorBarTest >> testHandlersAreKeptWhenTheBarsAreRebuilt [
 	self assert: clicked identicalTo: errorBar barPatches first
 ]
 
+{ #category : 'tests - instances' }
+BpErrorBarTest >> testInstanceMeasuresHasOneBarPerMeasure [
+
+	self assert: BpErrorBar instanceMeasures barPatches size equals: 5
+]
+
+{ #category : 'tests - instances' }
+BpErrorBarTest >> testInstanceSameErrorsHasBarsOnBothAxes [
+
+	self assert: BpErrorBar instanceSameErrors barPatches size equals: 2 * BpErrorBar decayX size
+]
+
 { #category : 'tests' }
 BpErrorBarTest >> testLabelGivesALegendEntry [
 
@@ -258,6 +265,19 @@ BpErrorBarTest >> testLegendSwatchIsCrossedByAVerticalBar [
 	bar := (self errorBarWith: [ :bars | bars label: 'measures' ]) legendEntries first value children first.
 	self assert: bar geometry from equals: BpLine swatchExtent x / 2 @ 0.
 	self assert: bar geometry to equals: BpLine swatchExtent x / 2 @ BpLine swatchExtent y
+]
+
+{ #category : 'tests - instances' }
+BpErrorBarTest >> testLimitInstancesAreLabeled [
+
+	self
+		assert: ({
+			 BpErrorBar instanceBothLimits.
+			 BpErrorBar instanceUpperLimits.
+			 BpErrorBar instanceUpperAndLowerLimits.
+			 BpErrorBar instanceAlternateLimits } collect: [ :each | each legendEntries first key ])
+		equals:
+		#( 'both limits (default)' 'upperLimits: true' 'upperLimits: true, lowerLimits: true' 'subsets of upperLimits and lowerLimits' )
 ]
 
 { #category : 'tests' }
@@ -366,6 +386,17 @@ BpErrorBarTest >> testXCapsAreVertical [
 				 xErr: 1;
 				 capSize: 3 ]) capPatches first marker vertices
 		equals: (BpMarker on: '|') vertices
+]
+
+{ #category : 'tests' }
+BpErrorBarTest >> testXErrAloneGivesOneBarPerPoint [
+
+	| errorBar |
+	errorBar := BpChart new addArtist: ((BpErrorBar x: #( 1 2 ) y: #( 3 4 ))
+		             xErr: 0.1;
+		             yourself).
+	self assert: errorBar barPatches size equals: 2.
+	self assert: (self barsOf: errorBar) first first y equals: 3
 ]
 
 { #category : 'tests' }

@@ -1,5 +1,5 @@
 "
-I am a line plot with error bars, added by `BpChart>>errorBarX:y:yErr:` and `BpChart>>errorBarX:y:xErr:yErr:`: around each point, a bar on y (`yErr:`), on x (`xErr:`) or both shows the uncertainty of the measure. As a `BpLine`, I draw the points with my line and markers (`format:`, `color:`, `marker:`, ...; `format: 'none'` draws only the bars). The bars can end with caps (`capSize:`), and a value can be marked as a limit, which draws its bar on one side only with an arrow (`lowerLimits:`, `upperLimits:`, `xLowerLimits:`, `xUpperLimits:`).
+I am a line plot with error bars, in a `BpChart`: around each point, a bar on y (`yErr:`), on x (`xErr:`) or both shows the uncertainty of the measure. As a `BpLine`, I draw the points with my line and markers (`format:`, `color:`, `marker:`, ...; `format: 'none'` draws only the bars). The bars can end with caps (`capSize:`), and a value can be marked as a limit, which draws its bar on one side only with an arrow (`lowerLimits:`, `upperLimits:`, `xLowerLimits:`, `xUpperLimits:`).
 
 ## Examples
 
@@ -22,7 +22,7 @@ BpErrorBar exampleInteraction
 
 ## Usage
 
-1. `BpChart>>errorBarX:y:yErr:` and `BpChart>>errorBarX:y:xErr:yErr:` create me (`BpLine class>>x:y:`) and add me to the chart; see `BpArtist` for the rest of the life cycle.
+1. `BpLine class>>x:y:` creates me with my points, `yErr:` and `xErr:` give my errors, and `BpChart>>addArtist:` adds me to a chart, as `BpErrorBar class>>exampleLimits` does with four series; see `BpArtist` for the rest of the life cycle.
 2. Each setter rebuilds my patches: `barPatches` (`BpPolygonPatch`es whose `dataset` is the index of their point) and `capPatches` (`BpMarkerPatch`es for caps and arrows), then those of my line.
 3. My legend entry is the swatch of my line crossed by an error bar.
 
@@ -61,29 +61,6 @@ Class {
 	#tag : 'ErrorBar'
 }
 
-{ #category : 'private - demo' }
-BpErrorBar class >> addLimitSeriesTo: aChart [
-	"Draw in aChart the four series of the gallery limits demo: no limits, upper limits, both limits, and alternate limits."
-
-	| x y yErr shifted |
-	x := 0 to: 9.
-	y := x collect: [ :each | (each / 20 * Float pi) sin * 2.5 ].
-	yErr := self linspaceFrom: 0.05 to: 0.2 count: 10.
-	shifted := [ :offset | aChart errorBarX: x y: (y collect: [ :each | each + offset ]) yErr: yErr ].
-	(shifted value: 3) label: 'both limits (default)'.
-	(shifted value: 2)
-		upperLimits: true;
-		label: 'upperLimits: true'.
-	(shifted value: 1)
-		upperLimits: true;
-		lowerLimits: true;
-		label: 'upperLimits: true, lowerLimits: true'.
-	(shifted value: 0)
-		upperLimits: ((1 to: 10) collect: [ :each | each odd ]);
-		lowerLimits: ((1 to: 10) collect: [ :each | each even ]);
-		label: 'subsets of upperLimits and lowerLimits'
-]
-
 { #category : 'markers' }
 BpErrorBar class >> caret: aSymbol [
 	"Answer the arrow drawn at the end of the error bar of a limit, pointing #up, #down, #left or #right, with its base on the end of the bar."
@@ -102,12 +79,60 @@ BpErrorBar class >> caret: aSymbol [
 	^ BpMarker kind: #lines vertices: (directions at: aSymbol ifAbsent: [ ^ self error: 'Unknown caret: ' , aSymbol printString ])
 ]
 
+{ #category : 'private - demo' }
+BpErrorBar class >> decayCurve [
+	"Answer the points of exp(-x) at the x of the gallery error bar demos, without errors yet."
+
+	^ self x: self decayX y: (self decayX collect: [ :each | each negated exp ])
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> decayErrors [
+	"Answer the errors of the gallery error bar features demo, growing with x."
+
+	^ self decayX collect: [ :each | 0.2 * each + 0.1 ]
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> decayX [
+	"Answer the x of the gallery error bar demos: 0.1 to 4 by 0.5."
+
+	^ self arangeFrom: 0.1 to: 4 by: 0.5
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> demoMeasureErrors [
+	"Answer the errors of the five measures of the measure demos."
+
+	^ #( 0.3 0.5 0.4 0.6 0.3 )
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> demoMeasures [
+	"Answer the five measures of the measure demos."
+
+	^ #( 2.1 3.4 3.0 4.6 5.2 )
+]
+
 { #category : 'examples' }
 BpErrorBar class >> exampleErrorBarFeatures [
-	"Reproduce the gallery 'Different ways of specifying error bars': symmetric and asymmetric errors."
+	"Reproduce the gallery 'Different ways of specifying error bars': symmetric errors varying with x, then asymmetric x errors on a log scale."
 
 	<example>
-	^ BpFigure instanceErrorBarFeatures show: 'errorbar_features'
+	| figure |
+	figure := BpFigure rows: 2 columns: 1.
+	figure extent: 640 @ 640.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceSymmetricErrors;
+			 title: 'variable, symmetric error';
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceAsymmetricErrors;
+			 title: 'variable, asymmetric error';
+			 yScale: #log;
+			 yourself).
+	^ figure show: 'errorbar_features'
 ]
 
 { #category : 'examples' }
@@ -115,72 +140,295 @@ BpErrorBar class >> exampleErrorBarFunction [
 	"Reproduce the gallery 'Errorbar function': the same errors on every point."
 
 	<example>
-	^ BpFigure instanceErrorBarFunction show: 'errorbar'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceSameErrors;
+		title: 'Simplest errorbars, 0.2 in x, 0.4 in y'.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'errorbar'
 ]
 
 { #category : 'examples' }
 BpErrorBar class >> exampleInteraction [
-	"Interaction handlers on error bars: hover a bar to thicken it, click it to see its measure."
+	"Interaction handlers on error bars: hover a bar to thicken it, click it to see its measure in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveErrorBars show: 'Error bar interaction'
+	| figure chart errorBar |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart title: 'Click an error bar'.
+	errorBar := chart addArtist: self instanceMeasures.
+	errorBar
+		whenPatch: BlMouseEnterEvent
+		do: [ :event :patch |
+			(errorBar barPatches includes: patch) ifTrue: [ patch border: (BlBorder paint: patch border paint width: 5) ] ];
+		whenPatch: BlMouseLeaveEvent
+		do: [ :event :patch |
+			(errorBar barPatches includes: patch) ifTrue: [ patch border: (BlBorder paint: patch border paint width: 2) ] ];
+		whenPatch: BlClickEvent do: [ :event :patch |
+			(errorBar barPatches includes: patch) ifTrue: [
+				chart title: ('measure {1}: {2} ± {3}' format: {
+					 patch dataset.
+					 (self demoMeasures at: patch dataset).
+					 (self demoMeasureErrors at: patch dataset) }) ] ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Error bar interaction'
 ]
 
 { #category : 'examples' }
 BpErrorBar class >> exampleLimits [
-	"Reproduce the gallery 'Including upper and lower limits in error bars'."
+	"Reproduce the gallery 'Including upper and lower limits in error bars': limits on all points, on both sides, or on some points only."
 
 	<example>
-	^ BpFigure instanceErrorBarLimits show: 'errorbar_limits_simple'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart
+		addArtist: self instanceBothLimits;
+		addArtist: self instanceUpperLimits;
+		addArtist: self instanceUpperAndLowerLimits;
+		addArtist: self instanceAlternateLimits;
+		legend.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'errorbar_limits_simple'
 ]
 
 { #category : 'examples' }
 BpErrorBar class >> examplePlotType [
-	"Reproduce the plot type errorbar(x, y, yerr, xerr)."
+	"Reproduce the plot type errorbar(x, y, yerr, xerr): three circles with error bars in a chart of fixed limits and ticks."
 
 	<example>
-	^ BpFigure instanceErrorBarPlotType show: 'errorbar(x, y, yerr, xerr)'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceThreeCircles.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7).
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'errorbar(x, y, yerr, xerr)'
 ]
 
 { #category : 'examples' }
 BpErrorBar class >> exampleSubsample [
-	"Reproduce the gallery 'Errorbar subsampling': draw one error bar in six, shifted between two series."
+	"Reproduce the gallery 'Errorbar subsampling': all error bars, one in six, then the second series shifted by three points."
 
 	<example>
-	^ BpFigure instanceErrorBarSubsample show: 'errorbar_subsample'
+	| figure |
+	figure := BpFigure rows: 1 columns: 3.
+	figure extent: 1000 @ 360.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceFastDecay;
+			 addArtist: self instanceSlowDecay;
+			 title: 'all errorbars';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceFastDecayEverySixth;
+			 addArtist: self instanceSlowDecayEverySixth;
+			 title: 'only every 6th errorbar';
+			 yourself);
+		chartAtRow: 1 column: 3 put: (BpChart new
+			 addArtist: self instanceFastDecayEverySixth;
+			 addArtist: self instanceSlowDecayEverySixthShifted;
+			 title: 'second series shifted by 3';
+			 yourself).
+	^ figure show: 'errorbar_subsample'
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> fastDecaySeries [
+	"Answer the first series of the gallery subsampling demo: exp(-x) with errors growing as the square root of x."
+
+	| x |
+	x := self subsampleX.
+	^ (self x: x y: (x collect: [ :each | each negated exp ]))
+		  yErr: (x collect: [ :each | 0.1 * each sqrt + 0.1 ]);
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceAlternateLimits [
+	"Gallery: Including upper and lower limits in error bars (errorbar_limits_simple), fourth series: odd points are upper limits and even points lower limits."
+
+	<sampleInstance>
+	^ (self limitSeriesShiftedBy: 0)
+		  upperLimits: ((1 to: 10) collect: [ :each | each odd ]);
+		  lowerLimits: ((1 to: 10) collect: [ :each | each even ]);
+		  label: 'subsets of upperLimits and lowerLimits';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceAsymmetricErrors [
+	"Gallery: Different ways of specifying error bars (errorbar_features), second chart: errors on x, smaller on the left (the lower errors, then the upper ones)."
+
+	<sampleInstance>
+	^ self decayCurve
+		  xErr: {
+			  (self decayErrors collect: [ :each | each * 0.4 ]).
+			  self decayErrors };
+		  format: 'o';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceBothLimits [
+	"Gallery: Including upper and lower limits in error bars (errorbar_limits_simple), first series: error bars on both sides, the default."
+
+	<sampleInstance>
+	^ (self limitSeriesShiftedBy: 3)
+		  label: 'both limits (default)';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceFastDecay [
+	"Gallery: Errorbar subsampling (errorbar_subsample), first series with all its error bars."
+
+	<sampleInstance>
+	^ self fastDecaySeries
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceFastDecayEverySixth [
+	"Gallery: Errorbar subsampling (errorbar_subsample), first series with one error bar in six (see `BpErrorBar>>errorEvery:`)."
+
+	<sampleInstance>
+	^ self fastDecaySeries
+		  errorEvery: 6;
+		  yourself
 ]
 
 { #category : 'instances' }
 BpErrorBar class >> instanceMeasures [
-	"Answer five measures drawn as circles with error bars and caps, in a new chart."
+	"Answer five measures drawn as circles with error bars and caps."
 
 	<sampleInstance>
-	^ ((BpChart new
-		    extent: 400 @ 300;
-		    yourself) errorBarX: (1 to: 5) y: #( 2.1 3.4 3.0 4.6 5.2 ) yErr: #( 0.3 0.5 0.4 0.6 0.3 ))
+	^ (self x: (1 to: 5) y: self demoMeasures)
+		  yErr: self demoMeasureErrors;
 		  format: 'o';
 		  capSize: 4;
 		  yourself
 ]
 
-{ #category : 'private - demo' }
-BpErrorBar class >> subsampleIn: aChart column: anInteger [
-	"Draw in aChart the two series of the gallery subsampling demo: with all their error bars in the first column, one in six in the second one, one in six shifted by three points for the second series in the third one."
+{ #category : 'instances' }
+BpErrorBar class >> instanceSameErrors [
+	"Gallery: Errorbar function (errorbar): the same errors on every point, 0.2 in x and 0.4 in y."
 
-	| x first second |
-	x := self arangeFrom: 0.1 to: 4 by: 0.1.
-	first := aChart errorBarX: x y: (x collect: [ :each | each negated exp ]) yErr: (x collect: [ :each | 0.1 * each sqrt + 0.1 ]).
-	second := aChart
-		          errorBarX: x
-		          y: (x collect: [ :each | (each / -2) exp ])
-		          yErr: (x collect: [ :each | 0.1 * (each / 2) sqrt + 0.1 ]).
-	anInteger = 1 ifTrue: [ ^ aChart title: 'all errorbars' ].
-	first errorEvery: 6.
-	anInteger = 2 ifTrue: [
-		second errorEvery: 6.
-		^ aChart title: 'only every 6th errorbar' ].
-	second errorEvery: 6 startingAt: 4.
-	aChart title: 'second series shifted by 3'
+	<sampleInstance>
+	^ self decayCurve
+		  xErr: 0.2;
+		  yErr: 0.4;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceSlowDecay [
+	"Gallery: Errorbar subsampling (errorbar_subsample), second series with all its error bars."
+
+	<sampleInstance>
+	^ self slowDecaySeries
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceSlowDecayEverySixth [
+	"Gallery: Errorbar subsampling (errorbar_subsample), second series with one error bar in six."
+
+	<sampleInstance>
+	^ self slowDecaySeries
+		  errorEvery: 6;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceSlowDecayEverySixthShifted [
+	"Gallery: Errorbar subsampling (errorbar_subsample), second series with one error bar in six from the fourth point, so that its bars fall between those of the first series (see `BpErrorBar>>errorEvery:startingAt:`)."
+
+	<sampleInstance>
+	^ self slowDecaySeries
+		  errorEvery: 6 startingAt: 4;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceSymmetricErrors [
+	"Gallery: Different ways of specifying error bars (errorbar_features), first chart: errors on y growing with x, the same below and above each point."
+
+	<sampleInstance>
+	^ self decayCurve
+		  yErr: self decayErrors;
+		  format: '-o';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceThreeCircles [
+	"Plot types: errorbar(x, y, yerr, xerr), three circles with 2 point wide error bars and caps."
+
+	<sampleInstance>
+	^ (self x: #( 2 4 6 ) y: #( 3.6 5 4.2 ))
+		  yErr: #( 0.9 1.2 0.5 );
+		  format: 'o';
+		  lineWidth: 2;
+		  capSize: 6;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceUpperAndLowerLimits [
+	"Gallery: Including upper and lower limits in error bars (errorbar_limits_simple), third series: every point is both an upper and a lower limit."
+
+	<sampleInstance>
+	^ (self limitSeriesShiftedBy: 1)
+		  upperLimits: true;
+		  lowerLimits: true;
+		  label: 'upperLimits: true, lowerLimits: true';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpErrorBar class >> instanceUpperLimits [
+	"Gallery: Including upper and lower limits in error bars (errorbar_limits_simple), second series: every point is an upper limit, drawn as an arrow down (see `BpErrorBar>>upperLimits:`)."
+
+	<sampleInstance>
+	^ (self limitSeriesShiftedBy: 2)
+		  upperLimits: true;
+		  label: 'upperLimits: true';
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> limitSeriesShiftedBy: aNumber [
+	"Answer the series of the gallery limits demo shifted up by aNumber: ten points of a sine with errors from 0.05 to 0.2."
+
+	| x |
+	x := 0 to: 9.
+	^ (self x: x y: (x collect: [ :each | (each / 20 * Float pi) sin * 2.5 + aNumber ]))
+		  yErr: (self linspaceFrom: 0.05 to: 0.2 count: 10);
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> slowDecaySeries [
+	"Answer the second series of the gallery subsampling demo: exp(-x/2) with errors growing as the square root of x/2."
+
+	| x |
+	x := self subsampleX.
+	^ (self x: x y: (x collect: [ :each | (each / -2) exp ]))
+		  yErr: (x collect: [ :each | 0.1 * (each / 2) sqrt + 0.1 ]);
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpErrorBar class >> subsampleX [
+	"Answer the x of the gallery subsampling demo: 0.1 to 4 by 0.1."
+
+	^ self arangeFrom: 0.1 to: 4 by: 0.1
 ]
 
 { #category : 'private - patches' }

@@ -1,5 +1,5 @@
 "
-I am a step curve, added by `BpChart>>stairs:` and `BpChart>>stairs:edges:`: one horizontal step per value, between two consecutive `edges`, joined by vertical risers. I suit data that is constant over intervals, such as a histogram computed beforehand. I draw one `BpPolygonPatch`: an open outline, or a closed and filled polygon after `fill: true`.
+I am a step curve of a `BpChart`: one horizontal step per value, between two consecutive `edges`, joined by vertical risers. I suit data that is constant over intervals, such as a histogram computed beforehand. I draw one `BpPolygonPatch`: an open outline, or a closed and filled polygon after `fill: true`.
 
 ## Examples
 
@@ -19,7 +19,7 @@ BpStairs exampleInteraction
 
 ## Usage
 
-1. `BpChart>>stairs:` and `BpChart>>stairs:edges:` create me with my data (`values:edges:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette. I can also be created and given to `BpChart>>addArtist:`.
+1. `BpStairs class>>values:` (edges 0, 1, 2, ...) and `BpStairs class>>values:edges:` create me with my data, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`), which gives me one color of its palette.
 2. My chart reads my polygon (`patches`) for autoscaling and my `legendEntries` (a rectangle drawn as my outline or fill).
 
 ## Implementation Notes
@@ -52,72 +52,238 @@ Class {
 	#tag : 'Stairs'
 }
 
+{ #category : 'private - demo' }
+BpStairs class >> curveStepsOf: aBlock label: aString [
+	"Answer steps of the values of aBlock at the middles of the bins 0 to 12, without baseline, labeled aString."
+
+	^ (self values: ((0 to: 11) collect: [ :index | aBlock value: index + (1 / 2) ]) edges: (0 to: 12))
+		  baseline: nil;
+		  label: aString;
+		  yourself
+]
+
 { #category : 'examples' }
 BpStairs class >> exampleInteraction [
-	"Interaction handlers on step curves: hover one to thicken it, click it to see its name."
+	"Interaction handlers on step curves: hover one to thicken it, click it to see its name in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveStairs show: 'Stairs interaction'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart title: 'Click a step curve'.
+	{
+		self instanceSineSteps.
+		self instanceCosineSteps.
+		self instanceHalfSineSteps } do: [ :stairs |
+			chart addArtist: stairs.
+			stairs
+				whenPatch: BlMouseEnterEvent do: [ :event :polygon | polygon border: (BlBorder paint: polygon border paint width: 4) ];
+				whenPatch: BlMouseLeaveEvent do: [ :event :polygon | stairs paint: polygon ];
+				whenPatch: BlClickEvent do: [ :event :polygon | chart title: ('clicked: {1}' format: { stairs legendEntries first key }) ] ].
+	chart legend.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Stairs interaction'
 ]
 
 { #category : 'examples' }
 BpStairs class >> examplePlotType [
-	"Reproduce the plot type stairs(values)."
+	"Reproduce the plot type stairs(values): eight steps in a chart of fixed limits and ticks, with a grid."
 
 	<example>
-	^ BpFigure instanceStairsPlotType show: 'stairs(values)'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceEightSteps.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7);
+		grid: true.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'stairs(values)'
 ]
 
 { #category : 'examples' }
 BpStairs class >> exampleStairsDemo [
-	"Reproduce the gallery 'Stairs Demo': step histograms, filled and horizontal steps, and a `BpStairs` added as an artist."
+	"Reproduce the gallery 'Stairs Demo': step histograms with a modified baseline or none, filled and horizontal steps, and steps over given edges in fixed limits."
 
 	<example>
-	^ BpFigure instanceStairsDemo show: 'stairs_demo'
+	| figure |
+	figure := BpFigure rows: 3 columns: 1.
+	figure extent: 600 @ 900.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceStepHistogram;
+			 addArtist: self instanceStepHistogramOnABaseline;
+			 addArtist: self instanceStepHistogramWithoutBaseline;
+			 title: 'Step Histograms';
+			 legend;
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceFilledSteps;
+			 addArtist: self instanceHorizontalSteps;
+			 title: 'Filled histogram';
+			 legend;
+			 yourself);
+		chartAtRow: 3 column: 1 put: (BpChart new
+			 addArtist: self instancePyramidSteps;
+			 xLimits: #( 0 7 );
+			 yLimits: #( -1 5 );
+			 title: 'BpStairs artist';
+			 legend;
+			 yourself).
+	^ figure show: 'stairs_demo'
 ]
 
-{ #category : 'private - demo' }
-BpStairs class >> filledStepsIn: aChart [
-	"Draw in aChart the filled steps of the gallery stairs demo, with automatic edges, and horizontal steps over the edges 2 to 7."
+{ #category : 'instances' }
+BpStairs class >> instanceCosineSteps [
+	"Answer steps following a cosine on 12 bins, without baseline, labeled cos."
 
-	(aChart stairs: (1 to: 5))
-		fill: true;
-		label: 'Filled histogram w/ automatic edges'.
-	(aChart stairs: ((1 to: 5) collect: [ :each | each * 0.3 ]) edges: (2 to: 7))
-		orientation: #horizontal;
-		label: 'Histogram w/ horizontal orientation'.
-	aChart title: 'Filled histogram'
+	<sampleInstance>
+	^ self curveStepsOf: [ :each | (each / 2) cos ] label: 'cos'
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceEightSteps [
+	"Plot types: stairs(values), eight steps drawn 2.5 points wide."
+
+	<sampleInstance>
+	^ (self values: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ))
+		  lineWidth: 2.5;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceFilledSteps [
+	"Gallery: Stairs Demo (stairs_demo), second chart: filled steps of heights 1 to 5 between the edges 0 to 5 (see `BpStairs>>fill:`)."
+
+	<sampleInstance>
+	^ (self values: (1 to: 5))
+		  fill: true;
+		  label: 'Filled histogram w/ automatic edges';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceHalfSineSteps [
+	"Answer steps following half a sine on 12 bins, without baseline, labeled half sin."
+
+	<sampleInstance>
+	^ self curveStepsOf: [ :each | (each / 2) sin / 2 ] label: 'half sin'
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceHorizontalSteps [
+	"Gallery: Stairs Demo (stairs_demo), second chart: steps along the y axis over the edges 2 to 7 (see `BpStairs>>orientation:`)."
+
+	<sampleInstance>
+	^ (self values: ((1 to: 5) collect: [ :each | each * 0.3 ]) edges: (2 to: 7))
+		  orientation: #horizontal;
+		  label: 'Histogram w/ horizontal orientation';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStairs class >> instancePyramidSteps [
+	"Gallery: Stairs Demo (stairs_demo), third chart: steps of heights 1, 2, 3, 2 and 1 over the edges 1 to 6."
+
+	<sampleInstance>
+	^ (self values: #( 1 2 3 2 1 ) edges: (1 to: 6))
+		  label: 'Artist added to the chart';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceSineSteps [
+	"Answer steps following a sine on 12 bins, without baseline, labeled sin."
+
+	<sampleInstance>
+	^ self curveStepsOf: [ :each | (each / 2) sin ] label: 'sin'
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceStepHistogram [
+	"Gallery: Stairs Demo (stairs_demo), first chart: the counts of 5000 normal samples drawn as a step histogram on their 20 edges."
+
+	<sampleInstance>
+	^ (self stepHistogramShiftedBy: 0)
+		  label: 'Simple histogram';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceStepHistogramOnABaseline [
+	"Gallery: Stairs Demo (stairs_demo), first chart: the same step histogram shifted by 5, standing on a baseline at 50 (see `BpStairs>>baseline:`)."
+
+	<sampleInstance>
+	^ (self stepHistogramShiftedBy: 5)
+		  baseline: 50;
+		  label: 'Modified baseline';
+		  yourself
+]
+
+{ #category : 'instances' }
+BpStairs class >> instanceStepHistogramWithoutBaseline [
+	"Gallery: Stairs Demo (stairs_demo), first chart: the same step histogram shifted by 10, without baseline, so without its outer edges."
+
+	<sampleInstance>
+	^ (self stepHistogramShiftedBy: 10)
+		  baseline: nil;
+		  label: 'No edges';
+		  yourself
 ]
 
 { #category : 'instances' }
 BpStairs class >> instanceSteps [
-	"Answer steps of heights 1, 3, 2 and 4 between the edges 0 to 4, in a new chart."
+	"Answer steps of heights 1, 3, 2 and 4 between the edges 0 to 4."
 
 	<sampleInstance>
-	^ (BpChart new
-		   extent: 400 @ 300;
-		   yourself) stairs: #( 1 3 2 4 )
+	^ self values: #( 1 3 2 4 )
 ]
 
 { #category : 'private - demo' }
-BpStairs class >> stepHistogramsIn: aChart [
-	"Draw in aChart the step histograms of the gallery stairs demo: a histogram of 5000 normal samples (mean 5, deviation 3) on 19 bins between 0 and 10, then shifted by 5 on a baseline at 50, then shifted by 10 without baseline."
+BpStairs class >> stepHistogramCounts [
+	"Answer the counts of 5000 normal samples (mean 5, deviation 3) in the bins of the step histograms of the gallery stairs demo."
 
-	| random edges counts |
+	| random |
 	random := Random seed: 0.
-	edges := self linspaceFrom: 0 to: 10 count: 20.
-	counts := BpHistogramBinning
-		          countsOf: ((1 to: 5000) collect: [ :each | random nextNormalMean: 5 deviation: 3 ])
-		          weights: nil
-		          in: edges.
-	(aChart stairs: counts edges: edges) label: 'Simple histogram'.
-	(aChart stairs: counts edges: (edges collect: [ :each | each + 5 ]))
-		baseline: 50;
-		label: 'Modified baseline'.
-	(aChart stairs: counts edges: (edges collect: [ :each | each + 10 ]))
-		baseline: nil;
-		label: 'No edges'.
-	aChart title: 'Step Histograms'
+	^ BpHistogramBinning
+		  countsOf: ((1 to: 5000) collect: [ :each | random nextNormalMean: 5 deviation: 3 ])
+		  weights: nil
+		  in: self stepHistogramEdges
+]
+
+{ #category : 'private - demo' }
+BpStairs class >> stepHistogramEdges [
+	"Answer the 20 edges of the step histograms of the gallery stairs demo, from 0 to 10."
+
+	^ self linspaceFrom: 0 to: 10 count: 20
+]
+
+{ #category : 'private - demo' }
+BpStairs class >> stepHistogramShiftedBy: aNumber [
+	"Answer the step histogram of the gallery stairs demo, its edges shifted by aNumber."
+
+	^ self values: self stepHistogramCounts edges: (self stepHistogramEdges collect: [ :each | each + aNumber ])
+]
+
+{ #category : 'instance creation' }
+BpStairs class >> values: aCollectionOfNumbers [
+	"Answer steps of the heights aCollectionOfNumbers between the edges 0, 1, 2, ..."
+
+	^ self new
+		  values: aCollectionOfNumbers;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+BpStairs class >> values: aCollectionOfNumbers edges: anotherCollectionOfNumbers [
+	"Answer steps of the heights aCollectionOfNumbers between the edges anotherCollectionOfNumbers, one more than the heights."
+
+	^ self new
+		  values: aCollectionOfNumbers edges: anotherCollectionOfNumbers;
+		  yourself
 ]
 
 { #category : 'accessing' }
