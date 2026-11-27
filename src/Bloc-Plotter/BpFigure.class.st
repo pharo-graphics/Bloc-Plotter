@@ -121,54 +121,6 @@ BpFigure class >> addColorBarsSecondRowTo: aFigure [
 	aFigure charts fourth title: 'two color bars'
 ]
 
-{ #category : 'private - demo' }
-BpFigure class >> addHistogramOptionsFirstRowTo: aFigure data: aCollection [
-	"Add the cumulative, horizontal and log scale histograms of aCollection to the first row of aFigure."
-
-	((aFigure chartAtRow: 1 column: 1) hist: aCollection)
-		bins: 30;
-		density: true;
-		cumulative: true;
-		histType: #step.
-	((aFigure chartAtRow: 1 column: 1) hist: aCollection)
-		bins: 30;
-		density: true;
-		cumulative: -1;
-		histType: #step.
-	(aFigure chartAtRow: 1 column: 1) title: 'cumulative: true and -1'.
-	((aFigure chartAtRow: 1 column: 2) hist: aCollection)
-		bins: 15;
-		orientation: #horizontal;
-		relativeWidth: 0.9.
-	(aFigure chartAtRow: 1 column: 2) title: 'orientation: #horizontal'.
-	((aFigure chartAtRow: 1 column: 3) hist: aCollection)
-		bins: 30;
-		log: true.
-	(aFigure chartAtRow: 1 column: 3) title: 'log: true'
-]
-
-{ #category : 'private - demo' }
-BpFigure class >> addHistogramOptionsSecondRowTo: aFigure data: aCollection [
-	"Add the left aligned, bin strategy and weighted histograms of aCollection to the second row of aFigure."
-
-	((aFigure chartAtRow: 2 column: 1) hist: aCollection)
-		bins: #( -3 -2 -1 0 1 2 3 );
-		align: #left;
-		relativeWidth: 0.5;
-		bottom: 50.
-	(aFigure chartAtRow: 2 column: 1) title: 'align: #left, bottom: 50'.
-	((aFigure chartAtRow: 2 column: 2) hist: aCollection)
-		bins: #fd;
-		histType: #stepfilled;
-		edgeColor: ((BpSequentialPalette greys: 9) colorAt: 9).
-	(aFigure chartAtRow: 2 column: 2) title: 'bins: #fd'.
-	((aFigure chartAtRow: 2 column: 3) hist: aCollection)
-		bins: 20;
-		range: #( 0 3 );
-		weights: (aCollection collect: [ :each | 0.5 ]).
-	(aFigure chartAtRow: 2 column: 3) title: 'range: #(0 3), weights: 0.5'
-]
-
 { #category : 'examples' }
 BpFigure class >> exampleBar [
 	"Show the figure of the gallery bar color demo: one bar per category, with its own color and legend label (see `BpBarPlot`)."
@@ -243,26 +195,26 @@ BpFigure class >> exampleHistTypes [
 
 { #category : 'examples' }
 BpFigure class >> exampleInteraction [
-	"Show a figure of one chart whose histogram reacts to the mouse: hover a bar to highlight it, click it to see its bin and count."
+	"Show a figure of one chart whose histogram reacts to the mouse: hover a bar to highlight it, click it to see its bin and count (see `BpHistogram`)."
 
 	<example>
-	^ self instanceInteractiveHistogram show: 'Histogram interaction'
+	^ BpHistogram exampleInteraction
 ]
 
 { #category : 'examples' }
 BpFigure class >> exampleMultiHist [
-	"Show a figure of four charts with several datasets per histogram (the gallery histogram_multihist)."
+	"Show a figure of four charts with several datasets per histogram (see `BpHistogram`)."
 
 	<example>
-	^ self instanceMultiHist show: 'histogram_multihist'
+	^ BpHistogram exampleMultiHist
 ]
 
 { #category : 'examples' }
 BpFigure class >> exampleOptions [
-	"Show a figure of two rows of three charts, larger than the default one (extent: 900 @ 520), each with a histogram option."
+	"Show a figure of two rows of three charts, larger than the default one, each with a histogram option (see `BpHistogram`)."
 
 	<example>
-	^ self instanceHistogramOptions show: 'hist options'
+	^ BpHistogram exampleOptions
 ]
 
 { #category : 'examples' }
@@ -845,97 +797,21 @@ BpFigure class >> instanceHexbinPlotType [
 
 { #category : 'instances - histogram' }
 BpFigure class >> instanceHistTypes [
-	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes)."
+	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes), built from the instances of `BpHistogram`."
 
 	<sampleInstance>
-	| random x w figure bottomLeft |
-	random := Random seed: 19680801.
-	x := (1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ].
-	w := (1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 10 ].
+	| figure barstacked |
 	figure := self rows: 2 columns: 2.
-	((figure chartAtRow: 1 column: 1) hist: x)
-		bins: 20;
-		density: true;
-		histType: #stepfilled;
-		faceColor: (BpQualitativePalette set1 colorAt: 3);
-		alpha: 0.75.
-	(figure chartAtRow: 1 column: 1) title: 'stepfilled'.
-	((figure chartAtRow: 1 column: 2) hist: x)
-		bins: 20;
-		density: true;
-		histType: #step;
-		faceColor: (BpQualitativePalette set1 colorAt: 3);
-		alpha: 0.75.
-	(figure chartAtRow: 1 column: 2) title: 'step'.
-	bottomLeft := figure chartAtRow: 2 column: 1.
-	(bottomLeft hist: x)
-		density: true;
-		histType: #barstacked;
-		relativeWidth: 0.8.
-	(bottomLeft hist: w)
-		density: true;
-		histType: #barstacked;
-		relativeWidth: 0.8.
-	bottomLeft title: 'barstacked'.
-	"Create a histogram by providing the bin edges (unequally spaced)."
-	((figure chartAtRow: 2 column: 2) hist: x)
-		bins: #( 100 150 180 195 205 220 250 300 );
-		density: true;
-		histType: #bar;
-		relativeWidth: 0.8.
-	(figure chartAtRow: 2 column: 2) title: 'bar, unequal bins'.
-	^ figure
-]
-
-{ #category : 'instances - histogram' }
-BpFigure class >> instanceHistogramColorByHeight [
-	"Gallery: Histograms (hist), second figure: bars colored by their height with viridis (normalized between the lowest and the highest bar), and a density with percent tick labels."
-
-	<sampleInstance>
-	| random dist1 figure histogram lowest highest |
-	random := Random seed: 19680801.
-	dist1 := (1 to: 100000) collect: [ :each | random nextNormal ].
-	figure := self rows: 1 columns: 2.
-	histogram := ((figure chartAtRow: 1 column: 1) hist: dist1)
-		             bins: 20;
-		             yourself.
-	lowest := histogram counts min.
-	highest := histogram counts max.
-	histogram patches do: [ :each | each background: (BpInterpolatedPalette viridis colorAt: each amount - lowest / (highest - lowest)) ].
-	((figure chartAtRow: 1 column: 2) hist: dist1)
-		bins: 20;
-		density: true.
-	(figure chartAtRow: 1 column: 2) yTickFormatter: [ :value | (value * 100) rounded printString , '%' ].
-	^ figure
-]
-
-{ #category : 'instances - histogram' }
-BpFigure class >> instanceHistogramOptions [
-	"The other options of `BpHistogram`: cumulative densities, horizontal bars, log scale, bars aligned on the left edges and starting at a bottom, and a bin strategy."
-
-	<sampleInstance>
-	| random x figure |
-	random := Random seed: 19680801.
-	x := (1 to: 1000) collect: [ :each | random nextNormal ].
-	figure := self rows: 2 columns: 3.
-	figure extent: 900 @ 520.
-	self addHistogramOptionsFirstRowTo: figure data: x.
-	self addHistogramOptionsSecondRowTo: figure data: x.
-	^ figure
-]
-
-{ #category : 'instances - histogram' }
-BpFigure class >> instanceHistogramTwoDistributions [
-	"Gallery: Histograms (hist), first figure: the number of bins set with bins."
-
-	<sampleInstance>
-	| random dist1 dist2 figure |
-	random := Random seed: 19680801.
-	dist1 := (1 to: 100000) collect: [ :each | random nextNormal ].
-	dist2 := (1 to: 100000) collect: [ :each | random nextNormalMean: 5 deviation: 0.4 ].
-	figure := self rows: 1 columns: 2.
-	((figure chartAtRow: 1 column: 1) hist: dist1) bins: 20.
-	((figure chartAtRow: 1 column: 2) hist: dist2) bins: 20.
+	barstacked := BpChart new.
+	barstacked
+		addArtist: BpHistogram instanceBarStacked;
+		addArtist: BpHistogram instanceBarStackedNarrow;
+		title: 'barstacked'.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new addArtist: BpHistogram instanceStepFilled; title: 'stepfilled'; yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new addArtist: BpHistogram instanceStep; title: 'step'; yourself);
+		chartAtRow: 2 column: 1 put: barstacked;
+		chartAtRow: 2 column: 2 put: (BpChart new addArtist: BpHistogram instanceUnequalBins; title: 'bar, unequal bins'; yourself).
 	^ figure
 ]
 
@@ -1104,31 +980,6 @@ BpFigure class >> instanceInteractiveHexbin [
 	^ figure
 ]
 
-{ #category : 'instances - histogram' }
-BpFigure class >> instanceInteractiveHistogram [
-	"A histogram with interaction handlers on its bars: hovering a bar highlights it, clicking it shows its bin and count in the title."
-
-	<sampleInstance>
-	| random figure chart histogram |
-	random := Random seed: 19680801.
-	figure := self new.
-	chart := figure charts first.
-	histogram := chart hist: ((1 to: 1000) collect: [ :each | random nextNormal ]).
-	histogram
-		bins: 20;
-		edgeColor: ((BpSequentialPalette greys: 9) colorAt: 1).
-	chart title: 'Click a bar'.
-	histogram
-		whenPatch: BlMouseEnterEvent do: [ :event :bar | bar background: (chart palette colorAt: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :bar | bar background: (chart palette colorAt: 1) ];
-		whenPatch: BlClickEvent do: [ :event :bar |
-			chart title: ('[{1}, {2}): {3} values' format: {
-				 ((histogram binEdges at: bar bin) printShowingDecimalPlaces: 2).
-				 ((histogram binEdges at: bar bin + 1) printShowingDecimalPlaces: 2).
-				 bar amount }) ].
-	^ figure
-]
-
 { #category : 'instances - stack plot' }
 BpFigure class >> instanceInteractiveStack [
 	"The world population by continent: hovering a layer outlines it, clicking it shows its continent and its last value in the title."
@@ -1206,97 +1057,6 @@ BpFigure class >> instanceInteractiveViolins [
 			chart title: ('violin {1}: median {2}' format: {
 				 patch dataset.
 				 ((violins statistics at: patch dataset) median printShowingDecimalPlaces: 2) }) ].
-	^ figure
-]
-
-{ #category : 'instances - histogram' }
-BpFigure class >> instanceMultiHist [
-	"Gallery: Plot multiple data sets as histograms (histogram_multihist), first figure."
-
-	<sampleInstance>
-	| random x colors xMulti figure |
-	random := Random seed: 19680801.
-	x := (1 to: 3) collect: [ :dataset | (1 to: 1000) collect: [ :each | random nextNormal ] ].
-	figure := self rows: 2 columns: 2.
-	colors := #( 1 7 3 ) collect: [ :each | BpQualitativePalette set1 colorAt: each ].
-	((figure chartAtRow: 1 column: 1) hist: x)
-		bins: 10;
-		density: true;
-		histType: #bar;
-		color: colors;
-		label: #( 'red' 'brown' 'green' ).
-	(figure chartAtRow: 1 column: 1)
-		legend;
-		title: 'bars with legend'.
-	((figure chartAtRow: 1 column: 2) hist: x)
-		bins: 10;
-		density: true;
-		histType: #bar;
-		stacked: true.
-	(figure chartAtRow: 1 column: 2) title: 'stacked bar'.
-	((figure chartAtRow: 2 column: 1) hist: x)
-		bins: 10;
-		histType: #step;
-		stacked: true;
-		fill: false.
-	(figure chartAtRow: 2 column: 1) title: 'stack step (unfilled)'.
-	"Make a multiple-histogram of data-sets with different length."
-	xMulti := #( 10000 5000 2000 ) collect: [ :size | (1 to: size) collect: [ :each | random nextNormal ] ].
-	((figure chartAtRow: 2 column: 2) hist: xMulti)
-		bins: 10;
-		histType: #bar.
-	(figure chartAtRow: 2 column: 2) title: 'different sample sizes'.
-	^ figure
-]
-
-{ #category : 'instances - histogram' }
-BpFigure class >> instanceMultiHistStyles [
-	"Gallery: Plot multiple data sets as histograms (histogram_multihist), one style setting per dataset: edge color, face color, line width and line style."
-
-	<sampleInstance>
-	| random x figure colors |
-	random := Random seed: 19680801.
-	x := (1 to: 3) collect: [ :dataset | (1 to: 1000) collect: [ :each | random nextNormal ] ].
-	colors := #( 3 1 2 ) collect: [ :each | BpQualitativePalette set1 colorAt: each ].
-	figure := self rows: 2 columns: 2.
-	((figure chartAtRow: 1 column: 1) hist: x)
-		bins: 10;
-		fill: false;
-		histType: #step;
-		stacked: true;
-		edgeColor: colors;
-		label: #( 'green' 'red' 'blue' ).
-	(figure chartAtRow: 1 column: 1)
-		legend;
-		title: 'Stacked Steps with Edgecolors'.
-	((figure chartAtRow: 1 column: 2) hist: x)
-		bins: 10;
-		histType: #barstacked;
-		faceColor: colors;
-		label: #( 'green' 'red' 'blue' ).
-	(figure chartAtRow: 1 column: 2)
-		legend;
-		title: 'Bars with different Facecolors'.
-	((figure chartAtRow: 2 column: 1) hist: x)
-		bins: 10;
-		fill: false;
-		histType: #bar;
-		lineWidth: #( 1 2 3 );
-		edgeColor: colors;
-		label: #( '1' '2' '3' ).
-	(figure chartAtRow: 2 column: 1)
-		legend;
-		title: 'Bars with Linewidths'.
-	((figure chartAtRow: 2 column: 2) hist: x)
-		bins: 10;
-		fill: false;
-		histType: #bar;
-		lineStyle: #( #solid #dotted #dashed );
-		edgeColor: colors;
-		label: #( '-' ':' '--' ).
-	(figure chartAtRow: 2 column: 2)
-		legend;
-		title: 'Bars with Linestyles'.
 	^ figure
 ]
 

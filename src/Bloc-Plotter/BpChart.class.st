@@ -90,14 +90,12 @@ BpChart class >> instanceHistogram [
 	"Answer a chart showing a histogram, with a title."
 
 	<sampleInstance>
-	| random chart |
-	random := Random seed: 19680801.
-	chart := self new
-		         extent: 400 @ 300;
-		         yourself.
-	(chart hist: ((1 to: 100) collect: [ :each | random nextNormalMean: 200 deviation: 25 ])) bins: 20.
-	chart title: 'normal samples'.
-	^ chart
+	^ (self new
+		   extent: 400 @ 300;
+		   yourself)
+		  addArtist: BpHistogram instanceNormalSamples;
+		  title: 'normal samples';
+		  yourself
 ]
 
 { #category : 'instances' }

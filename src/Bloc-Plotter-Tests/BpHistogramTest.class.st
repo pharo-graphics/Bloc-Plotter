@@ -246,6 +246,49 @@ BpHistogramTest >> testHorizontalSwapsTheAxes [
 	self assert: bar dataBounds equals: (0 @ 2 corner: 2 @ 4)
 ]
 
+{ #category : 'tests - instances' }
+BpHistogramTest >> testInstanceBarStackedNarrowDrawsOtherSamples [
+
+	self deny: BpHistogram instanceBarStackedNarrow binEdges equals: BpHistogram instanceBarStacked binEdges
+]
+
+{ #category : 'tests - instances' }
+BpHistogramTest >> testInstanceDifferentSampleSizesHasThreeDatasetsOfTheirSize [
+
+	self assert: (BpHistogram instanceDifferentSampleSizes counts collect: [ :each | each sum ]) equals: #( 10000 5000 2000 )
+]
+
+{ #category : 'tests - instances' }
+BpHistogramTest >> testInstanceNormalSamplesHasTwentyBinsOfAHundredSamples [
+
+	| histogram |
+	histogram := BpHistogram instanceNormalSamples.
+	self assert: histogram counts size equals: 20.
+	self assert: histogram counts sum equals: 100
+]
+
+{ #category : 'tests - instances' }
+BpHistogramTest >> testInstanceShiftedNormalIsCenteredOnFive [
+
+	| edges |
+	edges := BpHistogram instanceShiftedNormal binEdges.
+	self assert: (edges first < 5 and: [ edges last > 5 ])
+]
+
+{ #category : 'tests - instances' }
+BpHistogramTest >> testInstanceWeightedWeighsHalfEachSample [
+
+	| inRange |
+	inRange := BpHistogram thousandNormalSamples count: [ :each | each between: 0 and: 3 ].
+	self assert: (BpHistogram instanceWeighted counts flattened sum closeTo: inRange / 2)
+]
+
+{ #category : 'tests - instances' }
+BpHistogramTest >> testInstancesOfTheMultiHistDemosShareTheirDatasets [
+
+	self assert: BpHistogram instanceStackedBars binEdges equals: BpHistogram instanceLabeledDatasets binEdges
+]
+
 { #category : 'tests - styles' }
 BpHistogramTest >> testLineStyleDashesTheBorder [
 
