@@ -26,21 +26,13 @@ BpChartTest >> newChart [
 ]
 
 { #category : 'tests - box plot' }
-BpChartTest >> testBoxPlotAddsABoxPlot [
-
-	| chart boxPlot |
-	chart := BpChart new.
-	boxPlot := chart boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
-	self assert: chart artists asArray equals: { boxPlot }.
-	self assert: boxPlot statistics size equals: 2
-]
-
-{ #category : 'tests - box plot' }
 BpChartTest >> testBoxPlotLimitsAreHalfAUnitAroundThePositions [
 
 	| chart |
 	chart := BpChart new.
-	chart boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
+	chart addArtist: (BpBoxPlot new
+	 x: #( #( 1 2 3 ) #( 4 5 6 ) );
+	 yourself).
 	self assert: chart dataTransform xLimits equals: #( 0.5 2.5 )
 ]
 
@@ -49,7 +41,9 @@ BpChartTest >> testBoxPlotPutsATickAtEachPosition [
 
 	| chart |
 	chart := BpChart new.
-	chart boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
+	chart addArtist: (BpBoxPlot new
+	 x: #( #( 1 2 3 ) #( 4 5 6 ) );
+	 yourself).
 	self
 		assert:
 		((chart ticks select: [ :each | each axis = #x ]) collect: [ :each | each location -> each label text asString ] as: Array)
@@ -63,7 +57,9 @@ BpChartTest >> testBoxPlotTickLabels [
 
 	| chart |
 	chart := BpChart new.
-	(chart boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) )) tickLabels: #( 'A' 'B' ).
+	(chart addArtist: (BpBoxPlot new
+	  x: #( #( 1 2 3 ) #( 4 5 6 ) );
+	  yourself)) tickLabels: #( 'A' 'B' ).
 	self
 		assert: ((chart ticks select: [ :each | each axis = #x ]) collect: [ :each | each label text asString ] as: Array)
 		equals: #( 'A' 'B' )
@@ -74,7 +70,7 @@ BpChartTest >> testChangingTheHistogramUpdatesThePlotArea [
 
 	| chart histogram |
 	chart := self newChart.
-	histogram := chart hist: #( 1 2 3 ).
+	histogram := chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
 	histogram bins: 3.
 	self assert: chart plotArea patches size equals: 3
 ]
@@ -85,8 +81,8 @@ BpChartTest >> testChangingThePaletteRecolorsThePlots [
 	| chart palette second |
 	palette := BpQualitativePalette set1.
 	chart := self newChart.
-	chart plotX: #( 0 1 ) y: #( 0 1 ).
-	second := chart plotX: #( 0 1 ) y: #( 1 2 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
+	second := chart addArtist: (BpLine x: #( 0 1 ) y: #( 1 2 )).
 	chart palette: palette.
 	self assert: second linePatch border paint color equals: (palette colorAt: 2)
 ]
@@ -96,7 +92,7 @@ BpChartTest >> testExplicitLimitsReplaceAutoScaling [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 ).
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
 	chart xLimits: #( 0 100 ).
 	self assert: chart xLimits equals: #( 0 100 )
 ]
@@ -106,7 +102,9 @@ BpChartTest >> testFixedTicksWinOverTheBoxPlotTicks [
 
 	| chart |
 	chart := BpChart new.
-	chart boxPlot: #( #( 1 2 3 ) #( 4 5 6 ) ).
+	chart addArtist: (BpBoxPlot new
+	 x: #( #( 1 2 3 ) #( 4 5 6 ) );
+	 yourself).
 	chart xTicks: #( 1 1.5 2 ).
 	self assert: ((chart ticks select: [ :each | each axis = #x ]) collect: [ :each | each location ] as: Array) equals: #( 1 1.5 2 )
 ]
@@ -116,7 +114,7 @@ BpChartTest >> testGridFalseRemovesTheLines [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 ).
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
 	chart
 		grid: true;
 		grid: false.
@@ -128,7 +126,7 @@ BpChartTest >> testGridHasOneLinePerTick [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 ).
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
 	chart grid: true.
 	self
 		assert: (chart plotArea gridLines collect: [ :each | each location ] as: Array)
@@ -140,7 +138,7 @@ BpChartTest >> testGridIsDrawnAboveScatterPoints [
 
 	| chart scatter children |
 	chart := BpChart new.
-	scatter := chart scatterX: #( 0 1 ) y: #( 0 1 ).
+	scatter := chart addArtist: (BpScatterPlot x: #( 0 1 ) y: #( 0 1 )).
 	chart grid: true.
 	children := chart plotArea children asArray.
 	self assert: (children indexOf: scatter patches first) < (children findFirst: [ :each | each isKindOf: BpGridLine ])
@@ -151,7 +149,7 @@ BpChartTest >> testGridIsDrawnBelowLines [
 
 	| chart line children |
 	chart := BpChart new.
-	line := chart plotX: #( 0 1 ) y: #( 0 1 ).
+	line := chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
 	chart grid: true.
 	children := chart plotArea children asArray.
 	self assert: (children indexOf: line linePatch) > (children findLast: [ :each | each isKindOf: BpGridLine ])
@@ -162,7 +160,7 @@ BpChartTest >> testGridLinesCrossThePlotArea [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 ).
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
 	chart grid: true.
 	chart inNewHeadlessSpaceDo: [ :space |
 		space settle.
@@ -170,22 +168,12 @@ BpChartTest >> testGridLinesCrossThePlotArea [
 ]
 
 { #category : 'tests' }
-BpChartTest >> testHistAnswersAHistogramOfTheChart [
-
-	| chart histogram |
-	chart := self newChart.
-	histogram := chart hist: #( 1 2 3 ).
-	self assert: histogram chart identicalTo: chart.
-	self assert: (chart artists includes: histogram)
-]
-
-{ #category : 'tests' }
 BpChartTest >> testHistogramsTakeTheNextCycleColors [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 ).
-	self assert: (chart hist: #( 1 2 3 )) patches first background paint color equals: (BpPalette default colorAt: 2)
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
+	self assert: (chart addArtist: (BpHistogram xValues: #( 1 2 3 ))) patches first background paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests - box plot' }
@@ -193,7 +181,9 @@ BpChartTest >> testHorizontalBoxPlotPutsTheTicksOnTheYAxis [
 
 	| chart |
 	chart := BpChart new.
-	(chart boxPlot: #( #( 1 2 3 ) )) orientation: #horizontal.
+	(chart addArtist: (BpBoxPlot new
+	  x: #( #( 1 2 3 ) );
+	  yourself)) orientation: #horizontal.
 	self assert: ((chart ticks select: [ :each | each axis = #y ]) collect: [ :each | each location ] as: Array) equals: #( 1 )
 ]
 
@@ -202,7 +192,7 @@ BpChartTest >> testHorizontalHistogramsStickToZeroOnX [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: #( 1 1 ))
+	(chart addArtist: (BpHistogram xValues: #( 1 1 )))
 		bins: #( 0 10 );
 		orientation: #horizontal.
 	self assert: chart xLimits first equals: 0
@@ -257,7 +247,7 @@ BpChartTest >> testLegendShowsTheLabels [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: #( #( 1 ) #( 2 ) #( 3 ) )) label: #( 'red' 'tan' 'lime' ).
+	(chart addArtist: (BpHistogram xValues: #( #( 1 ) #( 2 ) #( 3 ) ))) label: #( 'red' 'tan' 'lime' ).
 	chart legend.
 	self assert: chart legendElement labels asArray equals: #( 'red' 'tan' 'lime' )
 ]
@@ -267,8 +257,8 @@ BpChartTest >> testLegendSkipsDatasetsWithoutLabel [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 ).
-	(chart hist: #( 1 2 3 )) label: 'second'.
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
+	(chart addArtist: (BpHistogram xValues: #( 1 2 3 ))) label: 'second'.
 	chart legend.
 	self assert: chart legendElement labels asArray equals: #( 'second' )
 ]
@@ -278,7 +268,7 @@ BpChartTest >> testLogHistogramPutsTheValueAxisOnALogScale [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: #( 1 2 2 3 3 3 )) log: true.
+	(chart addArtist: (BpHistogram xValues: #( 1 2 2 3 3 3 ))) log: true.
 	self assert: chart yScale equals: #log.
 	self assert: chart yLimits first > 0
 ]
@@ -289,7 +279,7 @@ BpChartTest >> testLogTicksArePowersOfTen [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: ((1 to: 1000) collect: [ :each | each \\ 10 ])) log: true.
+	(chart addArtist: (BpHistogram xValues: ((1 to: 1000) collect: [ :each | each \\ 10 ]))) log: true.
 	self
 		assert: ((chart ticks select: [ :each | each axis = #y ] thenCollect: [ :each | each location ]) as: Array)
 		equals: #( 10 100 1000 )
@@ -300,7 +290,7 @@ BpChartTest >> testNoGridByDefault [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 ).
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
 	self assert: chart plotArea gridLines isEmpty
 ]
 
@@ -309,7 +299,7 @@ BpChartTest >> testNoLegendByDefault [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: #( 1 2 3 )) label: 'a'.
+	(chart addArtist: (BpHistogram xValues: #( 1 2 3 ))) label: 'a'.
 	self assert: chart legendElement isNil
 ]
 
@@ -319,10 +309,10 @@ BpChartTest >> testPaletteColorsGoOnAfterARecolor [
 	| chart palette third |
 	palette := BpQualitativePalette set1.
 	chart := self newChart.
-	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
 	chart palette: palette.
-	chart plotX: #( 0 1 ) y: #( 1 2 ).
-	third := chart plotX: #( 0 1 ) y: #( 2 3 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 1 2 )).
+	third := chart addArtist: (BpLine x: #( 0 1 ) y: #( 2 3 )).
 	self assert: third linePatch border paint color equals: (palette colorAt: 3)
 ]
 
@@ -337,21 +327,8 @@ BpChartTest >> testPatchesAreShownInThePlotArea [
 
 	| chart histogram |
 	chart := self newChart.
-	histogram := chart hist: #( 1 2 3 ).
+	histogram := chart addArtist: (BpHistogram xValues: #( 1 2 3 )).
 	self assert: (histogram patches allSatisfy: [ :each | each parent == chart plotArea ])
-]
-
-{ #category : 'tests - plot' }
-BpChartTest >> testPlotAddsALine [
-
-	| chart line |
-	chart := BpChart new.
-	line := chart plotX: #( 0 1 2 ) y: #( 3 4 5 ).
-	self assert: chart artists asArray equals: { line }.
-	self assert: line points equals: {
-		(0 @ 3).
-		(1 @ 4).
-		(2 @ 5) }
 ]
 
 { #category : 'tests - plot' }
@@ -359,17 +336,8 @@ BpChartTest >> testPlotAutoScalesOnItsPoints [
 
 	| chart |
 	chart := BpChart new.
-	chart plotX: #( 0 10 ) y: #( 0 1 ).
+	chart addArtist: (BpLine x: #( 0 10 ) y: #( 0 1 )).
 	self assert: chart dataTransform xLimits equals: #( -0.5 10.5 )
-]
-
-{ #category : 'tests - plot' }
-BpChartTest >> testPlotFormatSetsTheStyle [
-
-	| line |
-	line := BpChart new plotX: #( 0 1 ) y: #( 0 1 ) format: 'o'.
-	self assert: line linePatch isNil.
-	self assert: line markerPatches size equals: 2
 ]
 
 { #category : 'tests - palette' }
@@ -379,8 +347,8 @@ BpChartTest >> testPlotsTakeTheColorsOfThePalette [
 	palette := BpQualitativePalette set1.
 	chart := self newChart.
 	chart palette: palette.
-	first := chart plotX: #( 0 1 ) y: #( 0 1 ).
-	second := chart plotX: #( 0 1 ) y: #( 1 2 ).
+	first := chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
+	second := chart addArtist: (BpLine x: #( 0 1 ) y: #( 1 2 )).
 	self assert: first linePatch border paint color equals: (palette colorAt: 1).
 	self assert: second linePatch border paint color equals: (palette colorAt: 2)
 ]
@@ -390,8 +358,8 @@ BpChartTest >> testPlotsTakeTheNextColorsOfTheCycle [
 
 	| chart |
 	chart := BpChart new.
-	chart plotX: #( 0 1 ) y: #( 0 1 ).
-	self assert: (chart plotX: #( 0 1 ) y: #( 1 2 )) linePatch border paint color equals: (BpPalette default colorAt: 2)
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
+	self assert: (chart addArtist: (BpLine x: #( 0 1 ) y: #( 1 2 ))) linePatch border paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests - ticks' }
@@ -400,7 +368,7 @@ BpChartTest >> testReversedLimitsKeepTheTicks [
 
 	| chart |
 	chart := self newChart.
-	chart plotX: #( 0 10 ) y: #( 0 10 ).
+	chart addArtist: (BpLine x: #( 0 10 ) y: #( 0 10 )).
 	chart yLimits: #( 10 0 ).
 	self
 		assert: ((chart ticks select: [ :each | each axis = #y ]) collect: [ :each | each location ] as: Array)
@@ -408,21 +376,11 @@ BpChartTest >> testReversedLimitsKeepTheTicks [
 ]
 
 { #category : 'tests - scatter' }
-BpChartTest >> testScatterAnswersAScatterOfTheChart [
-
-	| chart scatter |
-	chart := self newChart.
-	scatter := chart scatterX: #( 1 2 ) y: #( 3 4 ).
-	self assert: scatter chart identicalTo: chart.
-	self assert: chart artists asArray equals: { scatter }
-]
-
-{ #category : 'tests - scatter' }
 BpChartTest >> testScatterLimitsHaveFivePercentMarginsOnBothAxes [
 
 	| chart |
 	chart := self newChart.
-	chart scatterX: #( 0 10 ) y: #( 0 20 ).
+	chart addArtist: (BpScatterPlot x: #( 0 10 ) y: #( 0 20 )).
 	self assert: chart xLimits equals: #( -0.5 10.5 ).
 	self assert: chart yLimits equals: #( -1 21 )
 ]
@@ -432,7 +390,7 @@ BpChartTest >> testScatterMarkersArePlacedOnTheirPoints [
 
 	| chart scatter |
 	chart := self newChart.
-	scatter := chart scatterX: #( 0 10 ) y: #( 0 20 ).
+	scatter := chart addArtist: (BpScatterPlot x: #( 0 10 ) y: #( 0 20 )).
 	chart inNewHeadlessSpaceDo: [ :space |
 		space settle.
 		self assert: scatter patches first bounds center equals: (chart dataTransform pointFor: 0 @ 0) ]
@@ -443,8 +401,8 @@ BpChartTest >> testScatterTakesTheNextCycleColor [
 
 	| chart scatter |
 	chart := self newChart.
-	chart hist: #( 1 2 ).
-	scatter := chart scatterX: #( 1 ) y: #( 1 ).
+	chart addArtist: (BpHistogram xValues: #( 1 2 )).
+	scatter := chart addArtist: (BpScatterPlot x: #( 1 ) y: #( 1 )).
 	self assert: scatter patches first background paint color equals: (BpPalette default colorAt: 2)
 ]
 
@@ -454,7 +412,7 @@ BpChartTest >> testStepIsDrawnAsAnOutline [
 
 	| chart form |
 	chart := self newChart.
-	(chart hist: #( 1 1 1 3 ))
+	(chart addArtist: (BpHistogram xValues: #( 1 1 1 3 )))
 		bins: #( 0 2 4 );
 		histType: #step;
 		color: Color red.
@@ -477,7 +435,7 @@ BpChartTest >> testTickFormatterGivesTheLabels [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: #( 1 2 3 )) density: true.
+	(chart addArtist: (BpHistogram xValues: #( 1 2 3 ))) density: true.
 	chart yTickFormatter: [ :value | (value * 100) rounded printString , '%' ].
 	self assert: (chart ticks detect: [ :each | each axis = #y ]) label text asString equals: '0%'
 ]
@@ -487,7 +445,7 @@ BpChartTest >> testTicksAreInsideTheLimits [
 
 	| chart |
 	chart := self newChart.
-	chart hist: #( 1 2 3 7 ).
+	chart addArtist: (BpHistogram xValues: #( 1 2 3 7 )).
 	self assert: (chart ticks allSatisfy: [ :each |
 		 | limits |
 		 limits := each axis = #x
@@ -511,7 +469,7 @@ BpChartTest >> testWhenPatchDoReceivesTheClickedBar [
 	| chart histogram clicked |
 	clicked := nil.
 	chart := self newChart.
-	histogram := chart hist: #( 1 1 1 3 ).
+	histogram := chart addArtist: (BpHistogram xValues: #( 1 1 1 3 )).
 	histogram
 		bins: #( 0 2 4 );
 		whenPatch: BlClickEvent do: [ :event :patch | clicked := patch ].
@@ -525,7 +483,7 @@ BpChartTest >> testWhenPatchDoReceivesTheClickedMarker [
 	| chart scatter clicked |
 	clicked := nil.
 	chart := self newChart.
-	scatter := chart scatterX: #( 0 5 10 ) y: #( 0 5 10 ).
+	scatter := chart addArtist: (BpScatterPlot x: #( 0 5 10 ) y: #( 0 5 10 )).
 	scatter
 		s: 400;
 		whenPatch: BlClickEvent do: [ :event :patch | clicked := patch ].
@@ -539,7 +497,7 @@ BpChartTest >> testWhenPatchDoSurvivesARebuild [
 	| chart histogram clicked |
 	clicked := nil.
 	chart := self newChart.
-	histogram := chart hist: #( 1 1 1 3 ).
+	histogram := chart addArtist: (BpHistogram xValues: #( 1 1 1 3 )).
 	histogram whenPatch: BlClickEvent do: [ :event :patch | clicked := patch ].
 	histogram bins: #( 0 2 4 ).
 	self click: chart atData: 1 @ 0.5.
@@ -551,7 +509,7 @@ BpChartTest >> testXLimitsHaveFivePercentMargins [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: #( 1 )) bins: #( 0 10 ).
+	(chart addArtist: (BpHistogram xValues: #( 1 ))) bins: #( 0 10 ).
 	self assert: chart xLimits equals: #( -0.5 10.5 )
 ]
 
@@ -560,7 +518,7 @@ BpChartTest >> testXTicksAreTheGivenLocations [
 
 	| chart |
 	chart := BpChart new.
-	chart plotX: #( 0 10 ) y: #( 0 10 ).
+	chart addArtist: (BpLine x: #( 0 10 ) y: #( 0 10 )).
 	chart xTicks: (1 to: 7).
 	self
 		assert: ((chart ticks select: [ :each | each axis = #x ]) collect: [ :each | each location ] as: Array)
@@ -572,7 +530,7 @@ BpChartTest >> testYLimitsStickToZero [
 
 	| chart |
 	chart := self newChart.
-	(chart hist: #( 1 1 )) bins: #( 0 10 ).
+	(chart addArtist: (BpHistogram xValues: #( 1 1 ))) bins: #( 0 10 ).
 	self assert: chart yLimits first equals: 0.
 	self assert: chart yLimits last closeTo: 2.1
 ]
@@ -582,7 +540,7 @@ BpChartTest >> testYTicksAreTheGivenLocations [
 
 	| chart |
 	chart := BpChart new.
-	chart plotX: #( 0 10 ) y: #( 0 10 ).
+	chart addArtist: (BpLine x: #( 0 10 ) y: #( 0 10 )).
 	chart yTicks: #( 2 4 ).
 	self
 		assert: ((chart ticks select: [ :each | each axis = #y ]) collect: [ :each | each label text asString ] as: Array)

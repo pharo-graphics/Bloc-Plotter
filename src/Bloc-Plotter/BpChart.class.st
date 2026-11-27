@@ -1,5 +1,5 @@
 "
-I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram` added by `hist:`, a `BpScatterPlot` added by `scatterX:y:`, a `BpLine` added by `plotX:y:`, a `BpBoxPlot` added by `boxPlot:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpStemPlot` added by `stem:` or `stemLocations:heads:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, a `BpHexbin` added by `hexbinX:y:`, a `BpHeatmap` added by `heatmap:`, or a `BpDensityPlot` added by `densityPlot:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
+I am a plot area with its ticks, title and legend. I hold artists (`BpArtist`), such as a `BpHistogram`, a `BpScatterPlot`, a `BpLine`, a `BpBoxPlot` or a `BpStemPlot` added by `addArtist:`, a `BpBarPlot` added by `barX:height:` or `barhY:width:`, a `BpFillBetween` added by `fillBetweenX:y1:y2:` or `fillBetweenY:x1:x2:`, a `BpStackPlot` added by `stackPlotX:ys:`, a `BpStairs` added by `stairs:` or `stairs:edges:`, a `BpViolinPlot` added by `violinPlot:` or `violinPlot:positions:`, a `BpErrorBar` added by `errorBarX:y:yErr:` or `errorBarX:y:xErr:yErr:`, a `BpHexbin` added by `hexbinX:y:`, a `BpHeatmap` added by `heatmap:`, or a `BpDensityPlot` added by `densityPlot:`, compute the limits and scales of the data from them, and show their patches in my `BpPlotArea` through a `BpDataTransform`.
 
 ## Examples
 
@@ -23,7 +23,7 @@ BpChart instanceLinePlotType
 ## Usage
 
 1. `BpFigure>>rows:columns:chartClass:` creates me, or I am built apart and placed with `BpFigure>>chartAtRow:column:put:`; I can also be shown alone.
-2. `hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:` and `densityPlot:` create an artist, and `addArtist:` gives it the next colors of my palette (`nextColors:`) and answers it; it also adds an artist built apart, as `BpBarPlot class>>barX:height:`. `palette:` changes the palette and recolors the artists already added.
+2. `addArtist:` adds an artist created by its class (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpStemPlot class>>stem:`…), gives it the next colors of my palette (`nextColors:`) and answers it. `barX:height:`, `barhY:width:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:` (and their variants filling down to 0), `stackPlotX:ys:`, `stairs:`, `stairs:edges:`, `violinPlot:`, `violinPlot:positions:`, `errorBarX:y:yErr:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:` and `densityPlot:` create an artist and add it the same way. `palette:` changes the palette and recolors the artists already added.
 3. When an artist changes, it sends me `artistChanged:` and I `rebuild`: scales, limits (`autoScale:`), patches, legend, ticks (`BpTick`), color bars (`BpColorBar`, added by `addColorBarFor:`) and, after `grid: true`, grid lines (`BpGridLine`).
 4. `BpChartLayout` computes my plot bounds from the size of my tick labels, title and color bars, which gives its extent to my data transform.
 
@@ -225,15 +225,6 @@ BpChart >> barhYValues: aCollectionOrValue widthValues: aCollectionOrNumber [
 	^ self addArtist: (BpBarPlot barhYValues: aCollectionOrValue widthValues: aCollectionOrNumber)
 ]
 
-{ #category : 'plotting' }
-BpChart >> boxPlot: aCollection [
-	"Add a box plot of aCollection (numbers for one box, or one collection of numbers per box) and answer it, to be configured with notch:, whiskers:, positions:, widths:, patchArtist:, ... (see `BpBoxPlot`)."
-
-	^ self addArtist: (BpBoxPlot new
-		   x: aCollection;
-		   yourself)
-]
-
 { #category : 'accessing' }
 BpChart >> colorBars [
 
@@ -385,13 +376,6 @@ BpChart >> hexbinX: xValues y: yValues [
 	"Add a hexbin of the points (xValues at: i) @ (yValues at: i), which shows how many there are in each hexagon of a grid, and answer it, to be configured with gridSize:, bins:, c:, colorMap:, ... (see `BpHexbin`)."
 
 	^ self addArtist: (BpHexbin x: xValues y: yValues)
-]
-
-{ #category : 'plotting' }
-BpChart >> hist: aCollection [
-	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured with bins:, density:, histType:, ... (see `BpHistogram`)."
-
-	^ self addArtist: (BpHistogram xValues: aCollection)
 ]
 
 { #category : 'initialization' }
@@ -630,22 +614,6 @@ BpChart >> plotBounds: aRectangle [
 	transform extent: (aRectangle extent max: 1 @ 1)
 ]
 
-{ #category : 'plotting' }
-BpChart >> plotX: xValues y: yValues [
-	"Draw a line through the points of xValues and yValues. Answer the `BpLine`, to set its style."
-
-	^ self addArtist: (BpLine x: xValues y: yValues)
-]
-
-{ #category : 'plotting' }
-BpChart >> plotX: xValues y: yValues format: aString [
-	"Draw the points of xValues and yValues with the format aString ('o-', 'r--', 'x', ...; see `BpLine>>format:`). Answer the `BpLine`."
-
-	^ (self plotX: xValues y: yValues)
-		  format: aString;
-		  yourself
-]
-
 { #category : 'private - building' }
 BpChart >> rebuild [
 	"Recompute my scales and limits from my artists, then show their patches, my legend, my ticks, my grid and my color bars."
@@ -683,13 +651,6 @@ BpChart >> scaleOf: anAxis [
 		  ifFalse: [ yScale ]
 ]
 
-{ #category : 'plotting' }
-BpChart >> scatterX: xValues y: yValues [
-	"Add a scatter plot of the points (xValues at: i) @ (yValues at: i) and answer it, to be configured with s:, c:, marker:, alpha:, ... (see `BpScatterPlot`)."
-
-	^ self addArtist: (BpScatterPlot x: xValues y: yValues)
-]
-
 { #category : 'private - building' }
 BpChart >> showLegend: aLegendOrNil [
 	"Show aLegendOrNil instead of my current legend, in my plot area."
@@ -720,20 +681,6 @@ BpChart >> stairs: aCollection edges: aCollectionOrNil [
 	^ self addArtist: (BpStairs new
 		   values: aCollection edges: aCollectionOrNil;
 		   yourself)
-]
-
-{ #category : 'plotting' }
-BpChart >> stem: aCollection [
-	"Add a stem plot of the heads aCollection, located at 0, 1, 2, ..., and answer it, to be configured with lineFormat:, markerFormat:, baseFormat:, bottom:, orientation:, ... (see `BpStemPlot`)."
-
-	^ self addArtist: (BpStemPlot stem: aCollection)
-]
-
-{ #category : 'plotting' }
-BpChart >> stemLocations: aCollection heads: anotherCollection [
-	"Add a stem plot of the heads anotherCollection at the locations aCollection and answer it (see `stem:`)."
-
-	^ self addArtist: (BpStemPlot stemLocations: aCollection heads: anotherCollection)
 ]
 
 { #category : 'private - building' }

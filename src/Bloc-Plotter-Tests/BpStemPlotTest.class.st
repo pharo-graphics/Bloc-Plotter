@@ -28,6 +28,26 @@ BpStemPlotTest >> stems [
 		  yourself
 ]
 
+{ #category : 'tests - instances' }
+BpStemPlotTest >> testAddArtistAddsAStemPlotToTheChart [
+
+	| chart stems |
+	chart := BpChart new.
+	stems := chart addArtist: (BpStemPlot stem: #( 4 -1 2 )).
+	self assert: chart artists asArray equals: { stems }
+]
+
+{ #category : 'tests' }
+BpStemPlotTest >> testAddArtistGivesTheChartToAStemPlotAtItsLocations [
+
+	| chart stems |
+	chart := BpChart new.
+	stems := chart addArtist: (BpStemPlot stemLocations: #( 1 2 ) heads: #( 3 4 )).
+	self assert: stems chart identicalTo: chart.
+	self assert: (chart artists includes: stems).
+	self assert: stems markerLine size equals: 2
+]
+
 { #category : 'tests' }
 BpStemPlotTest >> testBaseFormatAndColorStyleTheBaseline [
 
@@ -74,26 +94,6 @@ BpStemPlotTest >> testBottomMovesTheStemsAndTheBaseline [
 		(3 @ 1) }
 ]
 
-{ #category : 'tests - instances' }
-BpStemPlotTest >> testChartStemAddsAStemPlotToTheChart [
-
-	| chart stems |
-	chart := BpChart new.
-	stems := chart stem: #( 4 -1 2 ).
-	self assert: chart artists asArray equals: { stems }
-]
-
-{ #category : 'tests' }
-BpStemPlotTest >> testChartStemLocationsHeadsAddsAStemPlot [
-
-	| chart stems |
-	chart := BpChart new.
-	stems := chart stemLocations: #( 1 2 ) heads: #( 3 4 ).
-	self assert: stems chart identicalTo: chart.
-	self assert: (chart artists includes: stems).
-	self assert: stems markerLine size equals: 2
-]
-
 { #category : 'tests - palette' }
 BpStemPlotTest >> testDefaultBaselineIsTheFourthColorOfThePalette [
 
@@ -128,7 +128,7 @@ BpStemPlotTest >> testDefaultStyleTakesTheColorsOfThePalette [
 	palette := BpQualitativePalette set1.
 	chart := BpChart new.
 	chart palette: palette.
-	stems := chart stem: #( 1 2 ).
+	stems := chart addArtist: (BpStemPlot stem: #( 1 2 )).
 	self assert: stems stemLines first border paint color equals: (palette colorAt: 1).
 	self assert: stems baseLine border paint color equals: (palette colorAt: 4)
 ]
@@ -329,8 +329,8 @@ BpStemPlotTest >> testStemsTakeNoColorOfTheCycle [
 
 	| chart |
 	chart := BpChart new.
-	chart stem: #( 1 2 ).
-	self assert: (chart plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: (BpPalette default colorAt: 1)
+	chart addArtist: (BpStemPlot stem: #( 1 2 )).
+	self assert: (chart addArtist: (BpLine x: #( 1 2 ) y: #( 1 2 ))) linePatch border paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests - errors' }

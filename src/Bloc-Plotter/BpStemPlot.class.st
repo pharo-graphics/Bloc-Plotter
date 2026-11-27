@@ -1,5 +1,5 @@
 "
-I am a stem plot, added by `BpChart>>stem:` and `BpChart>>stemLocations:heads:`. For each location I draw a vertical line (a stem) from a baseline to its head, and a marker on the head; a horizontal baseline joins the first and the last location. Three format strings style these parts: `lineFormat:` the stems, `markerFormat:` the markers and `baseFormat:` the baseline.
+I am a stem plot of a `BpChart`. For each location I draw a vertical line (a stem) from a baseline to its head, and a marker on the head; a horizontal baseline joins the first and the last location. Three format strings style these parts: `lineFormat:` the stems, `markerFormat:` the markers and `baseFormat:` the baseline.
 
 ## Examples
 
@@ -18,7 +18,7 @@ BpStemPlot exampleInteraction
 
 ## Usage
 
-1. `BpStemPlot class>>stem:` (heads only, located from 0) and `BpStemPlot class>>stemLocations:heads:` create me with my data (`locations:heads:`); `BpChart>>stem:` and `BpChart>>stemLocations:heads:` create me the same way and add me to the chart (see `BpArtist`), as `BpChart>>addArtist:` does for a stem plot created apart.
+1. `BpStemPlot class>>stem:` (heads only, located from 0) and `BpStemPlot class>>stemLocations:heads:` create me with my data (`locations:heads:`), and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`).
 2. My chart reads `isAboveGrid` (true) and my `legendEntries`: a stem with its marker on a piece of baseline.
 
 ## Implementation Notes

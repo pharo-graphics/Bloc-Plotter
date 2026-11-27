@@ -245,7 +245,7 @@ BpHexbinTest >> testHexbinTakesNoColorOfThePalette [
 	| chart |
 	chart := BpChart new.
 	chart hexbinX: #( 1 2 ) y: #( 1 2 ).
-	self assert: (chart plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: (BpPalette default colorAt: 1)
+	self assert: (chart addArtist: (BpLine x: #( 1 2 ) y: #( 1 2 ))) linePatch border paint color equals: (BpPalette default colorAt: 1)
 ]
 
 { #category : 'tests' }

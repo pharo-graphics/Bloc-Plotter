@@ -1,5 +1,5 @@
 "
-I am a chart in polar coordinates: the x of the data is an angle in radians, its y a radius. My plot area is a disk, with the angles labeled in degrees around it and the radii on its circles. Every artist of a `BpChart` can be added to me: the bars of `barX:height:` and `hist:` become sectors, the lines, points and filled areas follow the angles.
+I am a chart in polar coordinates: the x of the data is an angle in radians, its y a radius. My plot area is a disk, with the angles labeled in degrees around it and the radii on its circles. Every artist of a `BpChart` can be added to me: the bars of `barX:height:` and of a `BpHistogram` become sectors, the lines, points and filled areas follow the angles.
 
 ## Examples
 
@@ -100,7 +100,7 @@ BpPolarChart class >> instanceWindRose [
 { #category : 'private - demo' }
 BpPolarChart class >> showHistogramIn: aPolarChart random: aRandom [
 
-	(aPolarChart hist: ((1 to: 300) collect: [ :each | Float pi + aRandom nextNormal ]))
+	(aPolarChart addArtist: (BpHistogram xValues: ((1 to: 300) collect: [ :each | Float pi + aRandom nextNormal ])))
 		bins: ((0 to: 16) collect: [ :each | each * Float pi / 8 ]);
 		edgeColor: ((BpSequentialPalette greys: 9) colorAt: 1).
 	aPolarChart title: 'hist:'
@@ -109,9 +109,9 @@ BpPolarChart class >> showHistogramIn: aPolarChart random: aRandom [
 { #category : 'private - demo' }
 BpPolarChart class >> showPointsIn: aPolarChart random: aRandom [
 
-	(aPolarChart
-		 scatterX: ((1 to: 80) collect: [ :each | Float twoPi * aRandom next ])
-		 y: ((1 to: 80) collect: [ :each | 2 * aRandom next ]))
+	(aPolarChart addArtist: (BpScatterPlot
+	  x: ((1 to: 80) collect: [ :each | Float twoPi * aRandom next ])
+	  y: ((1 to: 80) collect: [ :each | 2 * aRandom next ])))
 		s: 40;
 		alpha: 0.7.
 	aPolarChart title: 'scatterX:y:'

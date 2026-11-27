@@ -165,7 +165,7 @@ BpPolarChartTest >> testHistogramsAreRoses [
 
 	| chart histogram |
 	chart := self newChart.
-	histogram := (chart hist: #( 1 1 2 ))
+	histogram := (chart addArtist: (BpHistogram xValues: #( 1 1 2 )))
 		             bins: #( 0 1.5 3 );
 		             yourself.
 	self assert: (histogram patches allSatisfy: [ :each | each geometry isKindOf: BlAnnulusSectorGeometry ])
@@ -227,7 +227,7 @@ BpPolarChartTest >> testNegativeRadiiMoveTheCenter [
 
 	| chart |
 	chart := self newChart.
-	chart plotX: #( 0 1 ) y: #( -5 10 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( -5 10 )).
 	self assert: chart yLimits first equals: -5
 ]
 
@@ -265,7 +265,7 @@ BpPolarChartTest >> testRadiiStartAtZero [
 
 	| chart |
 	chart := self newChart.
-	chart plotX: #( 0 1 ) y: #( 5 10 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 5 10 )).
 	self assert: chart yLimits first equals: 0
 ]
 

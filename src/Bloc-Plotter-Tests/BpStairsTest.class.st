@@ -260,7 +260,7 @@ BpStairsTest >> testStairsTakeTheNextColorOfTheCycle [
 
 	| chart |
 	chart := BpChart new.
-	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
 	self assert: (chart stairs: #( 1 2 )) patches first border paint color equals: (BpPalette default colorAt: 2)
 ]
 

@@ -102,7 +102,7 @@ BpStackPlotTest >> testEachLayerTakesTheNextColorOfTheCycle [
 	chart := BpChart new.
 	stack := chart stackPlotX: #( 1 2 3 ) ys: #( #( 1 2 3 ) #( 2 2 2 ) ).
 	self assert: (stack patches collect: [ :each | each background paint color ] as: Array) equals: (BpPalette default colors first: 2).
-	self assert: (chart plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: (BpPalette default colorAt: 3)
+	self assert: (chart addArtist: (BpLine x: #( 1 2 ) y: #( 1 2 ))) linePatch border paint color equals: (BpPalette default colorAt: 3)
 ]
 
 { #category : 'tests' }

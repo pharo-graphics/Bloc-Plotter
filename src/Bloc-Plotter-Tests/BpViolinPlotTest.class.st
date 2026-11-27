@@ -294,7 +294,7 @@ BpViolinPlotTest >> testViolinsTakeTheNextColorOfTheCycle [
 
 	| chart |
 	chart := BpChart new.
-	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
 	self assert: ((chart violinPlot: #( 1 2 3 )) parts at: #bars) first border paint color equals: (BpPalette default colorAt: 2)
 ]
 

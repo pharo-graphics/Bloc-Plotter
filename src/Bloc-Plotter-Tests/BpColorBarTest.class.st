@@ -65,7 +65,7 @@ BpColorBarTest >> testArtistWithoutNumbersRaisesError [
 
 	| chart line |
 	chart := self newChart.
-	line := chart plotX: #( 1 2 ) y: #( 1 2 ).
+	line := chart addArtist: (BpLine x: #( 1 2 ) y: #( 1 2 )).
 	self
 		should: [ chart addColorBarFor: line ]
 		raise: Error
@@ -94,7 +94,7 @@ BpColorBarTest >> testBarLeavesRoomInAPolarChart [
 	chart := BpPolarChart new
 		         extent: 300 @ 300;
 		         yourself.
-	scatter := chart scatterX: #( 0 1 ) y: #( 1 2 ).
+	scatter := chart addArtist: (BpScatterPlot x: #( 0 1 ) y: #( 1 2 )).
 	scatter c: #( 1 2 ).
 	bar := chart addColorBarFor: scatter.
 	chart asForm.
@@ -214,7 +214,7 @@ BpColorBarTest >> testScatterOfNumbersHasAColorBar [
 
 	| chart scatter |
 	chart := self newChart.
-	scatter := chart scatterX: #( 1 2 ) y: #( 1 2 ).
+	scatter := chart addArtist: (BpScatterPlot x: #( 1 2 ) y: #( 1 2 )).
 	scatter c: #( 0 100 ).
 	self assert: (chart addColorBarFor: scatter) ticks last location equals: 100
 ]
@@ -224,7 +224,7 @@ BpColorBarTest >> testScatterOfOneColorRaisesError [
 
 	| chart scatter |
 	chart := self newChart.
-	scatter := chart scatterX: #( 1 2 ) y: #( 1 2 ).
+	scatter := chart addArtist: (BpScatterPlot x: #( 1 2 ) y: #( 1 2 )).
 	self
 		should: [ chart addColorBarFor: scatter ]
 		raise: Error

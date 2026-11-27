@@ -35,7 +35,7 @@ BpCubehelixPaletteTest >> testChartArtistsTakeTheColorsOfACubehelixPalette [
 	chart := BpChart new
 		         palette: palette;
 		         yourself.
-	self assert: (chart plotX: #( 1 2 ) y: #( 1 2 )) linePatch border paint color equals: (palette colorAt: 1)
+	self assert: (chart addArtist: (BpLine x: #( 1 2 ) y: #( 1 2 ))) linePatch border paint color equals: (palette colorAt: 1)
 ]
 
 { #category : 'tests' }

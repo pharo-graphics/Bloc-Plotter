@@ -122,7 +122,7 @@ BpErrorBarTest >> testChartErrorBarAddsItWithTheNextColor [
 
 	| chart errorBar |
 	chart := BpChart new.
-	chart plotX: #( 0 1 ) y: #( 0 1 ).
+	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
 	errorBar := chart errorBarX: #( 1 2 ) y: #( 3 4 ) yErr: 0.5.
 	self assert: chart artists last identicalTo: errorBar.
 	self assert: errorBar barPatches first border paint color equals: (BpPalette default colorAt: 2)

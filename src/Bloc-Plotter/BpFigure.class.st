@@ -50,7 +50,7 @@ More figures of the gallery are shown by the examples of `BpHistogram`, `BpScatt
 ## Usage
 
 1. `rows:columns:` (also on the class side) creates my charts, row by row, in a `BlGridLayout`; `rows:columns:chartClass:` creates charts of another class, such as `BpPolarChart` or `BpKiviat`.
-2. Plots are added to my charts (`chartAtRow:column:`, `charts`), for example with `BpChart>>hist:`. A chart built apart replaces one of mine with `chartAtRow:column:put:`.
+2. Plots are added to my charts (`chartAtRow:column:`, `charts`) with `BpChart>>addArtist:`. A chart built apart replaces one of mine with `chartAtRow:column:put:`.
 3. `show:` opens me in a space of my extent.
 
 - I am mutable: plots can be added before or after I am shown, and `rows:columns:` replaces all my charts with what they show.
@@ -87,7 +87,7 @@ BpFigure class >> addColorBarsFirstRowTo: aFigure [
 		bins: #log.
 	(aFigure charts first addColorBarFor: hexbin) label: 'points'.
 	aFigure charts first title: 'log scale, label:'.
-	scatter := aFigure charts second scatterX: (1 to: 60) y: ((1 to: 60) collect: [ :each | each * 17 \\ 61 ]).
+	scatter := aFigure charts second addArtist: (BpScatterPlot x: (1 to: 60) y: ((1 to: 60) collect: [ :each | each * 17 \\ 61 ])).
 	scatter
 		c: (1 to: 60);
 		s: 80;
@@ -111,7 +111,7 @@ BpFigure class >> addColorBarsSecondRowTo: aFigure [
 	aFigure charts third title: 'bins: 4, tickFormatter:'.
 	heatmap := aFigure charts fourth heatmap: #( #( 1 2 3 ) #( 4 5 6 ) #( 7 8 9 ) ).
 	heatmap colorMap: (BpInterpolatedPalette name: 'Greys' anchors: (BpSequentialPalette greys: 9) colors).
-	scatter := aFigure charts fourth scatterX: #( 1 2 3 ) y: #( 1 2 3 ).
+	scatter := aFigure charts fourth addArtist: (BpScatterPlot x: #( 1 2 3 ) y: #( 1 2 3 )).
 	scatter
 		c: #( 10 50 100 );
 		s: 200;
@@ -134,7 +134,7 @@ BpFigure class >> exampleBoxPlot [
 	"Show the six box plot variants of the gallery (see `BpBoxPlot`)."
 
 	<example>
-	^ self instanceBoxPlotDemo show: 'boxplot_demo'
+	^ BpBoxPlot exampleBoxPlotDemo
 ]
 
 { #category : 'examples' }
@@ -289,17 +289,6 @@ BpFigure class >> exampleViolinPlot [
 	^ self instanceViolinPlotBasics show: 'violinplot'
 ]
 
-{ #category : 'private - demo' }
-BpFigure class >> filledFlierPropertiesOf: anIndex [
-	"Answer flier properties filling and outlining the fliers with a color of the palette set1."
-
-	| color |
-	color := BpQualitativePalette set1 colorAt: anIndex.
-	^ {
-		  (#markerFaceColor -> color).
-		  (#markerEdgeColor -> color) } asDictionary
-]
-
 { #category : 'instances - artists' }
 BpFigure class >> instanceAllMarkers [
 	"Every marker symbol, tuple and TeX shape known, one per column."
@@ -312,7 +301,7 @@ BpFigure class >> instanceAllMarkers [
 	figure extent: 1000 @ 220.
 	chart := figure charts first.
 	specifications withIndexDo: [ :each :index |
-		(chart scatterX: { index } y: #( 0 ))
+		(chart addArtist: (BpScatterPlot x: { index } y: #( 0 )))
 			s: 200;
 			c: ((BpSequentialPalette greys: 9) colorAt: 9);
 			marker: each ].
@@ -332,93 +321,18 @@ BpFigure class >> instanceArtistsInOneChart [
 	samples := (1 to: 500) collect: [ :each | random nextNormal ].
 	figure := self new.
 	chart := figure charts first.
-	histogram := (chart hist: samples)
+	histogram := (chart addArtist: (BpHistogram xValues: samples))
 		             bins: 15;
 		             yourself.
-	(chart
-		 scatterX: ((1 to: 15) collect: [ :index | (histogram binEdges at: index) + (histogram binEdges at: index + 1) / 2 ])
-		 y: histogram counts)
+	(chart addArtist: (BpScatterPlot
+	  x: ((1 to: 15) collect: [ :index | (histogram binEdges at: index) + (histogram binEdges at: index + 1) / 2 ])
+	  y: histogram counts))
 		marker: 'D';
 		s: 50;
 		label: 'counts'.
 	chart
 		title: 'BpHistogram and BpScatterPlot';
 		legend;
-		grid: true.
-	^ figure
-]
-
-{ #category : 'instances - box plot' }
-BpFigure class >> instanceBoxPlotDemo [
-	"Gallery: Boxplots (boxplot_demo), first figure: the same data drawn as a basic, a notched, a horizontal box plot, with other flier symbols, without fliers and with shorter whiskers."
-
-	<sampleInstance>
-	| random data figure settings |
-	random := Random seed: 19680801.
-	data := ((1 to: 50) collect: [ :each | random next * 100 ]) , (Array new: 25 withAll: 50)
-	        , ((1 to: 10) collect: [ :each | random next * 100 + 100 ]) , ((1 to: 10) collect: [ :each | random next * -100 ]).
-	figure := self rows: 2 columns: 3.
-	settings := {
-		            ('basic plot' -> [ :box |  ]).
-		            ('notched plot' -> [ :box | box notch: true ]).
-		            ((String cr join: #( 'change outlier' 'point symbols' )) -> [ :box |
-			             box
-				             flierSymbol: 'D';
-				             flierProperties: (self filledFlierPropertiesOf: 3) ]).
-		            ((String cr join: #( 'don''t show' 'outlier points' )) -> [ :box | box flierSymbol: '' ]).
-		            ('horizontal boxes' -> [ :box |
-			             box
-				             flierSymbol: 's';
-				             flierProperties: (self filledFlierPropertiesOf: 1);
-				             orientation: #horizontal ]).
-		            ('change whisker length' -> [ :box |
-			             box
-				             flierSymbol: 's';
-				             flierProperties: (self filledFlierPropertiesOf: 1);
-				             orientation: #horizontal;
-				             whiskers: 0.75 ]) }.
-	settings withIndexDo: [ :each :index |
-		| chart |
-		chart := figure chartAtRow: index - 1 // 3 + 1 column: index - 1 \\ 3 + 1.
-		each value value: (chart boxPlot: data).
-		chart title: each key ].
-	^ figure
-]
-
-{ #category : 'instances - box plot' }
-BpFigure class >> instanceBoxPlotType [
-	"Plot types: boxplot(X), three filled boxes at 2, 4 and 6 without fliers, with white medians and edges."
-
-	<sampleInstance>
-	| random columns figure chart |
-	random := Random seed: 10.
-	columns := #( #( 3 1.25 ) #( 5 1 ) #( 4 1.25 ) ) collect: [ :meanAndDeviation |
-		           (1 to: 100) collect: [ :each | random nextNormalMean: meanAndDeviation first deviation: meanAndDeviation last ] ].
-	figure := self new.
-	chart := figure charts first.
-	(chart boxPlot: columns)
-		positions: #( 2 4 6 );
-		widths: 1.5;
-		patchArtist: true;
-		showFliers: false;
-		medianProperties: {
-			(#color -> ((BpSequentialPalette greys: 9) colorAt: 1)).
-			(#lineWidth -> 0.5) } asDictionary;
-		boxProperties: {
-			(#faceColor -> (chart palette colorAt: 1)).
-			(#edgeColor -> ((BpSequentialPalette greys: 9) colorAt: 1)).
-			(#lineWidth -> 0.5) } asDictionary;
-		whiskerProperties: {
-			(#color -> (chart palette colorAt: 1)).
-			(#lineWidth -> 1.5) } asDictionary;
-		capProperties: {
-			(#color -> (chart palette colorAt: 1)).
-			(#lineWidth -> 1.5) } asDictionary.
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
 		grid: true.
 	^ figure
 ]
@@ -475,7 +389,7 @@ BpFigure class >> instanceDensityPlotOptions [
 		orientation: #horizontal;
 		alpha: 0.5.
 	figure charts third title: 'orientation: #horizontal, alpha: 0.5'.
-	(figure charts fourth hist: values)
+	(figure charts fourth addArtist: (BpHistogram xValues: values))
 		bins: 25;
 		density: true;
 		color: ((BpSequentialPalette greys: 9) colorAt: 4).
@@ -588,9 +502,13 @@ BpFigure class >> instanceFillBetweenConfidenceBand [
 	band := BpFillBetween confidenceBandOf: x and: y.
 	figure := self new.
 	chart := figure charts first.
-	chart plotX: x y: (band first with: band last collect: [ :low :high | low + high / 2 ]) format: '-'.
+	chart addArtist: ((BpLine x: x y: (band first with: band last collect: [ :low :high | low + high / 2 ]))
+	 format: '-';
+	 yourself).
 	(chart fillBetweenX: x y1: band first y2: band last) alpha: 0.2.
-	(chart plotX: x y: y format: 'o') color: (chart palette colorAt: 6).
+	(chart addArtist: ((BpLine x: x y: y)
+	  format: 'o';
+	  yourself)) color: (chart palette colorAt: 6).
 	^ figure
 ]
 
@@ -629,7 +547,7 @@ BpFigure class >> instanceFillBetweenPlotType [
 	(chart fillBetweenX: x y1: y1 y2: y2)
 		alpha: 0.5;
 		lineWidth: 0.
-	(chart plotX: x y: (y1 with: y2 collect: [ :a :b | a + b / 2 ])) lineWidth: 2.
+	(chart addArtist: (BpLine x: x y: (y1 with: y2 collect: [ :a :b | a + b / 2 ]))) lineWidth: 2.
 	chart
 		xLimits: #( 0 8 );
 		xTicks: (1 to: 7);
@@ -655,7 +573,9 @@ BpFigure class >> instanceFillBetweenSteps [
 		(chart fillBetweenX: x y1: y)
 			step: style;
 			alpha: 0.4.
-		chart plotX: x y: y format: 'o'.
+		chart addArtist: ((BpLine x: x y: y)
+	 format: 'o';
+	 yourself).
 		chart title: 'step: #' , style ].
 	^ figure
 ]
@@ -821,38 +741,6 @@ BpFigure class >> instanceHistTypes [
 			 addArtist: BpHistogram instanceUnequalBins;
 			 title: 'bar, unequal bins';
 			 yourself).
-	^ figure
-]
-
-{ #category : 'instances - box plot' }
-BpFigure class >> instanceInteractiveBoxPlot [
-	"Three filled boxes: hovering a part outlines it in red, clicking a part shows the statistics of its box in the title."
-
-	<sampleInstance>
-	| figure chart boxPlot names |
-	names := #( 'A' 'B' 'C' ).
-	figure := self new.
-	chart := figure charts first.
-	boxPlot := (chart boxPlot: (BpBoxPlot instanceThreeBoxes statistics collect: [ :each | each values ]))
-		           patchArtist: true;
-		           showMeans: true;
-		           tickLabels: names;
-		           yourself.
-	chart title: 'Click a box'.
-	boxPlot
-		whenPatch: BlMouseEnterEvent do: [ :event :patch |
-			patch userData at: #border put: patch border.
-			patch border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
-		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch userData at: #border ifPresent: [ :border | patch border: border ] ];
-		whenPatch: BlClickEvent do: [ :event :patch |
-			| stats |
-			stats := boxPlot statistics at: patch dataset.
-			chart title: ('{1}: median {2}, quartiles {3} and {4}, mean {5}' format: {
-				 (names at: patch dataset).
-				 (stats median printShowingDecimalPlaces: 2).
-				 (stats q1 printShowingDecimalPlaces: 2).
-				 (stats q3 printShowingDecimalPlaces: 2).
-				 (stats mean printShowingDecimalPlaces: 2) }) ].
 	^ figure
 ]
 
@@ -1079,8 +967,7 @@ BpFigure class >> instancePolarArtists [
 	figure := self rows: 2 columns: 2 chartClass: BpPolarChart.
 	figure extent: 800 @ 800.
 	angles := (0 to: 360) collect: [ :each | each degreesToRadians ].
-	(figure chartAtRow: 1 column: 1)
-		plotX: angles y: (angles collect: [ :each | 1 + (4 * each) cos ]);
+	(figure chartAtRow: 1 column: 1) addArtist: (BpLine x: angles y: (angles collect: [ :each | 1 + (4 * each) cos ]));
 		title: 'plotX:y:'.
 	BpPolarChart showPointsIn: (figure chartAtRow: 1 column: 2) random: random.
 	BpPolarChart showHistogramIn: (figure chartAtRow: 2 column: 1) random: random.
@@ -1137,8 +1024,12 @@ BpFigure class >> instanceSelectiveFill [
 		chart title: 'interpolation=' , (interpolation
 			 ifTrue: [ 'True' ]
 			 ifFalse: [ 'False' ]).
-		chart plotX: x y: y1 format: 'o--'.
-		chart plotX: x y: y2 format: 'o--'.
+		chart addArtist: ((BpLine x: x y: y1)
+	 format: 'o--';
+	 yourself).
+		chart addArtist: ((BpLine x: x y: y2)
+	 format: 'o--';
+	 yourself).
 		(chart fillBetweenX: x y1: y1 y2: y2)
 			where: (y1 with: y2 collect: [ :a :b | a > b ]);
 			color: (chart palette colorAt: 1);

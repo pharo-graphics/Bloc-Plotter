@@ -1,5 +1,5 @@
 "
-I am a box plot of one or several datasets, added by `BpChart>>boxPlot:`: for each dataset, a box from the first to the third quartile crossed by the median, whiskers to the most extreme data within 1.5 interquartile ranges, caps at their ends, and the fliers beyond them as markers. I get the numbers from `BpBoxStatistics` and draw them with `BpPolygonPatch` lines and boxes and `BpMarkerPatch` fliers and means.
+I am a box plot of one or several datasets in a `BpChart`: for each dataset, a box from the first to the third quartile crossed by the median, whiskers to the most extreme data within 1.5 interquartile ranges, caps at their ends, and the fliers beyond them as markers. I get the numbers from `BpBoxStatistics` and draw them with `BpPolygonPatch` lines and boxes and `BpMarkerPatch` fliers and means.
 
 ## Examples
 
@@ -20,7 +20,7 @@ BpBoxPlot examplePlotType
 
 ## Usage
 
-1. `BpChart>>boxPlot:` creates me with a collection of numbers (one box) or a collection of such collections (one box per collection).
+1. `BpBoxPlot>>x:` gives me a collection of numbers (one box) or a collection of such collections (one box per collection), and `BpChart>>addArtist:` adds me to a chart, as `BpBoxPlot class>>exampleBoxPlotDemo` does with six box plots of the same data (see `BpArtist`).
 2. My setters rebuild me: `compute` asks `BpBoxStatistics` for the statistics of each dataset, `newPatches` builds the parts.
 3. `statistics` answers them, one per dataset; each patch knows its `dataset` index, so a handler given to `whenPatch:do:` finds the box it belongs to.
 
@@ -71,23 +71,188 @@ BpBoxPlot class >> exampleBoxPlotDemo [
 	"Show the six variants of the gallery Boxplots: basic, notched, other flier symbols, no fliers, horizontal, shorter whiskers."
 
 	<example>
-	^ BpFigure instanceBoxPlotDemo show: 'boxplot_demo'
+	| figure |
+	figure := BpFigure rows: 2 columns: 3.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceBasic;
+			 title: 'basic plot';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceNotched;
+			 title: 'notched plot';
+			 yourself);
+		chartAtRow: 1 column: 3 put: (BpChart new
+			 addArtist: self instanceDiamondFliers;
+			 title: (String cr join: #( 'change outlier' 'point symbols' ));
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceWithoutFliers;
+			 title: (String cr join: #( 'don''t show' 'outlier points' ));
+			 yourself);
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: self instanceHorizontal;
+			 title: 'horizontal boxes';
+			 yourself);
+		chartAtRow: 2 column: 3 put: (BpChart new
+			 addArtist: self instanceShortWhiskers;
+			 title: 'change whisker length';
+			 yourself).
+	^ figure show: 'boxplot_demo'
 ]
 
 { #category : 'examples' }
 BpBoxPlot class >> exampleInteraction [
-	"Show three boxes reacting to the mouse: hovering outlines a part, clicking shows the statistics of its box."
+	"Show three boxes reacting to the mouse: hovering outlines a part, clicking shows the statistics of its box in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveBoxPlot show: 'boxplot interaction'
+	| figure chart boxPlot |
+	figure := BpFigure new.
+	chart := BpChart new.
+	boxPlot := chart addArtist: self instanceLabeledBoxes.
+	chart title: 'Click a box'.
+	boxPlot
+		whenPatch: BlMouseEnterEvent do: [ :event :patch |
+			patch userData at: #border put: patch border.
+			patch border: (BlBorder paint: (BpQualitativePalette set1 colorAt: 1) width: 2) ];
+		whenPatch: BlMouseLeaveEvent do: [ :event :patch | patch userData at: #border ifPresent: [ :border | patch border: border ] ];
+		whenPatch: BlClickEvent do: [ :event :patch |
+			| stats |
+			stats := boxPlot statistics at: patch dataset.
+			chart title: ('{1}: median {2}, quartiles {3} and {4}, mean {5}' format: {
+				 (self labeledBoxNames at: patch dataset).
+				 (stats median printShowingDecimalPlaces: 2).
+				 (stats q1 printShowingDecimalPlaces: 2).
+				 (stats q3 printShowingDecimalPlaces: 2).
+				 (stats mean printShowingDecimalPlaces: 2) }) ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'boxplot interaction'
 ]
 
 { #category : 'examples' }
 BpBoxPlot class >> examplePlotType [
-	"Show the figure of the box plot type page."
+	"Show the figure of the box plot type page: three filled boxes in a chart of fixed limits and ticks, with a grid."
 
 	<example>
-	^ BpFigure instanceBoxPlotType show: 'boxplot'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceFilledBoxes.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7);
+		grid: true.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'boxplot'
+]
+
+{ #category : 'private - demo' }
+BpBoxPlot class >> filledFlierPropertiesOf: anIndex [
+	"Answer flier properties filling and outlining the fliers with a color of the palette set1."
+
+	| color |
+	color := BpQualitativePalette set1 colorAt: anIndex.
+	^ {
+		  (#markerFaceColor -> color).
+		  (#markerEdgeColor -> color) } asDictionary
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceBasic [
+	"Gallery: Boxplots (boxplot_demo), first chart: a basic box plot of data with outliers."
+
+	<sampleInstance>
+	^ self outlierDemoBox
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceDiamondFliers [
+	"Gallery: Boxplots (boxplot_demo), third chart: the same data with the outliers drawn as filled diamonds (see `BpBoxPlot>>flierSymbol:`)."
+
+	<sampleInstance>
+	^ self outlierDemoBox
+		  flierSymbol: 'D';
+		  flierProperties: (self filledFlierPropertiesOf: 3);
+		  yourself
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceFilledBoxes [
+	"Plot types: boxplot(X), three filled boxes of normal samples at 2, 4 and 6, without fliers, with light medians and edges."
+
+	<sampleInstance>
+	| random columns color light |
+	random := Random seed: 10.
+	columns := #( #( 3 1.25 ) #( 5 1 ) #( 4 1.25 ) ) collect: [ :meanAndDeviation |
+		           (1 to: 100) collect: [ :each | random nextNormalMean: meanAndDeviation first deviation: meanAndDeviation last ] ].
+	color := BpPalette default colorAt: 1.
+	light := (BpSequentialPalette greys: 9) colorAt: 1.
+	^ self new
+		  x: columns;
+		  positions: #( 2 4 6 );
+		  widths: 1.5;
+		  patchArtist: true;
+		  showFliers: false;
+		  medianProperties: {
+			  (#color -> light).
+			  (#lineWidth -> 0.5) } asDictionary;
+		  boxProperties: {
+			  (#faceColor -> color).
+			  (#edgeColor -> light).
+			  (#lineWidth -> 0.5) } asDictionary;
+		  whiskerProperties: {
+			  (#color -> color).
+			  (#lineWidth -> 1.5) } asDictionary;
+		  capProperties: {
+			  (#color -> color).
+			  (#lineWidth -> 1.5) } asDictionary;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceHorizontal [
+	"Gallery: Boxplots (boxplot_demo), fifth chart: the same data in a horizontal box, the outliers drawn as filled squares (see `BpBoxPlot>>orientation:`)."
+
+	<sampleInstance>
+	^ self outlierDemoBox
+		  flierSymbol: 's';
+		  flierProperties: (self filledFlierPropertiesOf: 1);
+		  orientation: #horizontal;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceLabeledBoxes [
+	"Answer the three filled boxes of `BpBoxPlot class>>instanceThreeBoxes`, with their means and the names A, B and C as tick labels, so that handlers can tell their parts and statistics."
+
+	<sampleInstance>
+	^ self instanceThreeBoxes
+		  patchArtist: true;
+		  showMeans: true;
+		  tickLabels: self labeledBoxNames;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceNotched [
+	"Gallery: Boxplots (boxplot_demo), second chart: the same data in a notched box, narrowed around the median (see `BpBoxPlot>>notch:`)."
+
+	<sampleInstance>
+	^ self outlierDemoBox
+		  notch: true;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceShortWhiskers [
+	"Gallery: Boxplots (boxplot_demo), sixth chart: the horizontal box with whiskers reaching 0.75 times the interquartile range, so that more values are outliers (see `BpBoxPlot>>whiskers:`)."
+
+	<sampleInstance>
+	^ self instanceHorizontal
+		  whiskers: 0.75;
+		  yourself
 ]
 
 { #category : 'instances' }
@@ -100,6 +265,42 @@ BpBoxPlot class >> instanceThreeBoxes [
 	^ self new
 		  x: (#( 3 5 4 ) collect: [ :mean | (1 to: 100) collect: [ :each | random nextNormalMean: mean deviation: 1 ] ]);
 		  yourself
+]
+
+{ #category : 'instances' }
+BpBoxPlot class >> instanceWithoutFliers [
+	"Gallery: Boxplots (boxplot_demo), fourth chart: the same data without the outliers (an empty flier symbol)."
+
+	<sampleInstance>
+	^ self outlierDemoBox
+		  flierSymbol: '';
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpBoxPlot class >> labeledBoxNames [
+	"Answer the names of the boxes of the interaction demo, one per box."
+
+	^ #( 'A' 'B' 'C' )
+]
+
+{ #category : 'private - demo' }
+BpBoxPlot class >> outlierDemoBox [
+	"Answer a box plot of the data of the gallery box plot demo, with the default settings."
+
+	^ self new
+		  x: self outlierDemoData;
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpBoxPlot class >> outlierDemoData [
+	"Answer the data of the gallery box plot demo: 50 values spread between 0 and 100, 25 values at 50, and 10 outliers above 100 and 10 below 0."
+
+	| random |
+	random := self demoRandom.
+	^ ((1 to: 50) collect: [ :each | random next * 100 ]) , (Array new: 25 withAll: 50)
+	  , ((1 to: 10) collect: [ :each | random next * 100 + 100 ]) , ((1 to: 10) collect: [ :each | random next * -100 ])
 ]
 
 { #category : 'private - computing' }

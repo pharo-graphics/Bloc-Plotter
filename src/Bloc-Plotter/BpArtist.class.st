@@ -16,7 +16,7 @@ BpArtist exampleArtistsInOneChart
 
 ## Usage
 
-1. A plotting method of `BpChart` (`hist:`, `scatterX:y:`, `plotX:y:`, `boxPlot:`, `barX:height:`, `barhY:width:`, `stem:`, `stemLocations:heads:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:`, `densityPlot:`, `BpKiviat>>addRow:`) creates the artist, and `BpChart>>addArtist:` gives it its chart and its colors of the palette (`defaultColors:`).
+1. My class creates me (`BpHistogram class>>xValues:`, `BpScatterPlot class>>x:y:`, `BpLine class>>x:y:`, `BpStemPlot class>>stem:`…), or a plotting method of `BpChart` does (`barX:height:`, `barhY:width:`, `fillBetweenX:y1:y2:`, `fillBetweenY:x1:x2:`, `stackPlotX:ys:`, `stairs:edges:`, `violinPlot:positions:`, `errorBarX:y:xErr:yErr:`, `hexbinX:y:`, `heatmap:`, `densityPlot:`, `BpKiviat>>addRow:`), and `BpChart>>addArtist:` gives me my chart and my colors of the palette (`defaultColors:`).
 2. Each setter calls `refresh`, which tells the chart (`BpChart>>artistChanged:`); it rebuilds its limits, patches, legend and ticks.
 
 - I am mutable: keep me, not my patches, which are replaced at each change.

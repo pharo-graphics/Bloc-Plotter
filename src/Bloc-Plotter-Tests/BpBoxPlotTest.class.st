@@ -103,7 +103,9 @@ BpBoxPlotTest >> testDefaultStyleTakesTheColorsOfThePalette [
 	palette := BpQualitativePalette set1.
 	chart := BpChart new.
 	chart palette: palette.
-	boxPlot := (chart boxPlot: #( #( 1 2 3 4 5 ) ))
+	boxPlot := (chart addArtist: (BpBoxPlot new
+	  x: #( #( 1 2 3 4 5 ) );
+	  yourself))
 		           patchArtist: true;
 		           showMeans: true;
 		           yourself.
@@ -141,6 +143,12 @@ BpBoxPlotTest >> testDefaultWidthShrinksWithCloserPositions [
 		  x: #( #( 1 2 ) #( 3 4 ) );
 		  positions: #( 0 2 );
 		  yourself) widths first closeTo: 0.3)
+]
+
+{ #category : 'tests - instances' }
+BpBoxPlotTest >> testDemoInstancesShareTheirData [
+
+	self assert: BpBoxPlot instanceNotched statistics first median equals: BpBoxPlot instanceBasic statistics first median
 ]
 
 { #category : 'tests' }
@@ -186,6 +194,42 @@ BpBoxPlotTest >> testHorizontalSwapsTheCoordinates [
 			  orientation: #horizontal;
 			  yourself) parts at: #boxes) first dataBounds
 		equals: (13 / 4 @ 0.75 corner: 31 / 4 @ 1.25)
+]
+
+{ #category : 'tests - instances' }
+BpBoxPlotTest >> testInstanceBasicHasFliers [
+
+	self assert: (BpBoxPlot instanceBasic parts at: #fliers) isNotEmpty
+]
+
+{ #category : 'tests - instances' }
+BpBoxPlotTest >> testInstanceFilledBoxesIsAtTwoFourAndSix [
+
+	self assert: (BpBoxPlot instanceFilledBoxes managedTicksOn: #x) equals: {
+		(2 -> '2').
+		(4 -> '4').
+		(6 -> '6') }
+]
+
+{ #category : 'tests - instances' }
+BpBoxPlotTest >> testInstanceLabeledBoxesHasThreeBoxesWithTheirMeans [
+
+	| boxPlot |
+	boxPlot := BpBoxPlot instanceLabeledBoxes.
+	self assert: boxPlot statistics size equals: 3.
+	self assert: (boxPlot parts at: #means) size equals: 3
+]
+
+{ #category : 'tests - instances' }
+BpBoxPlotTest >> testInstanceShortWhiskersMakesMoreFliers [
+
+	self assert: (BpBoxPlot instanceShortWhiskers parts at: #fliers) size > (BpBoxPlot instanceHorizontal parts at: #fliers) size
+]
+
+{ #category : 'tests - instances' }
+BpBoxPlotTest >> testInstanceWithoutFliersShowsNoFlier [
+
+	self assert: (BpBoxPlot instanceWithoutFliers parts at: #fliers) isEmpty
 ]
 
 { #category : 'tests' }
