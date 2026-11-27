@@ -22,7 +22,7 @@ BpBarPlot exampleInteraction
 
 ## Usage
 
-1. `BpChart>>barX:height:` and `BpChart>>barhY:width:` create me with my data (`x:height:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette. `BpChart` creates me with `BpBarPlot class>>barX:height:` or `barhY:width:`, which also create me apart, to be added with `BpChart>>addArtist:`.
+1. `BpBarPlot class>>barX:height:` and `BpBarPlot class>>barhY:width:` create me with my data (`xValues:height:`), and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`), which gives me one color of its palette.
 2. My chart reads my `stickyValuesOn:` (the bottoms), `managedTicksOn:` (categories or tick labels) and `logAxes` (the value axis when `log:` is true).
 
 - `positions`, `dataValues` and `patches` are the results of my last computation.
@@ -36,14 +36,13 @@ BpBarPlot exampleInteraction
 
 ## Invariants and Assumptions
 
-- When `x` and `height` are both collections, they have the same size; `x:height:` changes both at once.
+- When `x` and `height` are both collections, they have the same size; `xValues:height:` changes both at once.
 - The values of `x` are all numbers or all strings.
 "
 Class {
 	#name : 'BpBarPlot',
 	#superclass : 'BpArtist',
 	#instVars : [
-		'x',
 		'height',
 		'width',
 		'bottom',
@@ -56,7 +55,8 @@ Class {
 		'log',
 		'positions',
 		'heights',
-		'categories'
+		'categories',
+		'xValues'
 	],
 	#category : 'Bloc-Plotter-Bar',
 	#package : 'Bloc-Plotter',
@@ -64,22 +64,22 @@ Class {
 }
 
 { #category : 'instance creation' }
-BpBarPlot class >> barX: aCollectionOrValue height: aCollectionOrNumber [
+BpBarPlot class >> barXValues: aCollectionOrValue heightValues: aCollectionOrNumber [
 	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured with width:, bottom:, align:, color:, tickLabel:, ... (see `BpBarPlot`)."
 
 	^ self new
-		x: aCollectionOrValue 
-		height: aCollectionOrNumber;
+		xValues: aCollectionOrValue 
+		heightValues: aCollectionOrNumber;
 		yourself
 ]
 
 { #category : 'instance creation' }
-BpBarPlot class >> barhY: aCollectionOrValue width: aCollectionOrNumber [
+BpBarPlot class >> barhYValues: aCollectionOrValue widthValues: aCollectionOrNumber [
 	"Answer horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, the horizontal counterpart of `barX:height:`."
 
 	^ self new
 		  orientation: #horizontal;
-		  x: aCollectionOrValue height: aCollectionOrNumber;
+		  xValues: aCollectionOrValue heightValues: aCollectionOrNumber;
 		  yourself
 ]
 
@@ -205,8 +205,8 @@ BpBarPlot class >> instanceBarColors [
 	<sampleInstance>
 	| chartPlotter |
 	chartPlotter := self
-		barX: #( 'apple' 'blueberry' 'cherry' 'orange' ) 
-		height: #( 40 100 30 55 ).
+		barXValues: #( 'apple' 'blueberry' 'cherry' 'orange' ) 
+		heightValues: #( 40 100 30 55 ).
 	chartPlotter
 		label: #( 'red' 'blue' '_red' 'orange' );
 		color: (#( 1 2 1 5 ) collect: [ :each | BpQualitativePalette set1 colorAt: each ]).
@@ -255,7 +255,7 @@ BpBarPlot class >> instanceHorizontalBars [
 	| random people |
 	random := Random seed: 19680801.
 	people := #( 'Tom' 'Dick' 'Harry' 'Slim' 'Jim' ).
-	^ (self barhY: #( 4 3 2 1 0 ) width: (people collect: [ :each | 3 + (10 * random next) ]))
+	^ (self barhYValues: #( 4 3 2 1 0 ) widthValues: (people collect: [ :each | 3 + (10 * random next) ]))
 		  tickLabel: people;
 		  yourself
 ]
@@ -265,7 +265,7 @@ BpBarPlot class >> instancePlotType [
 	"Plot types: bar(x, height), eight bars one unit wide outlined in white."
 
 	<sampleInstance>
-	^ (self barX: ((0 to: 7) collect: [ :each | each + 0.5 ]) height: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ))
+	^ (self barXValues: ((0 to: 7) collect: [ :each | each + 0.5 ]) heightValues: #( 4.8 5.5 3.5 4.6 6.5 6.6 2.6 3.0 ))
 		  width: 1;
 		  edgeColor: ((BpSequentialPalette greys: 9) colorAt: 1);
 		  lineWidth: 0.7;
@@ -277,7 +277,7 @@ BpBarPlot class >> instanceThreeBars [
 	"Answer three bars of fruits."
 
 	<sampleInstance>
-	^ self barX: #( 'apple' 'blueberry' 'cherry' ) height: #( 40 100 30 )
+	^ self barXValues: #( 'apple' 'blueberry' 'cherry' ) heightValues: #( 40 100 30 )
 ]
 
 { #category : 'private - demo' }
@@ -287,7 +287,7 @@ BpBarPlot class >> penguinGroup: aCollectionOfMeans at: anIndex label: aString [
 	| width offset |
 	width := 0.25.
 	offset := width * (anIndex - 1).
-	^ (self barX: ((0 to: 2) collect: [ :position | position + offset ]) height: aCollectionOfMeans)
+	^ (self barXValues: ((0 to: 2) collect: [ :position | position + offset ]) heightValues: aCollectionOfMeans)
 		  width: width;
 		  label: aString;
 		  yourself
@@ -311,7 +311,7 @@ BpBarPlot class >> penguinsBelowAverageMass [
 BpBarPlot class >> penguinsLayer: aCollectionOfCounts on: aCollectionOfBottoms label: aString [
 	"Answer the bars of the stacked bar demo for one layer: one bar per species, 0.5 wide, starting on aCollectionOfBottoms."
 
-	^ (self barX: self penguinSpecies height: aCollectionOfCounts)
+	^ (self barXValues: self penguinSpecies heightValues: aCollectionOfCounts)
 		  width: 0.5;
 		  label: aString;
 		  bottom: aCollectionOfBottoms;
@@ -337,12 +337,12 @@ BpBarPlot >> align: aSymbol [
 BpBarPlot >> barCount [
 	"Answer the number of bars: the size of x or height, whichever is a collection, 1 when both are single values."
 
-	(x isNil or: [ height isNil ]) ifTrue: [ ^ 0 ].
-	((self isMany: x) and: [ (self isMany: height) and: [ x size ~= height size ] ]) ifTrue: [
+	(xValues isNil or: [ height isNil ]) ifTrue: [ ^ 0 ].
+	((self isMany: xValues) and: [ (self isMany: height) and: [ xValues size ~= height size ] ]) ifTrue: [
 		^ self error: ('x and height have different sizes: {1} and {2}' format: {
-			   x size.
+			   xValues size.
 			   height size }) ].
-	(self isMany: x) ifTrue: [ ^ x size ].
+	(self isMany: xValues) ifTrue: [ ^ xValues size ].
 	(self isMany: height) ifTrue: [ ^ height size ].
 	^ 1
 ]
@@ -404,7 +404,7 @@ BpBarPlot >> compute [
 	"Broadcast x and height to one value per bar, as numpy, and replace the categories of x by their positions."
 
 	| values |
-	values := (1 to: self barCount) collect: [ :index | self setting: x at: index ].
+	values := (1 to: self barCount) collect: [ :index | self setting: xValues at: index ].
 	heights := (1 to: values size) collect: [ :index | self setting: height at: index ].
 	categories := self categoriesOf: values.
 	positions := categories ifNil: [ values ] ifNotNil: [ values collect: [ :each | (categories indexOf: each) - 1 ] ]
@@ -679,24 +679,24 @@ BpBarPlot >> width: aNumberOrCollection [
 ]
 
 { #category : 'accessing - data' }
-BpBarPlot >> x [
+BpBarPlot >> xValues [
 
-	^ x
+	^ xValues
 ]
 
 { #category : 'accessing - data' }
-BpBarPlot >> x: aCollectionOrValue [
+BpBarPlot >> xValues: aCollectionOrValue [
 	"Set the positions of the bars: numbers, or category names placed from 0."
 
-	x := aCollectionOrValue.
+	xValues := aCollectionOrValue.
 	self refresh
 ]
 
 { #category : 'accessing - data' }
-BpBarPlot >> x: aCollectionOrValue height: aCollectionOrNumber [
+BpBarPlot >> xValues: aCollectionOrValue heightValues: aCollectionOrNumber [
 	"Set the positions and the heights of the bars at once, so that their number can change."
 
-	x := aCollectionOrValue.
+	xValues := aCollectionOrValue.
 	height := aCollectionOrNumber.
 	self refresh
 ]

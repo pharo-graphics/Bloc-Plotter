@@ -42,10 +42,10 @@ BpPolarChartTest >> newChartOfTwoBars [
 	| chart |
 	chart := self newChart.
 	(chart
-		 barX: {
+		 barXValues: {
 			 0.
 			 Float pi }
-		 height: #( 10 10 )) width: Float halfPi.
+		 heightValues: #( 10 10 )) width: Float halfPi.
 	^ chart
 ]
 
@@ -65,7 +65,7 @@ BpPolarChartTest >> testBarIsPaintedInItsSector [
 	color := BpQualitativePalette set1 colorAt: 1.
 	chart := self newChart.
 	chart grid: false.
-	(chart barX: { Float halfPi } height: #( 10 ))
+	(chart barXValues: { Float halfPi } heightValues: #( 10 ))
 		width: Float halfPi;
 		color: color.
 	chart yLimits: #( 0 10 ).
@@ -85,7 +85,7 @@ BpPolarChartTest >> testBarsStandOnTheirBottom [
 	color := BpQualitativePalette set1 colorAt: 1.
 	chart := self newChart.
 	chart grid: false.
-	(chart barX: { Float halfPi } height: #( 5 ))
+	(chart barXValues: { Float halfPi } heightValues: #( 5 ))
 		width: Float halfPi;
 		bottom: 5;
 		color: color.
@@ -155,7 +155,7 @@ BpPolarChartTest >> testGridIsShownByDefault [
 
 	| chart |
 	chart := self newChart.
-	chart barX: #( 0 1 ) height: #( 5 8.5 ).
+	chart barXValues: #( 0 1 ) heightValues: #( 5 8.5 ).
 	self assert: (chart plotArea gridLines count: [ :each | each axis = #x ]) equals: 8.
 	self assert: (chart plotArea gridLines count: [ :each | each axis = #y ]) equals: 4
 ]
@@ -190,7 +190,7 @@ BpPolarChartTest >> testLegendIsInTheUpperRightCorner [
 
 	| chart |
 	chart := self newChart.
-	(chart barX: #( 0 1 ) height: #( 5 10 )) label: 'bars'.
+	(chart barXValues: #( 0 1 ) heightValues: #( 5 10 )) label: 'bars'.
 	chart legend.
 	chart inNewHeadlessSpaceDo: [ :space |
 		space settle.
@@ -203,7 +203,7 @@ BpPolarChartTest >> testLegendIsOutsideThePlotArea [
 
 	| chart |
 	chart := self newChart.
-	(chart barX: #( 0 1 ) height: #( 5 10 )) label: 'bars'.
+	(chart barXValues: #( 0 1 ) heightValues: #( 5 10 )) label: 'bars'.
 	chart legend.
 	self assert: chart legendElement labels asArray equals: #( 'bars' ).
 	self assert: chart legendElement parent identicalTo: chart
@@ -214,7 +214,7 @@ BpPolarChartTest >> testLegendIsReplacedAtEachRebuild [
 
 	| chart bars |
 	chart := self newChart.
-	bars := chart barX: #( 0 1 ) height: #( 5 10 ).
+	bars := chart barXValues: #( 0 1 ) heightValues: #( 5 10 ).
 	bars label: 'bars'.
 	chart legend.
 	bars label: 'others'.
@@ -236,7 +236,7 @@ BpPolarChartTest >> testNoLegendByDefault [
 
 	| chart |
 	chart := self newChart.
-	(chart barX: #( 0 1 ) height: #( 5 10 )) label: 'bars'.
+	(chart barXValues: #( 0 1 ) heightValues: #( 5 10 )) label: 'bars'.
 	self assert: chart legendElement isNil
 ]
 
@@ -256,7 +256,7 @@ BpPolarChartTest >> testRadiiHaveAMarginAtTheEdge [
 
 	| chart |
 	chart := self newChart.
-	chart barX: #( 0 1 ) height: #( 5 10 ).
+	chart barXValues: #( 0 1 ) heightValues: #( 5 10 ).
 	self assert: chart yLimits last closeTo: 10.5
 ]
 
@@ -284,7 +284,7 @@ BpPolarChartTest >> testTheCenterHasNoTick [
 
 	| chart |
 	chart := self newChart.
-	chart barX: #( 0 1 ) height: #( 5 8.5 ).
+	chart barXValues: #( 0 1 ) heightValues: #( 5 8.5 ).
 	self assert: (self labelsOn: #y of: chart) equals: #( '2' '4' '6' '8' )
 ]
 
@@ -328,7 +328,7 @@ BpPolarChartTest >> testYLimitsReplaceTheRadii [
 
 	| chart |
 	chart := self newChart.
-	chart barX: #( 0 1 ) height: #( 5 10 ).
+	chart barXValues: #( 0 1 ) heightValues: #( 5 10 ).
 	chart yLimits: #( 0 20 ).
 	self assert: chart yLimits equals: #( 0 20 )
 ]

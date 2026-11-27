@@ -13,7 +13,7 @@ BpHistogramTest >> testAlignLeftCentersBarsOnLeftEdges [
 
 	| bar |
 	bar := (BpHistogram new
-		        x: #( 1 );
+		        xValues: #( 1 );
 		        bins: #( 0 2 );
 		        align: #left;
 		        yourself) patches first.
@@ -24,7 +24,7 @@ BpHistogramTest >> testAlignLeftCentersBarsOnLeftEdges [
 BpHistogramTest >> testAlphaIsTheOpacity [
 
 	self assert: ((BpHistogram new
-		  x: #( 1 );
+		  xValues: #( 1 );
 		  alpha: 0.75;
 		  yourself) patches first opacity closeTo: 0.75)
 ]
@@ -34,7 +34,7 @@ BpHistogramTest >> testBarFillsItsBin [
 
 	| bar |
 	bar := (BpHistogram new
-		        x: #( 1 3 3 );
+		        xValues: #( 1 3 3 );
 		        bins: #( 0 2 4 );
 		        yourself) patches second.
 	self assert: bar dataBounds equals: (2 @ 0 corner: 4 @ 2).
@@ -47,7 +47,7 @@ BpHistogramTest >> testBarStackedStacks [
 
 	self
 		assert: (BpHistogram new
-			 x: #( #( 0 1 ) #( 9 10 ) );
+			 xValues: #( #( 0 1 ) #( 9 10 ) );
 			 bins: 2;
 			 histType: #barstacked;
 			 yourself) counts
@@ -58,7 +58,7 @@ BpHistogramTest >> testBarStackedStacks [
 BpHistogramTest >> testBarsHaveNoBorderByDefault [
 
 	self assert: (BpHistogram new
-		 x: #( 1 );
+		 xValues: #( 1 );
 		 yourself) patches first border isTransparent
 ]
 
@@ -67,7 +67,7 @@ BpHistogramTest >> testBarsUseTheFirstCycleColor [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 );
+			 xValues: #( 1 );
 			 yourself) patches first background paint color
 		equals: (BpPalette default colorAt: 1)
 ]
@@ -77,7 +77,7 @@ BpHistogramTest >> testBottomShiftsTheBars [
 
 	| bar |
 	bar := (BpHistogram new
-		        x: #( 1 );
+		        xValues: #( 1 );
 		        bins: #( 0 2 );
 		        bottom: 5;
 		        yourself) patches first.
@@ -89,7 +89,7 @@ BpHistogramTest >> testColorGivesOneColorPerDataset [
 
 	self
 		assert: (BpHistogram new
-			 x: #( #( 1 ) #( 2 ) );
+			 xValues: #( #( 1 ) #( 2 ) );
 			 color: {
 				 Color red.
 				 Color blue };
@@ -102,7 +102,7 @@ BpHistogramTest >> testCountsOfOneDataset [
 
 	| histogram |
 	histogram := BpHistogram new
-		             x: #( 1 2 2 3 3 3 );
+		             xValues: #( 1 2 2 3 3 3 );
 		             bins: 3;
 		             yourself.
 	self assert: histogram counts equals: #( 1 2 3 ).
@@ -118,7 +118,7 @@ BpHistogramTest >> testCumulative [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 2 2 3 3 3 );
+			 xValues: #( 1 2 2 3 3 3 );
 			 bins: 3;
 			 cumulative: true;
 			 yourself) counts
@@ -130,7 +130,7 @@ BpHistogramTest >> testCumulativeDensityEndsAtOne [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 2 2 3 3 3 );
+			 xValues: #( 1 2 2 3 3 3 );
 			 bins: 3;
 			 density: true;
 			 cumulative: true;
@@ -144,7 +144,7 @@ BpHistogramTest >> testDatasetsArePutSideBySide [
 
 	| histogram |
 	histogram := BpHistogram new
-		             x: #( #( 1 ) #( 1 ) );
+		             xValues: #( #( 1 ) #( 1 ) );
 		             bins: #( 0 5 10 );
 		             yourself.
 	self assert: histogram patches first first dataBounds left closeTo: 0.5.
@@ -158,7 +158,7 @@ BpHistogramTest >> testDatasetsShareTheirEdges [
 
 	| histogram |
 	histogram := BpHistogram new
-		             x: #( #( 0 1 ) #( 9 10 ) );
+		             xValues: #( #( 0 1 ) #( 9 10 ) );
 		             bins: 2;
 		             yourself.
 	self assert: histogram binEdges equals: #( 0 5 10 ).
@@ -170,7 +170,7 @@ BpHistogramTest >> testDatasetsUseTheNextCycleColors [
 
 	self
 		assert: (BpHistogram new
-			 x: #( #( 1 ) #( 2 ) );
+			 xValues: #( #( 1 ) #( 2 ) );
 			 yourself) patches second first background paint color
 		equals: (BpPalette default colorAt: 2)
 ]
@@ -180,7 +180,7 @@ BpHistogramTest >> testDefaultBinsAreTen [
 
 	self
 		assert: (BpHistogram new
-			 x: (1 to: 100);
+			 xValues: (1 to: 100);
 			 yourself) counts size
 		equals: 10
 ]
@@ -190,7 +190,7 @@ BpHistogramTest >> testDensity [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 2 2 3 );
+			 xValues: #( 1 2 2 3 );
 			 bins: #( 0 2 4 );
 			 density: true;
 			 yourself) counts
@@ -202,7 +202,7 @@ BpHistogramTest >> testEdgeColorAndLineWidthGiveABorder [
 
 	| bar |
 	bar := (BpHistogram new
-		        x: #( 1 );
+		        xValues: #( 1 );
 		        edgeColor: Color black;
 		        lineWidth: 2;
 		        yourself) patches first.
@@ -215,7 +215,7 @@ BpHistogramTest >> testFaceColorOverridesColorOfBars [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 );
+			 xValues: #( 1 );
 			 color: Color red;
 			 faceColor: Color blue;
 			 yourself) patches first background paint color
@@ -227,7 +227,7 @@ BpHistogramTest >> testFillFalseLeavesBarsEmpty [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 );
+			 xValues: #( 1 );
 			 fill: false;
 			 edgeColor: Color red;
 			 yourself) patches first background paint color
@@ -239,7 +239,7 @@ BpHistogramTest >> testHorizontalSwapsTheAxes [
 
 	| bar |
 	bar := (BpHistogram new
-		        x: #( 1 3 3 );
+		        xValues: #( 1 3 3 );
 		        bins: #( 0 2 4 );
 		        orientation: #horizontal;
 		        yourself) patches second.
@@ -293,7 +293,7 @@ BpHistogramTest >> testInstancesOfTheMultiHistDemosShareTheirDatasets [
 BpHistogramTest >> testLineStyleDashesTheBorder [
 
 	self assert: (BpHistogram new
-		 x: #( 1 );
+		 xValues: #( 1 );
 		 edgeColor: Color red;
 		 lineStyle: #dashed;
 		 yourself) patches first border style dashArray isNotEmpty
@@ -304,7 +304,7 @@ BpHistogramTest >> testOneBarPerBin [
 
 	| histogram |
 	histogram := BpHistogram new
-		             x: #( 1 2 2 3 3 3 );
+		             xValues: #( 1 2 2 3 3 3 );
 		             bins: 3;
 		             yourself.
 	self assert: histogram patches size equals: 3.
@@ -316,7 +316,7 @@ BpHistogramTest >> testRange [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 3 12 );
+			 xValues: #( 1 3 12 );
 			 range: #( 0 4 );
 			 bins: 2;
 			 yourself) counts
@@ -328,7 +328,7 @@ BpHistogramTest >> testRelativeWidthNarrowsTheBars [
 
 	| bar |
 	bar := (BpHistogram new
-		        x: #( 1 );
+		        xValues: #( 1 );
 		        bins: #( 0 10 );
 		        relativeWidth: 0.8;
 		        yourself) patches first.
@@ -341,7 +341,7 @@ BpHistogramTest >> testReverseCumulative [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 2 2 3 3 3 );
+			 xValues: #( 1 2 2 3 3 3 );
 			 bins: 3;
 			 cumulative: -1;
 			 yourself) counts
@@ -353,7 +353,7 @@ BpHistogramTest >> testStackedBarsStartOnThePreviousTop [
 
 	| histogram |
 	histogram := BpHistogram new
-		             x: #( #( 1 1 ) #( 1 ) );
+		             xValues: #( #( 1 1 ) #( 1 ) );
 		             bins: #( 0 2 );
 		             histType: #barstacked;
 		             yourself.
@@ -365,7 +365,7 @@ BpHistogramTest >> testStackedCountsAreSummed [
 
 	self
 		assert: (BpHistogram new
-			 x: #( #( 0 1 ) #( 9 10 ) );
+			 xValues: #( #( 0 1 ) #( 9 10 ) );
 			 bins: 2;
 			 stacked: true;
 			 yourself) counts
@@ -377,7 +377,7 @@ BpHistogramTest >> testStackedDensityNormalizesTheSum [
 
 	self
 		assert: (BpHistogram new
-			 x: #( #( 1 ) #( 3 ) );
+			 xValues: #( #( 1 ) #( 3 ) );
 			 bins: #( 0 2 4 );
 			 stacked: true;
 			 density: true;
@@ -390,7 +390,7 @@ BpHistogramTest >> testStackedStepStartsOnThePreviousTop [
 
 	| patches |
 	patches := (BpHistogram new
-		            x: #( #( 1 ) #( 1 3 ) );
+		            xValues: #( #( 1 ) #( 1 3 ) );
 		            bins: #( 0 2 4 );
 		            histType: #step;
 		            stacked: true;
@@ -408,7 +408,7 @@ BpHistogramTest >> testStackedStepStartsOnThePreviousTop [
 BpHistogramTest >> testStepCanBeDrawnBeforeLayout [
 
 	self assert: (BpHistogram new
-		 x: #( 1 3 3 );
+		 xValues: #( 1 3 3 );
 		 histType: #step;
 		 yourself) patches first asForm isNotNil
 ]
@@ -418,7 +418,7 @@ BpHistogramTest >> testStepFilledFillsDownToThePreviousTop [
 
 	| patches |
 	patches := (BpHistogram new
-		            x: #( #( 1 ) #( 1 3 ) );
+		            xValues: #( #( 1 ) #( 1 3 ) );
 		            bins: #( 0 2 4 );
 		            histType: #stepfilled;
 		            stacked: true;
@@ -434,7 +434,7 @@ BpHistogramTest >> testStepFilledFillsDownToThePreviousTop [
 BpHistogramTest >> testStepFilledIsClosed [
 
 	self assert: (BpHistogram new
-		 x: #( 1 3 3 );
+		 xValues: #( 1 3 3 );
 		 bins: #( 0 2 4 );
 		 histType: #stepfilled;
 		 yourself) patches first isClosed
@@ -446,7 +446,7 @@ BpHistogramTest >> testStepIsDrawnWithColorNotFaceColor [
 
 	| step |
 	step := (BpHistogram new
-		         x: #( 1 );
+		         xValues: #( 1 );
 		         histType: #step;
 		         faceColor: Color green;
 		         yourself) patches first.
@@ -459,7 +459,7 @@ BpHistogramTest >> testStepIsOneOpenOutline [
 
 	| patches |
 	patches := (BpHistogram new
-		            x: #( 1 3 3 );
+		            xValues: #( 1 3 3 );
 		            bins: #( 0 2 4 );
 		            histType: #step;
 		            yourself) patches.
@@ -491,7 +491,7 @@ BpHistogramTest >> testWeights [
 
 	self
 		assert: (BpHistogram new
-			 x: #( 1 3 );
+			 xValues: #( 1 3 );
 			 weights: #( 2 0.5 );
 			 bins: #( 0 2 4 );
 			 yourself) counts

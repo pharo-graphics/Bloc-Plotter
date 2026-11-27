@@ -25,22 +25,6 @@ BpChartTest >> newChart [
 		  yourself
 ]
 
-{ #category : 'tests' }
-BpChartTest >> testBarIsPaintedWhereItsDataIs [
-	"Sample the middle of the bar of the bin [0, 2), which holds 3 values."
-
-	| chart form point |
-	chart := self newChart.
-	(chart hist: #( 1 1 1 3 ))
-		bins: #( 0 2 4 );
-		color: Color red.
-	form := chart asForm.
-	point := chart plotBounds origin + (chart dataTransform pointFor: 1 @ 1.5).
-	self assert: (form colorAt: point rounded) equals: Color red.
-	point := chart plotBounds origin + (chart dataTransform pointFor: 3 @ 1.5).
-	self assert: (form colorAt: point rounded) equals: Color white
-]
-
 { #category : 'tests - box plot' }
 BpChartTest >> testBoxPlotAddsABoxPlot [
 

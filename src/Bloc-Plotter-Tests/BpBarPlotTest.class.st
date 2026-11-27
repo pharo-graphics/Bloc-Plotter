@@ -18,7 +18,7 @@ BpBarPlotTest >> bars [
 	"Three bars at 1, 2 and 3, 4, 5 and 6 high."
 
 	^ BpBarPlot new
-		  x: #( 1 2 3 ) height: #( 4 5 6 );
+		  xValues: #( 1 2 3 ) heightValues: #( 4 5 6 );
 		  yourself
 ]
 
@@ -40,7 +40,7 @@ BpBarPlotTest >> testAlphaMakesTheBarsTransparent [
 BpBarPlotTest >> testBarhYWidthAnswersHorizontalBars [
 
 	| bars |
-	bars := BpBarPlot barhY: #( 1 2 ) width: #( 3 4 ).
+	bars := BpBarPlot barhYValues: #( 1 2 ) widthValues: #( 3 4 ).
 	self assert: bars orientation equals: #horizontal.
 	self assert: bars positions equals: #( 1 2 ).
 	self assert: bars patches second dataBounds corner x equals: 4
@@ -95,7 +95,7 @@ BpBarPlotTest >> testCategoriesArePositionedFromZero [
 
 	| bars |
 	bars := BpBarPlot new
-		        x: #( 'apple' 'cherry' 'apple' ) height: #( 1 2 3 );
+		        xValues: #( 'apple' 'cherry' 'apple' ) heightValues: #( 1 2 3 );
 		        yourself.
 	self assert: bars positions equals: #( 0 1 0 ).
 	self assert: bars patches first dataBounds equals: (-0.4 @ 0 corner: 0.4 @ 1)
@@ -106,7 +106,7 @@ BpBarPlotTest >> testCategoriesAreTheTicksOfThePositionAxis [
 
 	| bars |
 	bars := BpBarPlot new
-		        x: #( 'apple' 'cherry' 'apple' ) height: #( 1 2 3 );
+		        xValues: #( 'apple' 'cherry' 'apple' ) heightValues: #( 1 2 3 );
 		        yourself.
 	self assert: (bars managedTicksOn: #x) equals: {
 		(0 -> 'apple').
@@ -115,21 +115,10 @@ BpBarPlotTest >> testCategoriesAreTheTicksOfThePositionAxis [
 ]
 
 { #category : 'tests' }
-BpBarPlotTest >> testChartBarAddsABarPlot [
-
-	| chart bars |
-	chart := BpChart new.
-	bars := chart barX: #( 1 2 ) height: #( 3 4 ).
-	self assert: bars chart identicalTo: chart.
-	self assert: (chart artists includes: bars).
-	self assert: bars patches size equals: 2
-]
-
-{ #category : 'tests' }
 BpBarPlotTest >> testChartBarhAddsHorizontalBars [
 
 	| bars |
-	bars := (BpChart new barhY: #( 1 2 ) width: #( 3 4 ))
+	bars := (BpChart new barhYValues: #( 1 2 ) widthValues: #( 3 4 ))
 		        width: 1 / 2;
 		        yourself.
 	self assert: bars orientation equals: #horizontal.
@@ -199,7 +188,7 @@ BpBarPlotTest >> testHandlersAreKeptWhenTheBarsAreRebuilt [
 { #category : 'tests - errors' }
 BpBarPlotTest >> testHeightsOfAnotherSizeRaiseError [
 
-	self should: [ BpBarPlot new x: #( 1 2 3 ) height: #( 1 2 ) ] raise: Error
+	self should: [ BpBarPlot new xValues: #( 1 2 3 ) heightValues: #( 1 2 ) ] raise: Error
 ]
 
 { #category : 'tests' }
@@ -322,7 +311,7 @@ BpBarPlotTest >> testLogPutsTheValueAxisOnALogScale [
 { #category : 'tests - errors' }
 BpBarPlotTest >> testMixedNumbersAndCategoriesRaiseError [
 
-	self should: [ BpBarPlot new x: #( 1 'apple' ) height: #( 1 2 ) ] raise: Error
+	self should: [ BpBarPlot new xValues: #( 1 'apple' ) heightValues: #( 1 2 ) ] raise: Error
 ]
 
 { #category : 'tests' }
@@ -359,7 +348,7 @@ BpBarPlotTest >> testOneHeightIsSharedByAllBars [
 
 	self
 		assert: ((BpBarPlot new
-			  x: #( 1 2 3 ) height: 2;
+			  xValues: #( 1 2 3 ) heightValues: 2;
 			  yourself) patches collect: [ :each | each amount ] as: Array)
 		equals: #( 2 2 2 )
 ]

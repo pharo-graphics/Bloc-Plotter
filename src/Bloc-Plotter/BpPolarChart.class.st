@@ -80,7 +80,7 @@ BpPolarChart class >> instanceBars [
 	chart := self new
 		         extent: 400 @ 400;
 		         yourself.
-	(chart barX: ((0 to: 3) collect: [ :each | each * Float halfPi ]) height: #( 4 7 5 9 )) width: Float halfPi * 0.8.
+	(chart barXValues: ((0 to: 3) collect: [ :each | each * Float halfPi ]) heightValues: #( 4 7 5 9 )) width: Float halfPi * 0.8.
 	^ chart
 ]
 
@@ -123,7 +123,7 @@ BpPolarChart class >> showWindRoseIn: aPolarChart [
 
 	| directions |
 	directions := #( 'N' 'NE' 'E' 'SE' 'S' 'SW' 'W' 'NW' ).
-	(aPolarChart barX: ((0 to: 7) collect: [ :each | each * Float pi / 4 ]) height: #( 5 3 2 4 8 12 9 6 ))
+	(aPolarChart barXValues: ((0 to: 7) collect: [ :each | each * Float pi / 4 ]) heightValues: #( 5 3 2 4 8 12 9 6 ))
 		width: Float pi / 5;
 		alpha: 0.7.
 	aPolarChart

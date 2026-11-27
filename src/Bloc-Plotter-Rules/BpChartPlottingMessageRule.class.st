@@ -68,7 +68,7 @@ BpChartPlottingMessageRule class >> instanceRule [
 BpChartPlottingMessageRule class >> plottingSelectors [
 	"Answer the plotting messages of BpChart that duplicate the creation of the artists, to be removed."
 
-	^ #( #barX:height: #barhY:width: #boxPlot: #densityPlot: #errorBarX:y:xErr:yErr: #errorBarX:y:yErr: #fillBetweenX:y1:
+	^ #( #barXValues:heightValues: #barhYValues:widthValues: #boxPlot: #densityPlot: #errorBarX:y:xErr:yErr: #errorBarX:y:yErr: #fillBetweenX:y1:
 	     #fillBetweenX:y1:y2: #fillBetweenY:x1: #fillBetweenY:x1:x2: #heatmap: #hexbinX:y: #hist: #plotX:y: #plotX:y:format:
 	     #scatterX:y: #stackPlotX:ys: #stairs: #stairs:edges: #stem: #stemLocations:heads: #violinPlot: #violinPlot:positions: )
 ]

@@ -212,17 +212,17 @@ BpChart >> automaticLimitsOn: anAxis [
 ]
 
 { #category : 'plotting' }
-BpChart >> barX: aCollectionOrValue height: aCollectionOrNumber [
+BpChart >> barXValues: aCollectionOrValue heightValues: aCollectionOrNumber [
 	"Add vertical bars at the positions aCollectionOrValue (numbers or category names), aCollectionOrNumber high, and answer them, to be configured with width:, bottom:, align:, color:, tickLabel:, ... (see `BpBarPlot`)."
 
-	^ self addArtist: (BpBarPlot barX: aCollectionOrValue height: aCollectionOrNumber)
+	^ self addArtist: (BpBarPlot barXValues: aCollectionOrValue heightValues: aCollectionOrNumber)
 ]
 
 { #category : 'plotting' }
-BpChart >> barhY: aCollectionOrValue width: aCollectionOrNumber [
+BpChart >> barhYValues: aCollectionOrValue widthValues: aCollectionOrNumber [
 	"Add horizontal bars at the positions aCollectionOrValue on the y axis, aCollectionOrNumber long, and answer them, the horizontal counterpart of `barX:height:`. They keep the vocabulary of `barX:height:`: their thickness is width:, their start is bottom:."
 
-	^ self addArtist: (BpBarPlot barhY: aCollectionOrValue width: aCollectionOrNumber)
+	^ self addArtist: (BpBarPlot barhYValues: aCollectionOrValue widthValues: aCollectionOrNumber)
 ]
 
 { #category : 'plotting' }
@@ -391,9 +391,7 @@ BpChart >> hexbinX: xValues y: yValues [
 BpChart >> hist: aCollection [
 	"Add a histogram of aCollection (numbers, or one collection of numbers per dataset) and answer it, to be configured with bins:, density:, histType:, ... (see `BpHistogram`)."
 
-	^ self addArtist: (BpHistogram new
-		   x: aCollection;
-		   yourself)
+	^ self addArtist: (BpHistogram xValues: aCollection)
 ]
 
 { #category : 'initialization' }

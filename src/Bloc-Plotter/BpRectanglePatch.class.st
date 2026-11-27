@@ -26,7 +26,7 @@ BpRectanglePatch class >> instanceBar [
 
 	<sampleInstance>
 	^ (BpHistogram new
-		   x: #( 1 2 2 3 );
+		   xValues: #( 1 2 2 3 );
 		   bins: 3;
 		   yourself) patches second
 ]

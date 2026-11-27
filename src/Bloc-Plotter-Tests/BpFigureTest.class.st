@@ -17,7 +17,7 @@ BpFigureTest >> testArtistsOfAChartAlreadyWithTheUniquePaletteAreNotRecomputed [
 	figure uniquePalette: palette.
 	chart := BpChart new.
 	chart palette: palette.
-	bars := chart barX: #( 1 2 ) height: #( 3 4 ).
+	bars := chart barXValues: #( 1 2 ) heightValues: #( 3 4 ).
 	patch := bars patches first.
 	figure chartAtRow: 1 column: 1 put: chart.
 	self assert: bars patches first identicalTo: patch
@@ -311,7 +311,7 @@ BpFigureTest >> testUniquePaletteRecolorsThePlacedChart [
 	| figure palette chart bars |
 	palette := BpQualitativePalette set1.
 	chart := BpChart new.
-	bars := chart barX: #( 1 2 ) height: #( 3 4 ).
+	bars := chart barXValues: #( 1 2 ) heightValues: #( 3 4 ).
 	figure := BpFigure new.
 	figure uniquePalette: palette.
 	figure chartAtRow: 1 column: 1 put: chart.

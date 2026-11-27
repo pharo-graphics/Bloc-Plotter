@@ -808,10 +808,19 @@ BpFigure class >> instanceHistTypes [
 		addArtist: BpHistogram instanceBarStackedNarrow;
 		title: 'barstacked'.
 	figure
-		chartAtRow: 1 column: 1 put: (BpChart new addArtist: BpHistogram instanceStepFilled; title: 'stepfilled'; yourself);
-		chartAtRow: 1 column: 2 put: (BpChart new addArtist: BpHistogram instanceStep; title: 'step'; yourself);
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: BpHistogram instanceStepFilled;
+			 title: 'stepfilled';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: BpHistogram instanceStep;
+			 title: 'step';
+			 yourself);
 		chartAtRow: 2 column: 1 put: barstacked;
-		chartAtRow: 2 column: 2 put: (BpChart new addArtist: BpHistogram instanceUnequalBins; title: 'bar, unequal bins'; yourself).
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: BpHistogram instanceUnequalBins;
+			 title: 'bar, unequal bins';
+			 yourself).
 	^ figure
 ]
 
@@ -1090,7 +1099,7 @@ BpFigure class >> instancePolarBar [
 	count := 20.
 	radii := (1 to: count) collect: [ :each | 10 * random next ].
 	figure := self rows: 1 columns: 1 chartClass: BpPolarChart.
-	(figure charts first barX: ((0 to: count - 1) collect: [ :each | Float twoPi * each / count ]) height: radii)
+	(figure charts first barXValues: ((0 to: count - 1) collect: [ :each | Float twoPi * each / count ]) heightValues: radii)
 		width: ((1 to: count) collect: [ :each | Float pi / 4 * random next ]);
 		color: (radii collect: [ :each | BpInterpolatedPalette viridis colorAt: each / 10 ]);
 		alpha: 0.5.

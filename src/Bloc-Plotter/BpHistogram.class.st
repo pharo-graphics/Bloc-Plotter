@@ -20,7 +20,7 @@ BpHistogram exampleInteraction
 
 ## Usage
 
-1. `BpHistogram class>>x:` creates me with the data, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`), which takes one color of its palette per dataset (`colorCount`). `BpHistogram class>>exampleHistTypes` adds two of us to the same chart.
+1. `BpHistogram class>>xValues:` creates me with the data, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`), which takes one color of its palette per dataset (`colorCount`). `BpHistogram class>>exampleHistTypes` adds two of us to the same chart.
 2. My chart reads my `stickyValuesOn:` (the bottoms of the bins) and `logAxes` (the value axis when `log:` is true).
 
 - The style setters take one value or one per dataset.
@@ -81,8 +81,12 @@ BpHistogram class >> exampleHist [
 	| figure chart histogram lowest highest palette |
 	figure := BpFigure rows: 1 columns: 2.
 	figure
-		chartAtRow: 1 column: 1 put: (BpChart new addArtist: self instanceStandardNormal; yourself);
-		chartAtRow: 1 column: 2 put: (BpChart new addArtist: self instanceShiftedNormal; yourself).
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceStandardNormal;
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceShiftedNormal;
+			 yourself).
 	figure show: 'hist: two distributions'.
 	figure := BpFigure rows: 1 columns: 2.
 	chart := BpChart new.
@@ -108,14 +112,23 @@ BpHistogram class >> exampleHistTypes [
 	| figure |
 	figure := BpFigure rows: 2 columns: 2.
 	figure
-		chartAtRow: 1 column: 1 put: (BpChart new addArtist: self instanceStepFilled; title: 'stepfilled'; yourself);
-		chartAtRow: 1 column: 2 put: (BpChart new addArtist: self instanceStep; title: 'step'; yourself);
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceStepFilled;
+			 title: 'stepfilled';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceStep;
+			 title: 'step';
+			 yourself);
 		chartAtRow: 2 column: 1 put: (BpChart new
-				 addArtist: self instanceBarStacked;
-				 addArtist: self instanceBarStackedNarrow;
-				 title: 'barstacked';
-				 yourself);
-		chartAtRow: 2 column: 2 put: (BpChart new addArtist: self instanceUnequalBins; title: 'bar, unequal bins'; yourself).
+			 addArtist: self instanceBarStacked;
+			 addArtist: self instanceBarStackedNarrow;
+			 title: 'barstacked';
+			 yourself);
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: self instanceUnequalBins;
+			 title: 'bar, unequal bins';
+			 yourself).
 	^ figure show: 'histogram_histtypes'
 ]
 
@@ -149,10 +162,23 @@ BpHistogram class >> exampleMultiHist [
 	| figure |
 	figure := BpFigure rows: 2 columns: 2.
 	figure
-		chartAtRow: 1 column: 1 put: (BpChart new addArtist: self instanceLabeledDatasets; legend; title: 'bars with legend'; yourself);
-		chartAtRow: 1 column: 2 put: (BpChart new addArtist: self instanceStackedBars; title: 'stacked bar'; yourself);
-		chartAtRow: 2 column: 1 put: (BpChart new addArtist: self instanceStackedSteps; title: 'stack step (unfilled)'; yourself);
-		chartAtRow: 2 column: 2 put: (BpChart new addArtist: self instanceDifferentSampleSizes; title: 'different sample sizes'; yourself).
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceLabeledDatasets;
+			 legend;
+			 title: 'bars with legend';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceStackedBars;
+			 title: 'stacked bar';
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceStackedSteps;
+			 title: 'stack step (unfilled)';
+			 yourself);
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: self instanceDifferentSampleSizes;
+			 title: 'different sample sizes';
+			 yourself).
 	^ figure show: 'histogram_multihist'
 ]
 
@@ -164,10 +190,26 @@ BpHistogram class >> exampleMultiHistStyles [
 	| figure |
 	figure := BpFigure rows: 2 columns: 2.
 	figure
-		chartAtRow: 1 column: 1 put: (BpChart new addArtist: self instanceEdgeColors; legend; title: 'Stacked Steps with Edgecolors'; yourself);
-		chartAtRow: 1 column: 2 put: (BpChart new addArtist: self instanceFaceColors; legend; title: 'Bars with different Facecolors'; yourself);
-		chartAtRow: 2 column: 1 put: (BpChart new addArtist: self instanceLineWidths; legend; title: 'Bars with Linewidths'; yourself);
-		chartAtRow: 2 column: 2 put: (BpChart new addArtist: self instanceLineStyles; legend; title: 'Bars with Linestyles'; yourself).
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceEdgeColors;
+			 legend;
+			 title: 'Stacked Steps with Edgecolors';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceFaceColors;
+			 legend;
+			 title: 'Bars with different Facecolors';
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceLineWidths;
+			 legend;
+			 title: 'Bars with Linewidths';
+			 yourself);
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: self instanceLineStyles;
+			 legend;
+			 title: 'Bars with Linestyles';
+			 yourself).
 	^ figure show: 'histogram_multihist styles'
 ]
 
@@ -181,15 +223,30 @@ BpHistogram class >> exampleOptions [
 	figure extent: 900 @ 520.
 	figure
 		chartAtRow: 1 column: 1 put: (BpChart new
-				 addArtist: self instanceCumulative;
-				 addArtist: self instanceReverseCumulative;
-				 title: 'cumulative: true and -1';
-				 yourself);
-		chartAtRow: 1 column: 2 put: (BpChart new addArtist: self instanceHorizontal; title: 'orientation: #horizontal'; yourself);
-		chartAtRow: 1 column: 3 put: (BpChart new addArtist: self instanceLogScale; title: 'log: true'; yourself);
-		chartAtRow: 2 column: 1 put: (BpChart new addArtist: self instanceLeftAligned; title: 'align: #left, bottom: 50'; yourself);
-		chartAtRow: 2 column: 2 put: (BpChart new addArtist: self instanceFreedmanDiaconisBins; title: 'bins: #fd'; yourself);
-		chartAtRow: 2 column: 3 put: (BpChart new addArtist: self instanceWeighted; title: 'range: #(0 3), weights: 0.5'; yourself).
+			 addArtist: self instanceCumulative;
+			 addArtist: self instanceReverseCumulative;
+			 title: 'cumulative: true and -1';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceHorizontal;
+			 title: 'orientation: #horizontal';
+			 yourself);
+		chartAtRow: 1 column: 3 put: (BpChart new
+			 addArtist: self instanceLogScale;
+			 title: 'log: true';
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceLeftAligned;
+			 title: 'align: #left, bottom: 50';
+			 yourself);
+		chartAtRow: 2 column: 2 put: (BpChart new
+			 addArtist: self instanceFreedmanDiaconisBins;
+			 title: 'bins: #fd';
+			 yourself);
+		chartAtRow: 2 column: 3 put: (BpChart new
+			 addArtist: self instanceWeighted;
+			 title: 'range: #(0 3), weights: 0.5';
+			 yourself).
 	^ figure show: 'hist options'
 ]
 
@@ -206,14 +263,22 @@ BpHistogram class >> histTypesNarrowSamples [
 	| random |
 	random := self demoRandom.
 	self normalSamples: 100 from: random.
-	^ self normalSamples: 100 mean: 200 deviation: 10 from: random
+	^ self
+		  normalSamples: 100
+		  mean: 200
+		  deviation: 10
+		  from: random
 ]
 
 { #category : 'private - demo' }
 BpHistogram class >> histTypesSamples [
 	"Answer the 100 samples of the histtypes demo (mean 200, deviation 25)."
 
-	^ self normalSamples: 100 mean: 200 deviation: 25 from: self demoRandom
+	^ self
+		  normalSamples: 100
+		  mean: 200
+		  deviation: 25
+		  from: self demoRandom
 ]
 
 { #category : 'private - demo' }
@@ -228,7 +293,7 @@ BpHistogram class >> instanceBarStacked [
 	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes), third chart, first histogram: the barstacked density of 100 normal samples (deviation 25)."
 
 	<sampleInstance>
-	^ (self x: self histTypesSamples)
+	^ (self xValues: self histTypesSamples)
 		  density: true;
 		  histType: #barstacked;
 		  relativeWidth: 0.8;
@@ -240,7 +305,7 @@ BpHistogram class >> instanceBarStackedNarrow [
 	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes), third chart, second histogram: the barstacked density of 100 normal samples of a smaller deviation (10)."
 
 	<sampleInstance>
-	^ (self x: self histTypesNarrowSamples)
+	^ (self xValues: self histTypesNarrowSamples)
 		  density: true;
 		  histType: #barstacked;
 		  relativeWidth: 0.8;
@@ -252,7 +317,7 @@ BpHistogram class >> instanceClickableBars [
 	"Answer 1000 standard normal samples in 20 bins edged with the lightest grey, so that a handler can highlight the bars."
 
 	<sampleInstance>
-	^ (self x: self thousandNormalSamples)
+	^ (self xValues: self thousandNormalSamples)
 		  bins: 20;
 		  edgeColor: ((BpSequentialPalette greys: 9) colorAt: 1);
 		  yourself
@@ -263,7 +328,7 @@ BpHistogram class >> instanceCumulative [
 	"Answer the cumulative density of 1000 standard normal samples, drawn as a step (see `BpHistogram>>cumulative:`)."
 
 	<sampleInstance>
-	^ (self x: self thousandNormalSamples)
+	^ (self xValues: self thousandNormalSamples)
 		  bins: 30;
 		  density: true;
 		  cumulative: true;
@@ -279,7 +344,7 @@ BpHistogram class >> instanceDifferentSampleSizes [
 	| random |
 	random := self demoRandom.
 	self normalSamples: 3000 from: random.
-	^ (self x: (#( 10000 5000 2000 ) collect: [ :each | self normalSamples: each from: random ]))
+	^ (self xValues: (#( 10000 5000 2000 ) collect: [ :each | self normalSamples: each from: random ]))
 		  bins: 10;
 		  histType: #bar;
 		  yourself
@@ -290,7 +355,7 @@ BpHistogram class >> instanceEdgeColors [
 	"Gallery: Plot multiple data sets as histograms (histogram_multihist), style settings, first chart: stacked unfilled steps, one edge color per dataset."
 
 	<sampleInstance>
-	^ (self x: self threeDatasets)
+	^ (self xValues: self threeDatasets)
 		  bins: 10;
 		  fill: false;
 		  histType: #step;
@@ -305,7 +370,7 @@ BpHistogram class >> instanceFaceColors [
 	"Gallery: Plot multiple data sets as histograms (histogram_multihist), style settings, second chart: stacked bars, one face color per dataset."
 
 	<sampleInstance>
-	^ (self x: self threeDatasets)
+	^ (self xValues: self threeDatasets)
 		  bins: 10;
 		  histType: #barstacked;
 		  faceColor: self stylesDemoColors;
@@ -318,7 +383,7 @@ BpHistogram class >> instanceFreedmanDiaconisBins [
 	"Answer a filled step histogram of 1000 standard normal samples whose bins come from the Freedman Diaconis strategy (bins: #fd), edged with the darkest grey."
 
 	<sampleInstance>
-	^ (self x: self thousandNormalSamples)
+	^ (self xValues: self thousandNormalSamples)
 		  bins: #fd;
 		  histType: #stepfilled;
 		  edgeColor: ((BpSequentialPalette greys: 9) colorAt: 9);
@@ -330,7 +395,7 @@ BpHistogram class >> instanceHorizontal [
 	"Answer a horizontal histogram of 1000 standard normal samples (see `BpHistogram>>orientation:`)."
 
 	<sampleInstance>
-	^ (self x: self thousandNormalSamples)
+	^ (self xValues: self thousandNormalSamples)
 		  bins: 15;
 		  orientation: #horizontal;
 		  relativeWidth: 0.9;
@@ -342,7 +407,7 @@ BpHistogram class >> instanceLabeledDatasets [
 	"Gallery: Plot multiple data sets as histograms (histogram_multihist), first chart: three datasets side by side, one color and one label each."
 
 	<sampleInstance>
-	^ (self x: self threeDatasets)
+	^ (self xValues: self threeDatasets)
 		  bins: 10;
 		  density: true;
 		  histType: #bar;
@@ -356,7 +421,7 @@ BpHistogram class >> instanceLeftAligned [
 	"Answer a histogram of 1000 standard normal samples on given bin edges, with narrow bars aligned on the left edges and starting at 50 (see `BpHistogram>>align:` and `BpHistogram>>bottom:`)."
 
 	<sampleInstance>
-	^ (self x: self thousandNormalSamples)
+	^ (self xValues: self thousandNormalSamples)
 		  bins: #( -3 -2 -1 0 1 2 3 );
 		  align: #left;
 		  relativeWidth: 0.5;
@@ -369,7 +434,7 @@ BpHistogram class >> instanceLineStyles [
 	"Gallery: Plot multiple data sets as histograms (histogram_multihist), style settings, fourth chart: unfilled bars, one line style per dataset."
 
 	<sampleInstance>
-	^ (self x: self threeDatasets)
+	^ (self xValues: self threeDatasets)
 		  bins: 10;
 		  fill: false;
 		  histType: #bar;
@@ -384,7 +449,7 @@ BpHistogram class >> instanceLineWidths [
 	"Gallery: Plot multiple data sets as histograms (histogram_multihist), style settings, third chart: unfilled bars, one line width per dataset."
 
 	<sampleInstance>
-	^ (self x: self threeDatasets)
+	^ (self xValues: self threeDatasets)
 		  bins: 10;
 		  fill: false;
 		  histType: #bar;
@@ -399,7 +464,7 @@ BpHistogram class >> instanceLogScale [
 	"Answer a histogram of 1000 standard normal samples whose counts are on a log scale (see `BpHistogram>>log:`)."
 
 	<sampleInstance>
-	^ (self x: self thousandNormalSamples)
+	^ (self xValues: self thousandNormalSamples)
 		  bins: 30;
 		  log: true;
 		  yourself
@@ -410,7 +475,7 @@ BpHistogram class >> instanceNormalSamples [
 	"Answer a histogram of 100 normal samples (mean 200, deviation 25) in 20 bins."
 
 	<sampleInstance>
-	^ (self x: self histTypesSamples)
+	^ (self xValues: self histTypesSamples)
 		  bins: 20;
 		  yourself
 ]
@@ -420,7 +485,7 @@ BpHistogram class >> instanceReverseCumulative [
 	"Answer the reversed cumulative density of 1000 standard normal samples (cumulative: -1), drawn as a step."
 
 	<sampleInstance>
-	^ (self x: self thousandNormalSamples)
+	^ (self xValues: self thousandNormalSamples)
 		  bins: 30;
 		  density: true;
 		  cumulative: -1;
@@ -436,7 +501,11 @@ BpHistogram class >> instanceShiftedNormal [
 	| random |
 	random := self demoRandom.
 	self normalSamples: 100000 from: random.
-	^ (self x: (self normalSamples: 100000 mean: 5 deviation: 0.4 from: random))
+	^ (self xValues: (self
+		    normalSamples: 100000
+		    mean: 5
+		    deviation: 0.4
+		    from: random))
 		  bins: 20;
 		  yourself
 ]
@@ -446,7 +515,7 @@ BpHistogram class >> instanceStackedBars [
 	"Gallery: Plot multiple data sets as histograms (histogram_multihist), second chart: the densities of three datasets stacked as bars."
 
 	<sampleInstance>
-	^ (self x: self threeDatasets)
+	^ (self xValues: self threeDatasets)
 		  bins: 10;
 		  density: true;
 		  histType: #bar;
@@ -459,7 +528,7 @@ BpHistogram class >> instanceStackedSteps [
 	"Gallery: Plot multiple data sets as histograms (histogram_multihist), third chart: three datasets stacked as unfilled steps."
 
 	<sampleInstance>
-	^ (self x: self threeDatasets)
+	^ (self xValues: self threeDatasets)
 		  bins: 10;
 		  histType: #step;
 		  stacked: true;
@@ -472,7 +541,7 @@ BpHistogram class >> instanceStandardNormal [
 	"Gallery: Histograms (hist), first figure, first chart: 100000 standard normal samples in 20 bins."
 
 	<sampleInstance>
-	^ (self x: self hundredThousandNormalSamples)
+	^ (self xValues: self hundredThousandNormalSamples)
 		  bins: 20;
 		  yourself
 ]
@@ -482,7 +551,7 @@ BpHistogram class >> instanceStandardNormalDensity [
 	"Gallery: Histograms (hist), second figure, second chart: the density of 100000 standard normal samples in 20 bins."
 
 	<sampleInstance>
-	^ (self x: self hundredThousandNormalSamples)
+	^ (self xValues: self hundredThousandNormalSamples)
 		  bins: 20;
 		  density: true;
 		  yourself
@@ -493,7 +562,7 @@ BpHistogram class >> instanceStep [
 	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes), second chart: the step density of the same samples, unfilled."
 
 	<sampleInstance>
-	^ (self x: self histTypesSamples)
+	^ (self xValues: self histTypesSamples)
 		  bins: 20;
 		  density: true;
 		  histType: #step;
@@ -507,7 +576,7 @@ BpHistogram class >> instanceStepFilled [
 	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes), first chart: a filled step density of 100 normal samples, half transparent."
 
 	<sampleInstance>
-	^ (self x: self histTypesSamples)
+	^ (self xValues: self histTypesSamples)
 		  bins: 20;
 		  density: true;
 		  histType: #stepfilled;
@@ -521,7 +590,7 @@ BpHistogram class >> instanceUnequalBins [
 	"Gallery: Demo of the histogram function's different histtype settings (histogram_histtypes), fourth chart: a bar density on unequally spaced bin edges."
 
 	<sampleInstance>
-	^ (self x: self histTypesSamples)
+	^ (self xValues: self histTypesSamples)
 		  bins: #( 100 150 180 195 205 220 250 300 );
 		  density: true;
 		  histType: #bar;
@@ -536,7 +605,7 @@ BpHistogram class >> instanceWeighted [
 	<sampleInstance>
 	| samples |
 	samples := self thousandNormalSamples.
-	^ (self x: samples)
+	^ (self xValues: samples)
 		  bins: 20;
 		  range: #( 0 3 );
 		  weights: (samples collect: [ :each | 0.5 ]);
@@ -581,11 +650,11 @@ BpHistogram class >> threeDatasets [
 ]
 
 { #category : 'instance creation' }
-BpHistogram class >> x: aCollection [
-	"Answer a histogram of aCollection: numbers, or one collection of numbers per dataset (see `BpHistogram>>x:`)."
+BpHistogram class >> xValues: aCollection [
+	"Answer a histogram of aCollection: numbers, or one collection of numbers per dataset (see `BpHistogram>>xValues:`)."
 
 	^ self new
-		  x: aCollection;
+		  xValues: aCollection;
 		  yourself
 ]
 
@@ -1300,7 +1369,7 @@ BpHistogram >> x [
 ]
 
 { #category : 'accessing - data' }
-BpHistogram >> x: aCollection [
+BpHistogram >> xValues: aCollection [
 	"Set the data: a collection of numbers, or a collection of such collections (one dataset each, of any size)."
 
 	x := aCollection.
