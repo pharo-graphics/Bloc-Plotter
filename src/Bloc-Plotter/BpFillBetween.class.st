@@ -1,5 +1,5 @@
 "
-I am the area between two curves, added by `BpChart>>fillBetweenX:y1:y2:` and `BpChart>>fillBetweenY:x1:x2:`. Both curves share their x values; `y1` and `y2` give one value per x, or one for all (a horizontal line, 0 by default). I fill one closed `BpPolygonPatch` per region: `where:` selects the x values to fill and splits the area into separate regions, `interpolate:` ends the regions where the curves cross, and `step:` draws the curves as steps.
+I am the area between two curves of a `BpChart`. Both curves share their x values; `y1` and `y2` give one value per x, or one for all (a horizontal line, 0 by default). I fill one closed `BpPolygonPatch` per region: `where:` selects the x values to fill and splits the area into separate regions, `interpolate:` ends the regions where the curves cross, and `step:` draws the curves as steps.
 
 ## Examples
 
@@ -16,13 +16,13 @@ BpFillBetween exampleInteraction
 ## Design Rationale
 
 - I compute my polygons as follows: for each run of true values of `where`, the polygon starts at the first x on `y2`, goes along `y1`, comes back along `y2`; with `interpolate:` its two ends are the points where `y1 - y2` changes sign, found by linear interpolation; `step:` turns each run into steps (#pre, #post, #mid) before.
-- I keep the vocabulary of `BpChart>>fillBetweenX:y1:y2:` whatever my orientation: `x` is the independent axis, `y1` and `y2` the dependent one. `BpChart>>fillBetweenY:x1:x2:` maps its arguments on them.
+- I keep the vocabulary of `BpFillBetween class>>x:y1:y2:` whatever my orientation: `x` is the independent axis, `y1` and `y2` the dependent one. `BpFillBetween class>>y:x1:x2:` maps its arguments on them.
 - Without color, the fill takes the next color of the palette of my chart and has no outline; `color:` sets both the fill and the outline, `faceColor:` only the fill, `edgeColor:` only the outline; `alpha:` makes both transparent.
 - Like bars, my polygons are drawn below the grid.
 
 ## Usage
 
-1. `BpChart>>fillBetweenX:y1:`, `BpChart>>fillBetweenX:y1:y2:` and `BpChart>>fillBetweenY:x1:x2:` create me with my data (`x:y1:y2:`) and add me to the chart (see `BpArtist`), which gives me one color of its palette.
+1. `BpFillBetween class>>x:y1:` (down to 0), `BpFillBetween class>>x:y1:y2:`, and their horizontal counterparts `BpFillBetween class>>y:x1:` and `BpFillBetween class>>y:x1:x2:` create me with my data, and `BpChart>>addArtist:` adds me to a chart (see `BpArtist`), which gives me one color of its palette.
 2. My chart reads my polygons (`patches`) for autoscaling and my `legendEntries` (a filled rectangle).
 
 ## Implementation Notes
@@ -75,72 +75,482 @@ BpFillBetween class >> confidenceBandOf: someXs and: someYs [
 			  collect: [ :each :dx | slope * each + intercept + (sign * deviation * (1 / n + (dx squared / sumSquares)) sqrt) ] ]
 ]
 
+{ #category : 'private - demo' }
+BpFillBetween class >> confidenceX [
+	"Answer the x of the confidence band demo: 0 to 10."
+
+	^ self linspaceFrom: 0 to: 10 count: 11
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> confidenceY [
+	"Answer the measures of the confidence band demo, one per x."
+
+	^ #( 3.9 4.4 10.8 10.3 11.2 13.1 14.1 9.9 13.9 15.1 12.5 )
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> demoX [
+	"Answer the x of the basic usage demo: 0 to 2 by 0.01."
+
+	^ self arangeFrom: 0.0 to: 2 by: 0.01
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> demoY1 [
+	"Answer the first curve of the basic usage demo, a sine of period 1."
+
+	^ self demoX collect: [ :each | (2 * Float pi * each) sin ]
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> demoY2 [
+	"Answer the second curve of the basic usage demo, a sine of period 0.5 and amplitude 0.8."
+
+	^ self demoX collect: [ :each | 0.8 * (4 * Float pi * each) sin ]
+]
+
 { #category : 'examples' }
 BpFillBetween class >> exampleConfidenceBand [
-	"Reproduce the confidence band figure of the gallery 'Fill the area between two lines'."
+	"Reproduce the confidence band figure of the gallery 'Fill the area between two lines': the linear fit of the measures, its confidence band and the measures."
 
 	<example>
-	^ BpFigure instanceFillBetweenConfidenceBand show: 'fill_between confidence band'
+	| figure chart band |
+	band := self confidenceBandOf: self confidenceX and: self confidenceY.
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: ((BpLine x: self confidenceX y: (band first with: band last collect: [ :low :high | low + high / 2 ]))
+		 format: '-';
+		 yourself).
+	chart addArtist: self instanceConfidenceBand.
+	(chart addArtist: ((BpLine x: self confidenceX y: self confidenceY)
+		  format: 'o';
+		  yourself)) color: (chart palette colorAt: 6).
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'fill_between confidence band'
 ]
 
 { #category : 'examples' }
 BpFillBetween class >> exampleFillBetweenDemo [
-	"Reproduce the basic usage figure of the gallery 'Fill the area between two lines'."
+	"Reproduce the basic usage figure of the gallery 'Fill the area between two lines': between y1 and 0, y1 and 1, y1 and y2."
 
 	<example>
-	^ BpFigure instanceFillBetweenDemo show: 'fill_between_demo'
+	| figure |
+	figure := BpFigure rows: 3 columns: 1.
+	figure extent: 600 @ 600.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceDownToZero;
+			 title: 'fill between y1 and 0';
+			 yourself);
+		chartAtRow: 2 column: 1 put: (BpChart new
+			 addArtist: self instanceUpToOne;
+			 title: 'fill between y1 and 1';
+			 yourself);
+		chartAtRow: 3 column: 1 put: (BpChart new
+			 addArtist: self instanceBetweenTwoCurves;
+			 title: 'fill between y1 and y2';
+			 yourself).
+	^ figure show: 'fill_between_demo'
 ]
 
 { #category : 'examples' }
 BpFillBetween class >> exampleFillBetweenX [
-	"Reproduce the gallery 'Fill the area between two vertical lines' (`BpChart>>fillBetweenY:x1:x2:`)."
+	"Reproduce the gallery 'Fill the area between two vertical lines' (`BpFillBetween class>>y:x1:x2:`): between (x1, 0), (x1, 1) and (x1, x2) along y."
 
 	<example>
-	^ BpFigure instanceFillBetweenX show: 'fill_betweenx_demo'
+	| figure |
+	figure := BpFigure rows: 1 columns: 3.
+	figure extent: 600 @ 600.
+	figure
+		chartAtRow: 1 column: 1 put: (BpChart new
+			 addArtist: self instanceHorizontalFromZero;
+			 title: 'between (x1, 0)';
+			 yourself);
+		chartAtRow: 1 column: 2 put: (BpChart new
+			 addArtist: self instanceHorizontalToOne;
+			 title: 'between (x1, 1)';
+			 yourself);
+		chartAtRow: 1 column: 3 put: (BpChart new
+			 addArtist: self instanceHorizontalBetweenTwoCurves;
+			 title: 'between (x1, x2)';
+			 yourself).
+	^ figure show: 'fill_betweenx_demo'
 ]
 
 { #category : 'examples' }
 BpFillBetween class >> exampleInteraction [
-	"Interaction handlers on filled regions: hover a hump to outline it, click it to see its x range."
+	"Interaction handlers on filled regions: hover a hump to outline it, click it to see its x range in the title."
 
 	<example>
-	^ BpFigure instanceInteractiveFill show: 'Fill interaction'
+	| figure chart |
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart title: 'Click a hump'.
+	{
+		self instancePositiveHumps.
+		self instanceNegativeHumps } do: [ :fill |
+			chart addArtist: fill.
+			fill
+				whenPatch: BlMouseEnterEvent
+				do: [ :event :polygon | polygon border: (BlBorder paint: ((BpSequentialPalette greys: 9) colorAt: 9) width: 2) ];
+				whenPatch: BlMouseLeaveEvent do: [ :event :polygon | fill paint: polygon ];
+				whenPatch: BlClickEvent do: [ :event :polygon |
+					chart title: ('from x = {1} to x = {2}' format: {
+						 ((polygon dataVertices collect: [ :each | each x ]) min printShowingDecimalPlaces: 2).
+						 ((polygon dataVertices collect: [ :each | each x ]) max printShowingDecimalPlaces: 2) }) ] ].
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'Fill interaction'
 ]
 
 { #category : 'examples' }
 BpFillBetween class >> examplePlotType [
-	"Reproduce the plot type fill_between(x, y1, y2)."
+	"Reproduce the plot type fill_between(x, y1, y2): a band between two noisy lines and the line in its middle, in a chart of fixed limits and ticks, with a grid."
 
 	<example>
-	^ BpFigure instanceFillBetweenPlotType show: 'fill_between(x, y1, y2)'
+	| figure chart curves |
+	curves := self noisyBandCurves.
+	figure := BpFigure new.
+	chart := BpChart new.
+	chart addArtist: self instanceNoisyBand.
+	(chart addArtist: (BpLine x: curves first y: (curves second with: curves third collect: [ :a :b | a + b / 2 ]))) lineWidth: 2.
+	chart
+		xLimits: #( 0 8 );
+		xTicks: (1 to: 7);
+		yLimits: #( 0 8 );
+		yTicks: (1 to: 7);
+		grid: true.
+	figure chartAtRow: 1 column: 1 put: chart.
+	^ figure show: 'fill_between(x, y1, y2)'
 ]
 
 { #category : 'examples' }
 BpFillBetween class >> exampleSelectiveFill [
-	"Reproduce the selective filling figure of the gallery 'Fill the area between two lines', without and with interpolation."
+	"Reproduce the selective filling figure of the gallery 'Fill the area between two lines': where y1 > y2 in the first color of the palette, where y1 < y2 in the second, without and with interpolation at the crossing."
 
 	<example>
-	^ BpFigure instanceSelectiveFill show: 'fill_between where'
+	| figure |
+	figure := BpFigure rows: 2 columns: 1.
+	{
+		('interpolation=False' -> {
+			 self instanceWhereFirstIsHigher.
+			 self instanceWhereFirstIsLower }).
+		('interpolation=True' -> {
+			 self instanceWhereFirstIsHigherInterpolated.
+			 self instanceWhereFirstIsLowerInterpolated }) } withIndexDo: [ :each :row |
+			| chart |
+			chart := BpChart new.
+			chart title: each key.
+			{
+				self selectiveY1.
+				self selectiveY2 } do: [ :y |
+					chart addArtist: ((BpLine x: self selectiveX y: y)
+						 format: 'o--';
+						 yourself) ].
+			each value do: [ :fill | chart addArtist: fill ].
+			figure chartAtRow: row column: 1 put: chart ].
+	^ figure show: 'fill_between where'
 ]
 
 { #category : 'examples' }
 BpFillBetween class >> exampleSteps [
-	"Show the three step styles of a fill."
+	"Show the three step styles of a fill (step: #pre, #post and #mid), with the data points marked."
 
 	<example>
-	^ BpFigure instanceFillBetweenSteps show: 'fill_between step'
+	| figure |
+	figure := BpFigure rows: 1 columns: 3.
+	figure extent: 900 @ 320.
+	{
+		('step: #pre' -> self instanceStepPre).
+		('step: #post' -> self instanceStepPost).
+		('step: #mid' -> self instanceStepMid) } withIndexDo: [ :each :column |
+			| chart |
+			chart := BpChart new.
+			chart addArtist: each value.
+			chart addArtist: ((BpLine x: self stepDemoX y: self stepDemoY)
+				 format: 'o';
+				 yourself).
+			chart title: each key.
+			figure chartAtRow: 1 column: column put: chart ].
+	^ figure show: 'fill_between step'
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> humpsWhere: aBlock colorAt: anIndex [
+	"Answer the fill of a sine down to 0 where aBlock answers true for its values, interpolated at the crossings, in the color anIndex of the default palette: one polygon per hump."
+
+	| y |
+	y := self humpsX collect: [ :each | each sin ].
+	^ (self x: self humpsX y1: y)
+		  where: (y collect: aBlock);
+		  interpolate: true;
+		  color: (BpPalette default colorAt: anIndex);
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> humpsX [
+	"Answer the x of the interaction demo: 200 points over two periods of a sine."
+
+	^ self linspaceFrom: 0 to: 4 * Float pi count: 200
 ]
 
 { #category : 'instances' }
 BpFillBetween class >> instanceArea [
-	"Answer the area under a sine between 0 and pi, in a new chart."
+	"Answer the area under a sine between 0 and pi."
 
 	<sampleInstance>
 	| x |
 	x := self linspaceFrom: 0 to: Float pi count: 50.
-	^ (BpChart new
-		   extent: 400 @ 300;
-		   yourself) fillBetweenX: x y1: (x collect: [ :each | each sin ])
+	^ self x: x y1: (x collect: [ :each | each sin ])
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceBetweenTwoCurves [
+	"Gallery: Fill the area between two lines (fill_between_demo), basic usage: the area between two sines."
+
+	<sampleInstance>
+	^ self x: self demoX y1: self demoY1 y2: self demoY2
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceConfidenceBand [
+	"Gallery: Fill the area between two lines (fill_between_demo), confidence bands: the confidence band of the linear fit of the measures, mostly transparent."
+
+	<sampleInstance>
+	| band |
+	band := self confidenceBandOf: self confidenceX and: self confidenceY.
+	^ (self x: self confidenceX y1: band first y2: band last)
+		  alpha: 0.2;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceDownToZero [
+	"Gallery: Fill the area between two lines (fill_between_demo), basic usage: the area between a sine and 0."
+
+	<sampleInstance>
+	^ self x: self demoX y1: self demoY1
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceHorizontalBetweenTwoCurves [
+	"Gallery: Fill the area between two vertical lines (fill_betweenx_demo): the area between two sines along y, the second of amplitude 1.2."
+
+	<sampleInstance>
+	^ self y: self demoX x1: self demoY1 x2: (self demoX collect: [ :each | 1.2 * (4 * Float pi * each) sin ])
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceHorizontalFromZero [
+	"Gallery: Fill the area between two vertical lines (fill_betweenx_demo): the area between 0 and a sine along y."
+
+	<sampleInstance>
+	^ self y: self demoX x1: 0 x2: self demoY1
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceHorizontalToOne [
+	"Gallery: Fill the area between two vertical lines (fill_betweenx_demo): the area between a sine along y and 1."
+
+	<sampleInstance>
+	^ self y: self demoX x1: self demoY1 x2: 1
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceNegativeHumps [
+	"Answer a sine filled up to 0 where it is negative, one polygon per hump, in the second color of the palette."
+
+	<sampleInstance>
+	^ self humpsWhere: [ :each | each <= 0 ] colorAt: 2
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceNoisyBand [
+	"Plot types: fill_between(x, y1, y2), a half transparent band without outline between two noisy lines."
+
+	<sampleInstance>
+	| curves |
+	curves := self noisyBandCurves.
+	^ (self x: curves first y1: curves second y2: curves third)
+		  alpha: 0.5;
+		  lineWidth: 0;
+		  yourself
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instancePositiveHumps [
+	"Answer a sine filled down to 0 where it is positive, one polygon per hump, in the first color of the palette."
+
+	<sampleInstance>
+	^ self humpsWhere: [ :each | each >= 0 ] colorAt: 1
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceStepMid [
+	"Answer a fill whose steps change halfway between the x (step: #mid)."
+
+	<sampleInstance>
+	^ self stepFill: #mid
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceStepPost [
+	"Answer a fill whose steps hold each value after its x (step: #post)."
+
+	<sampleInstance>
+	^ self stepFill: #post
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceStepPre [
+	"Answer a fill whose steps hold each value before its x (step: #pre, see `BpFillBetween>>step:`)."
+
+	<sampleInstance>
+	^ self stepFill: #pre
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceUpToOne [
+	"Gallery: Fill the area between two lines (fill_between_demo), basic usage: the area between a sine and 1."
+
+	<sampleInstance>
+	^ self x: self demoX y1: self demoY1 y2: 1
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceWhereFirstIsHigher [
+	"Gallery: Fill the area between two lines (fill_between_demo), selective filling, first chart: the region where y1 > y2, in the first color of the palette, ending at the last x selected (see `BpFillBetween>>where:`)."
+
+	<sampleInstance>
+	^ self selectiveFillWhere: [ :a :b | a > b ] colorAt: 1 interpolate: false
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceWhereFirstIsHigherInterpolated [
+	"Gallery: Fill the area between two lines (fill_between_demo), selective filling, second chart: the region where y1 > y2, ending where the curves cross (see `BpFillBetween>>interpolate:`)."
+
+	<sampleInstance>
+	^ self selectiveFillWhere: [ :a :b | a > b ] colorAt: 1 interpolate: true
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceWhereFirstIsLower [
+	"Gallery: Fill the area between two lines (fill_between_demo), selective filling, first chart: the region where y1 < y2, in the second color of the palette."
+
+	<sampleInstance>
+	^ self selectiveFillWhere: [ :a :b | a < b ] colorAt: 2 interpolate: false
+]
+
+{ #category : 'instances' }
+BpFillBetween class >> instanceWhereFirstIsLowerInterpolated [
+	"Gallery: Fill the area between two lines (fill_between_demo), selective filling, second chart: the region where y1 < y2, starting where the curves cross."
+
+	<sampleInstance>
+	^ self selectiveFillWhere: [ :a :b | a < b ] colorAt: 2 interpolate: true
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> noisyBandCurves [
+	"Answer the x, the upper and the lower curves of the plot type demo: two noisy lines over 16 points from 0 to 8."
+
+	| random x |
+	random := Random seed: 1.
+	x := self linspaceFrom: 0 to: 8 count: 16.
+	^ {
+		  x.
+		  (x collect: [ :each | 3 + (4 * each / 8) + (random next * 0.5) ]).
+		  (x collect: [ :each | 1 + (2 * each / 8) + (random next * 0.5) ]) }
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> selectiveFillWhere: aBlock colorAt: anIndex interpolate: aBoolean [
+	"Answer the fill between the two curves of the selective fill demo where aBlock answers true for their values, in the color anIndex of the default palette, half transparent."
+
+	^ (self x: self selectiveX y1: self selectiveY1 y2: self selectiveY2)
+		  where: (self selectiveY1 with: self selectiveY2 collect: aBlock);
+		  color: (BpPalette default colorAt: anIndex);
+		  alpha: 0.3;
+		  interpolate: aBoolean;
+		  yourself
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> selectiveX [
+	"Answer the x of the selective fill demo."
+
+	^ #( 0 1 2 3 )
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> selectiveY1 [
+	"Answer the first curve of the selective fill demo, high then low."
+
+	^ #( 0.8 0.8 0.2 0.2 )
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> selectiveY2 [
+	"Answer the second curve of the selective fill demo, low then high."
+
+	^ #( 0 0 1 1 )
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> stepDemoX [
+	"Answer the x of the step demo."
+
+	^ 1 to: 8
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> stepDemoY [
+	"Answer the values of the step demo, one per x."
+
+	^ #( 2 4 3 6 5 7 4 6 )
+]
+
+{ #category : 'private - demo' }
+BpFillBetween class >> stepFill: aSymbol [
+	"Answer the fill of the step demo down to 0 with the step style aSymbol, half transparent."
+
+	^ (self x: self stepDemoX y1: self stepDemoY)
+		  step: aSymbol;
+		  alpha: 0.4;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+BpFillBetween class >> x: aCollection y1: aCollectionOrNumber [
+	"Answer the area between the curve aCollectionOrNumber over aCollection and 0."
+
+	^ self x: aCollection y1: aCollectionOrNumber y2: 0
+]
+
+{ #category : 'instance creation' }
+BpFillBetween class >> x: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber [
+	"Answer the area between two curves over aCollection, each one value per x or one for all."
+
+	^ self new
+		  x: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+BpFillBetween class >> y: aCollection x1: aCollectionOrNumber [
+	"Answer the area between the curve aCollectionOrNumber over the y values aCollection and 0 (see `BpFillBetween class>>y:x1:x2:`)."
+
+	^ self y: aCollection x1: aCollectionOrNumber x2: 0
+]
+
+{ #category : 'instance creation' }
+BpFillBetween class >> y: aCollection x1: aCollectionOrNumber x2: anotherCollectionOrNumber [
+	"Answer the area between two curves over the y values aCollection, the horizontal counterpart of `BpFillBetween class>>x:y1:y2:`. The fill keeps the vocabulary of `x:y1:y2:`: y is its x, x1 and x2 its y1 and y2."
+
+	^ self new
+		  orientation: #horizontal;
+		  x: aCollection y1: aCollectionOrNumber y2: anotherCollectionOrNumber;
+		  yourself
 ]
 
 { #category : 'accessing - style' }

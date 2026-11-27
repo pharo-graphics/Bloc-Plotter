@@ -166,7 +166,7 @@ BpFigure class >> exampleFillBetween [
 	"Show the figure of the gallery fill_between demo: the area between a curve and 0, a curve and 1, and two curves (see `BpFillBetween`)."
 
 	<example>
-	^ self instanceFillBetweenDemo show: 'fill_between'
+	^ BpFillBetween exampleFillBetweenDemo
 ]
 
 { #category : 'examples' }
@@ -350,115 +350,6 @@ BpFigure class >> instanceColorBars [
 	^ figure
 ]
 
-{ #category : 'instances - fill between' }
-BpFigure class >> instanceFillBetweenConfidenceBand [
-	"Gallery: Fill the area between two lines (fill_between_demo), confidence bands: a linear fit of the data and its confidence band, half transparent."
-
-	<sampleInstance>
-	| x y band figure chart |
-	x := BpFillBetween linspaceFrom: 0 to: 10 count: 11.
-	y := #( 3.9 4.4 10.8 10.3 11.2 13.1 14.1 9.9 13.9 15.1 12.5 ).
-	band := BpFillBetween confidenceBandOf: x and: y.
-	figure := self new.
-	chart := figure charts first.
-	chart addArtist: ((BpLine x: x y: (band first with: band last collect: [ :low :high | low + high / 2 ]))
-	 format: '-';
-	 yourself).
-	(chart fillBetweenX: x y1: band first y2: band last) alpha: 0.2.
-	(chart addArtist: ((BpLine x: x y: y)
-	  format: 'o';
-	  yourself)) color: (chart palette colorAt: 6).
-	^ figure
-]
-
-{ #category : 'instances - fill between' }
-BpFigure class >> instanceFillBetweenDemo [
-	"Gallery: Fill the area between two lines (fill_between_demo), basic usage: between y1 and 0, y1 and 1, y1 and y2."
-
-	<sampleInstance>
-	| x y1 y2 figure |
-	x := BpFillBetween arangeFrom: 0.0 to: 2 by: 0.01.
-	y1 := x collect: [ :each | (2 * Float pi * each) sin ].
-	y2 := x collect: [ :each | 0.8 * (4 * Float pi * each) sin ].
-	figure := self rows: 3 columns: 1.
-	figure extent: 600 @ 600.
-	(figure chartAtRow: 1 column: 1) fillBetweenX: x y1: y1.
-	(figure chartAtRow: 1 column: 1) title: 'fill between y1 and 0'.
-	(figure chartAtRow: 2 column: 1) fillBetweenX: x y1: y1 y2: 1.
-	(figure chartAtRow: 2 column: 1) title: 'fill between y1 and 1'.
-	(figure chartAtRow: 3 column: 1) fillBetweenX: x y1: y1 y2: y2.
-	(figure chartAtRow: 3 column: 1) title: 'fill between y1 and y2'.
-	^ figure
-]
-
-{ #category : 'instances - fill between' }
-BpFigure class >> instanceFillBetweenPlotType [
-	"Plot types: fill_between(x, y1, y2), a half transparent band between two noisy lines and the line in its middle."
-
-	<sampleInstance>
-	| random x y1 y2 figure chart |
-	random := Random seed: 1.
-	x := BpFillBetween linspaceFrom: 0 to: 8 count: 16.
-	y1 := x collect: [ :each | 3 + (4 * each / 8) + (random next * 0.5) ].
-	y2 := x collect: [ :each | 1 + (2 * each / 8) + (random next * 0.5) ].
-	figure := self new.
-	chart := figure charts first.
-	(chart fillBetweenX: x y1: y1 y2: y2)
-		alpha: 0.5;
-		lineWidth: 0.
-	(chart addArtist: (BpLine x: x y: (y1 with: y2 collect: [ :a :b | a + b / 2 ]))) lineWidth: 2.
-	chart
-		xLimits: #( 0 8 );
-		xTicks: (1 to: 7);
-		yLimits: #( 0 8 );
-		yTicks: (1 to: 7);
-		grid: true.
-	^ figure
-]
-
-{ #category : 'instances - fill between' }
-BpFigure class >> instanceFillBetweenSteps [
-	"The three step styles of a fill (step: #pre, #post and #mid), with the data points marked."
-
-	<sampleInstance>
-	| x y figure |
-	x := 1 to: 8.
-	y := #( 2 4 3 6 5 7 4 6 ).
-	figure := self rows: 1 columns: 3.
-	figure extent: 900 @ 320.
-	#( #pre #post #mid ) withIndexDo: [ :style :column |
-		| chart |
-		chart := figure chartAtRow: 1 column: column.
-		(chart fillBetweenX: x y1: y)
-			step: style;
-			alpha: 0.4.
-		chart addArtist: ((BpLine x: x y: y)
-	 format: 'o';
-	 yourself).
-		chart title: 'step: #' , style ].
-	^ figure
-]
-
-{ #category : 'instances - fill between' }
-BpFigure class >> instanceFillBetweenX [
-	"Gallery: Fill the area between two vertical lines (fill_betweenx_demo): between (x1, 0), (x1, 1) and (x1, x2) along y."
-
-	<sampleInstance>
-	| y x1 x2 figure |
-	y := BpFillBetween arangeFrom: 0.0 to: 2 by: 0.01.
-	x1 := y collect: [ :each | (2 * Float pi * each) sin ].
-	x2 := y collect: [ :each | 1.2 * (4 * Float pi * each) sin ].
-	figure := self rows: 1 columns: 3.
-	figure extent: 600 @ 600.
-	(figure chartAtRow: 1 column: 1) fillBetweenY: y x1: 0 x2: x1.
-	(figure chartAtRow: 1 column: 1) title: 'between (x1, 0)'.
-	(figure chartAtRow: 1 column: 2) fillBetweenY: y x1: x1 x2: 1.
-	(figure chartAtRow: 1 column: 2) title: 'between (x1, 1)'.
-	(figure chartAtRow: 1 column: 3) fillBetweenY: y x1: x1 x2: x2.
-	(figure chartAtRow: 1 column: 3) title: 'between (x1, x2)'.
-	^ figure
-]
-
 { #category : 'instances - heatmap' }
 BpFigure class >> instanceHeatmap [
 	"The gallery annotated heatmap: the harvest of vegetables by farmers, with its numbers and a color bar."
@@ -603,40 +494,6 @@ BpFigure class >> instanceHistTypes [
 	^ figure
 ]
 
-{ #category : 'instances - fill between' }
-BpFigure class >> instanceInteractiveFill [
-	"A sine filled in the first color of the palette where it is positive and in the second where it is negative, one polygon per hump: hovering a polygon outlines it, clicking it shows its x range in the title."
-
-	<sampleInstance>
-	| x y figure chart fills |
-	x := BpFillBetween linspaceFrom: 0 to: 4 * Float pi count: 200.
-	y := x collect: [ :each | each sin ].
-	figure := self new.
-	chart := figure charts first.
-	chart title: 'Click a hump'.
-	fills := {
-		         ((chart fillBetweenX: x y1: y)
-			          where: (y collect: [ :each | each >= 0 ]);
-			          interpolate: true;
-			          color: (chart palette colorAt: 1);
-			          yourself).
-		         ((chart fillBetweenX: x y1: y)
-			          where: (y collect: [ :each | each <= 0 ]);
-			          interpolate: true;
-			          color: (chart palette colorAt: 2);
-			          yourself) }.
-	fills do: [ :fill |
-		fill
-			whenPatch: BlMouseEnterEvent
-			do: [ :event :polygon | polygon border: (BlBorder paint: ((BpSequentialPalette greys: 9) colorAt: 9) width: 2) ];
-			whenPatch: BlMouseLeaveEvent do: [ :event :polygon | fill paint: polygon ];
-			whenPatch: BlClickEvent do: [ :event :polygon |
-				chart title: ('from x = {1} to x = {2}' format: {
-					 ((polygon dataVertices collect: [ :each | each x ]) min printShowingDecimalPlaces: 2).
-					 ((polygon dataVertices collect: [ :each | each x ]) max printShowingDecimalPlaces: 2) }) ] ].
-	^ figure
-]
-
 { #category : 'instances - heatmap' }
 BpFigure class >> instanceInteractiveHeatmap [
 	"A heatmap with interaction handlers on its cells: hovering a cell outlines it, clicking it shows its names and number in the title."
@@ -748,11 +605,13 @@ BpFigure class >> instancePolarArtists [
 	figure := self rows: 2 columns: 2 chartClass: BpPolarChart.
 	figure extent: 800 @ 800.
 	angles := (0 to: 360) collect: [ :each | each degreesToRadians ].
-	(figure chartAtRow: 1 column: 1) addArtist: (BpLine x: angles y: (angles collect: [ :each | 1 + (4 * each) cos ]));
+	(figure chartAtRow: 1 column: 1)
+		addArtist: (BpLine x: angles y: (angles collect: [ :each | 1 + (4 * each) cos ]));
 		title: 'plotX:y:'.
 	BpPolarChart showPointsIn: (figure chartAtRow: 1 column: 2) random: random.
 	BpPolarChart showHistogramIn: (figure chartAtRow: 2 column: 1) random: random.
-	((figure chartAtRow: 2 column: 2) fillBetweenX: angles y1: (angles collect: [ :each | 2 + (3 * each) sin ])) alpha: 0.5.
+	((figure chartAtRow: 2 column: 2) addArtist: (BpFillBetween x: angles y1: (angles collect: [ :each | 2 + (3 * each) sin ])))
+		alpha: 0.5.
 	(figure chartAtRow: 2 column: 2) title: 'fillBetweenX:y1:'.
 	^ figure
 ]
@@ -786,41 +645,6 @@ BpFigure class >> instanceRadarChart [
 		BpKiviat showFactors: profile value in: chart.
 		chart title: profile key ].
 	figure charts first legend.
-	^ figure
-]
-
-{ #category : 'instances - fill between' }
-BpFigure class >> instanceSelectiveFill [
-	"Gallery: Fill the area between two lines (fill_between_demo), selectively filling horizontal regions: where y1 > y2 in the first color of the palette, where y1 < y2 in the second, without and with interpolation at the crossing."
-
-	<sampleInstance>
-	| x y1 y2 figure |
-	x := #( 0 1 2 3 ).
-	y1 := #( 0.8 0.8 0.2 0.2 ).
-	y2 := #( 0 0 1 1 ).
-	figure := self rows: 2 columns: 1.
-	#( false true ) withIndexDo: [ :interpolation :row |
-		| chart |
-		chart := figure chartAtRow: row column: 1.
-		chart title: 'interpolation=' , (interpolation
-			 ifTrue: [ 'True' ]
-			 ifFalse: [ 'False' ]).
-		chart addArtist: ((BpLine x: x y: y1)
-	 format: 'o--';
-	 yourself).
-		chart addArtist: ((BpLine x: x y: y2)
-	 format: 'o--';
-	 yourself).
-		(chart fillBetweenX: x y1: y1 y2: y2)
-			where: (y1 with: y2 collect: [ :a :b | a > b ]);
-			color: (chart palette colorAt: 1);
-			alpha: 0.3;
-			interpolate: interpolation.
-		(chart fillBetweenX: x y1: y1 y2: y2)
-			where: (y1 with: y2 collect: [ :a :b | a < b ]);
-			color: (chart palette colorAt: 2);
-			alpha: 0.3;
-			interpolate: interpolation ].
 	^ figure
 ]
 

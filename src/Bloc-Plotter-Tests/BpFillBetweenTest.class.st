@@ -55,26 +55,6 @@ BpFillBetweenTest >> testAlphaMakesTheFillTransparent [
 ]
 
 { #category : 'tests' }
-BpFillBetweenTest >> testChartFillBetweenXY1FillsDownToZero [
-
-	| chart fill |
-	chart := BpChart new.
-	fill := chart fillBetweenX: #( 0 1 ) y1: #( 2 3 ).
-	self assert: (chart artists includes: fill).
-	self assert: fill patches first dataVertices first equals: 0 @ 0
-]
-
-{ #category : 'tests' }
-BpFillBetweenTest >> testChartFillBetweenYX1X2FillsHorizontally [
-
-	| fill |
-	fill := BpChart new fillBetweenY: #( 0 1 ) x1: 0 x2: #( 2 3 ).
-	self assert: fill orientation equals: #horizontal.
-	self assert: fill patches first dataVertices second equals: 0 @ 0.
-	self assert: fill patches first dataVertices fourth equals: 3 @ 1
-]
-
-{ #category : 'tests' }
 BpFillBetweenTest >> testColorSetsTheFillAndTheOutline [
 
 	| polygon |
@@ -123,7 +103,7 @@ BpFillBetweenTest >> testFillTakesTheNextColorOfTheCycle [
 	| chart |
 	chart := BpChart new.
 	chart addArtist: (BpLine x: #( 0 1 ) y: #( 0 1 )).
-	self assert: (chart fillBetweenX: #( 0 1 ) y1: #( 1 2 )) patches first background paint color equals: (BpPalette default colorAt: 2)
+	self assert: (chart addArtist: (BpFillBetween x: #( 0 1 ) y1: #( 1 2 ))) patches first background paint color equals: (BpPalette default colorAt: 2)
 ]
 
 { #category : 'tests' }
@@ -136,6 +116,17 @@ BpFillBetweenTest >> testHandlersAreKeptWhenTheFillIsRebuilt [
 	fill color: (BpPalette default colorAt: 4).
 	BlEvent fireEvent: BlClickEvent new target: fill patches first.
 	self assert: clicked identicalTo: fill patches first
+]
+
+{ #category : 'tests - instances' }
+BpFillBetweenTest >> testHorizontalInstancesAreHorizontal [
+
+	self
+		assert: ({
+			 BpFillBetween instanceHorizontalFromZero.
+			 BpFillBetween instanceHorizontalToOne.
+			 BpFillBetween instanceHorizontalBetweenTwoCurves } collect: [ :each | each orientation ] as: Set)
+		equals: (Set with: #horizontal)
 ]
 
 { #category : 'tests' }
@@ -153,6 +144,12 @@ BpFillBetweenTest >> testHorizontalSwapsTheCoordinates [
 			(0 @ 1).
 			(0 @ 1).
 			(0 @ 0) }
+]
+
+{ #category : 'tests - instances' }
+BpFillBetweenTest >> testHumpInstancesHaveOnePolygonPerHump [
+
+	self assert: BpFillBetween instancePositiveHumps patches size equals: 2
 ]
 
 { #category : 'tests' }
@@ -240,6 +237,13 @@ BpFillBetweenTest >> testPolygonGoesAlongY1AndBackAlongY2 [
 BpFillBetweenTest >> testPolygonsAreClosed [
 
 	self assert: self fill patches first isClosed
+]
+
+{ #category : 'tests - instances' }
+BpFillBetweenTest >> testSelectiveInstancesFillOneRegionEach [
+
+	self assert: BpFillBetween instanceWhereFirstIsHigher patches size equals: 1.
+	self assert: BpFillBetween instanceWhereFirstIsLower patches size equals: 1
 ]
 
 { #category : 'tests' }
@@ -351,6 +355,16 @@ BpFillBetweenTest >> testWithoutInterpolationARegionEndsOnItsLastSelectedX [
 		(0 @ 0) }
 ]
 
+{ #category : 'tests' }
+BpFillBetweenTest >> testXY1FillsDownToZero [
+
+	| chart fill |
+	chart := BpChart new.
+	fill := chart addArtist: (BpFillBetween x: #( 0 1 ) y1: #( 2 3 )).
+	self assert: (chart artists includes: fill).
+	self assert: fill patches first dataVertices first equals: 0 @ 0
+]
+
 { #category : 'tests - errors' }
 BpFillBetweenTest >> testY1OfAnotherSizeRaisesError [
 
@@ -371,4 +385,23 @@ BpFillBetweenTest >> testY2CanBeACurve [
 			(1 @ -1).
 			(1 @ -1).
 			(0 @ 1) }
+]
+
+{ #category : 'tests - instances' }
+BpFillBetweenTest >> testYX1FillsHorizontallyFromZero [
+
+	| fill |
+	fill := BpFillBetween y: #( 0 1 ) x1: #( 2 3 ).
+	self assert: fill orientation equals: #horizontal.
+	self assert: (fill patches first dataVertices includes: 0 @ 0)
+]
+
+{ #category : 'tests' }
+BpFillBetweenTest >> testYX1X2FillsHorizontally [
+
+	| fill |
+	fill := BpChart new addArtist: (BpFillBetween y: #( 0 1 ) x1: 0 x2: #( 2 3 )).
+	self assert: fill orientation equals: #horizontal.
+	self assert: fill patches first dataVertices second equals: 0 @ 0.
+	self assert: fill patches first dataVertices fourth equals: 3 @ 1
 ]
